@@ -66,10 +66,6 @@ class Softmax {
             assert(_normalized);
             dLdX = dLdY * _jacobian;
 
-            // FOR TESTING
-            std::cout << "dLdX after softmax is : ";
-            dLdX.print();
-
             // reset normalization to -1
             _normalized = false;
         }

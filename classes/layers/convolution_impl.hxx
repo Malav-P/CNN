@@ -159,10 +159,6 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     // compute dLdX, this vector will be sent to be backpropagated through the previous layer
     dLdX = dLdY*_kernel;
 
-    //FOR TESTING
-    std::cout << "dLdX after convolution is : ";
-    dLdX.print();
-
     // compute gradients and add to existing gradient
     _dLdW += dLdY * _local_input;
 }

@@ -71,9 +71,6 @@ void MeanPool::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
 
         }}
 
-    // FOR TESTING
-    std::cout << "dLdX after MeanPool is : ";
-    dLdX.print();
 }
 
 template<typename T>

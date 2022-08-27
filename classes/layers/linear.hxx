@@ -22,6 +22,9 @@ class Linear {
         // construct Linear Layer with specified input and output sizes
         Linear(size_t in_size, size_t out_size);
 
+        // if a leaky relU parameter is specified, this constructor will be called
+        Linear(size_t in_size, size_t out_size, double leaky_param);
+
         // destructor
         ~Linear() = default;
 

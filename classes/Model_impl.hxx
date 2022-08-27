@@ -117,14 +117,6 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
         // compute dLdY, datapoint.second is the label
         dLdY = loss.grad(output, (datapoint.second));
 
-        // FOR TESTING
-        std::cout << "output : ";
-        output.print();
-
-        std::cout << "target : ";
-        datapoint.second.print();
-
-
 
         // make a backward pass
         Backward(dLdY, dLdX);

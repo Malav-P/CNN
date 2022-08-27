@@ -31,35 +31,22 @@ int main()
 
 
     model.Add<Linear<RelU>>(  model.get_outshape(1).width * model.get_outshape(1).height  // input size
-                            , 10                                                                   // output size
+                            , 10                                                                 // output size
+                            , 0.1  // leaky RelU parameter
                             );
+
 
     model.Add<Softmax>(model.get_outshape(2).width * model.get_outshape(2).height // input size
                         );
 
 
 
-//    model.Forward(*input_ptr, output);
-//
-//    // must call model.Forward(input, output) before calling Backward function because
-//    // _local_input member variable must be filled
-//    double tar_arr[2] = {1, 0};
-//    Vector<double> target(output.get_len(), tar_arr);
-//    dLdY = model.get_grad(output, target); hello
-//
-//    model.Backward(dLdY, dLdX);
-//
-//    // choose an optimizer
-//    Momentum optimizer(model, 0.1, 0.9);
-////    SGD optimizer;
-//
-
-    DataSet container = read_mnist(10);
+    DataSet container = read_mnist(1000);
     DataSet test_set = read_mnist(100, 1);
 
     SGD optimizer;
 
-    model.Train(&optimizer, container, 2);
+    model.Train(&optimizer, container, 5);
     model.Test(test_set, false);
 }
 

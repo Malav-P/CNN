@@ -50,7 +50,7 @@ class RelU {
     private:
 
         //! leaky reLU parameter
-        double alpha {0.1};
+        double alpha {0};
 
 };
 

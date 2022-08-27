@@ -24,9 +24,9 @@ DataSet read_mnist(size_t N_SAMPLES, size_t train_or_test)
     char* tok;
 
     if (train_or_test == 0)
-    {fp = fopen("/mnt/c/Users/malav/CLionProjects/ANN-master/ANN-master/mnist/mnist_train.csv","r");}
+    {fp = fopen("/mnt/c/Users/malav/CLionProjects/CNN/mnist/mnist_train.csv","r");}
 
-    else {fp = fopen("/mnt/c/Users/malav/CLionProjects/ANN-master/ANN-master/mnist/mnist_test.csv","r");}
+    else {fp = fopen("/mnt/c/Users/malav/CLionProjects/CNN/mnist/mnist_test.csv","r");}
 
     if(fp == nullptr) {
         perror("Error opening file \n");

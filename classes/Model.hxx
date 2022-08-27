@@ -48,9 +48,6 @@ class Model {
         // get const reference to vector of layers
         std::vector<LayerTypes> get_network() const {return network;}
 
-        // calculate grad of output / target pair (FOR TESTING PURPOSES)
-        Vector<double> get_grad(Vector<double>& output, Vector<double>& target) {return loss.grad(output, target);}
-
         // test the network
         void Test(DataSet& test_set, bool verbose = false /* args to be filled */ );
 

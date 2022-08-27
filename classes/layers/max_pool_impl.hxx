@@ -70,9 +70,6 @@ void MaxPool::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
         dLdX[_winners[i]] = dLdY[i];
     }
 
-    // FOR TESTING
-    std::cout << "dLdX after MaxPool is : ";
-    dLdX.print();
 
 }
 
