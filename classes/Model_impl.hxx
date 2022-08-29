@@ -29,7 +29,11 @@ void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
         visitor.input = visitor.output;
     }
 
+    // this uses copy assignment operator, need to deallocate memory associated with pointer visitor.output, which is
+    // done in the line below
     output = *(visitor.output);
+
+    delete visitor.output;
 }
 
 template<typename LossFunction>
@@ -55,7 +59,11 @@ void Model<LossFunction>::Backward(Vector<double> &dLdY, Vector<double>& dLdX)
         visitor.dLdY = visitor.dLdX;
     }
 
+    // this uses copy assignment operator, need to deallocate memory associated with pointer visitor.dLdX, which is
+    // done in the line below
     dLdX = *(visitor.dLdX);
+
+    delete visitor.dLdX;
 }
 
 template<typename LossFunction>
@@ -124,6 +132,7 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
 
     // if remainder exists we can update the model with the remaining datapoints
     if (remainder != 0) { Update_Params(optimizer, remainder);}
+
 }
 
 template<typename LossFunction>
@@ -162,6 +171,96 @@ void Model<LossFunction>::Test(DataSet &test_set, bool verbose)
     }
 
     std::cout << "model got " << num_correct << " guesses correct out of " << test_set.datapoints.size() << " samples.\n";
+}
+
+
+//destructor
+template<typename LossFunction>
+Model<LossFunction>::~Model()
+{
+    if (network.empty())
+    {
+        // do nothing
+        return;
+    }
+
+    // free memory that was allocated using model.Add() function
+    for (LayerTypes layer: network)
+    {
+        switch (layer.which())
+        {
+            case 0 : // convolutional layer
+            {
+                Convolution* ptr = boost::get<Convolution*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 1 : // maxpool layer
+            {
+                MaxPool* ptr = boost::get<MaxPool*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 2 : // meanpool layer
+            {
+                MeanPool* ptr = boost::get<MeanPool*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 3 : // Linear<RelU> layer
+            {
+                Linear<RelU>* ptr = boost::get<Linear<RelU>*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 4 : // Linear<Sigmoid> layer
+            {
+                Linear<Sigmoid>* ptr = boost::get<Linear<Sigmoid>*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 5 : // Linear<Tanh> layer
+            {
+                Linear<Tanh>* ptr = boost::get<Linear<Tanh>*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 6 : // Softmax layer
+            {
+                Softmax* ptr = boost::get<Softmax*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+
+            default : // nothing to do
+            {
+                break;
+            }
+        }
+    }
+
+
 }
 
 #endif //ANN_MODEL_IMPL_HXX

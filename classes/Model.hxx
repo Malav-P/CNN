@@ -18,9 +18,9 @@ class Model {
         Model() = default;
 
         // Destructor to release allocated memory
-        ~Model() = default;
+        ~Model();
 
-        // Add a layer to the model
+        // Add a layer to the model, memory is freed in the destructor ~Model();
         template<typename LayerType, typename... Args>
         void Add(Args... args) {network.push_back(new LayerType(args...));}
 
