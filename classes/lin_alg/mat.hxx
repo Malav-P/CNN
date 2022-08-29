@@ -5,9 +5,7 @@
 #ifndef ANN_MAT_HXX
 #define ANN_MAT_HXX
 
-#include "../prereqs.hxx"
 #include "data_types.hxx"
-#include "vector.hxx"
 
 
 template<typename T = double>

@@ -6,7 +6,6 @@
 #define ANN_CONVOLUTION_IMPL_HXX
 
 #include "convolution.hxx"
-#include "../lin_alg/vector.hxx"
 
 Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double>& filter, size_t stride_h, size_t stride_v, size_t padleft,
                          size_t padright, size_t padtop, size_t padbottom)
@@ -175,27 +174,6 @@ void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 
     // fill the gradient with zeros
     _dLdW.fill(0);
-
-//    switch (optimizer)
-//    {
-//        // gradient descent
-//        case 1:
-//        {
-//            // learning rate
-//            double alpha = 0.1;
-//
-//            // the below routine is terribly inefficient. We only really need to access and update the values
-//            // in the important indices and ignore everything else.
-//
-//            // positions in the kernel that had zeros are parameters that are not meant to be learned. We must
-//            // set the same positions in _dLdW to zero before updating the _kernel
-//            _dLdW.keep(_indices);
-//
-//            // update weights and reset dLdW to zeros
-//            _kernel += _dLdW * ((-alpha) * (1.0/normalizer));
-//            _dLdW.fill(0);
-//        }
-//    }
 }
 
 

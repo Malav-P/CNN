@@ -5,7 +5,6 @@
 #ifndef ANN_MEAN_POOL_HXX
 #define ANN_MEAN_POOL_HXX
 
-#include "../lin_alg/data_types.hxx"
 
 class MeanPool {
 public:

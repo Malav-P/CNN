@@ -13,14 +13,14 @@ class RelU {
         // default constructor
         RelU() = default;
 
-        //! constructor, alpha =/= 0 implies a leaky relU unit, alpha usually greater than 0
+        // constructor, alpha =/= 0 implies a leaky relU unit, alpha usually greater than 0
         explicit RelU(double Alpha):
         alpha(Alpha)
         {
             if (Alpha < 0) {alpha = 0;} //! alpha cannot be negative
         }
 
-        //! apply function to input
+        // apply function to input
         double func(double input)
         {
             if (input < 0) {return alpha*input;}
@@ -33,7 +33,7 @@ class RelU {
             for (size_t i = 0; i<input.get_len() ; i++) {output[i] = func(input[i]);}
         }
 
-        //! apply derivative to input
+        // apply derivative to input
         double deriv(double input)
         {
             if (input < 0) {return alpha;}

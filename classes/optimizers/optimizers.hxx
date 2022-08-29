@@ -10,6 +10,10 @@ class SGD;
 
 class Momentum;
 
+#include "../prereqs.hxx"
+#include "../lin_alg/data_types.hxx"
+
 #include "momentum.hxx"
 #include "SGD.hxx"
+
 #endif //ANN_OPTIMIZERS_HXX

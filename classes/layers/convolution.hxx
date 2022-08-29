@@ -5,7 +5,6 @@
 #ifndef ANN_CONVOLUTION_HXX
 #define ANN_CONVOLUTION_HXX
 
-#include "../lin_alg/data_types.hxx"
 
 class Convolution {
     public:

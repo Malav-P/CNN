@@ -5,7 +5,6 @@
 #ifndef ANN_MOMENTUM_H
 #define ANN_MOMENTUM_H
 
-#include "../lin_alg/data_types.hxx"
 #include "../Model.hxx"
 
 
@@ -20,11 +19,11 @@ public:
     // constructor
     template <typename L>
     Momentum(Model<L>& model, double learn_rate, double beta)
-            : alpha(learn_rate),
-              beta(beta),
-              velocities_mat(new Mat<double>*[model.get_size()]),
-              velocities_vec(new Vector<double>*[model.get_size()]),
-              model_size(model.get_size())
+    : alpha(learn_rate),
+      beta(beta),
+      velocities_mat(new Mat<double>*[model.get_size()]),
+      velocities_vec(new Vector<double>*[model.get_size()]),
+      model_size(model.get_size())
     {
         std::vector<LayerTypes> network = model.get_network();
         LayerTypes layer;

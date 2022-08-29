@@ -5,9 +5,6 @@
 #ifndef ANN_SGD_HXX
 #define ANN_SGD_HXX
 
-#include "../lin_alg/data_types.hxx"
-
-
 // stochastic gradient descent
 class SGD {
 

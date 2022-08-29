@@ -2,9 +2,8 @@
 // Created by malav on 6/18/2022.
 //
 
-#include "../classes/layers/convolution.hxx"
+#include "../classes/layers/layer_types.hxx"
 #include "../classes/optimizers/SGD.hxx"
-#include <iostream>
 
 int main()
 {

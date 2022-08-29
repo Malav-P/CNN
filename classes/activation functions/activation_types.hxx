@@ -5,8 +5,6 @@
 #ifndef ANN_ACTIVATION_TYPES_HXX
 #define ANN_ACTIVATION_TYPES_HXX
 
-#include "../prereqs.hxx"
-
 //! sigmoid activation
 class Sigmoid;
 
@@ -16,6 +14,8 @@ class Tanh;
 //! relU activation
 class RelU;
 
+
+#include "../prereqs.hxx"
 #include "relU.hxx"
 #include "sigmoid.hxx"
 #include "tanh.hxx"

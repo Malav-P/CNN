@@ -5,9 +5,6 @@
 #ifndef ANN_SOFTMAX_HXX
 #define ANN_SOFTMAX_HXX
 
-#include "../prereqs.hxx"
-#include "../lin_alg/data_types.hxx"
-
 class Softmax {
     public:
 

@@ -6,8 +6,7 @@
 #define ANN_MODEL_IMPL_HXX
 
 #include "Model.hxx"
-#include <algorithm>
-#include <iostream>
+
 #include "optimizers/optimizers.hxx"
 
 template<typename LossFunction>
@@ -86,9 +85,6 @@ template<typename Optimizer>
 void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, size_t batch_size /* args TBD */)
 {
 
-    // initialize the optimizer using a switch statement
-
-
     // determine if number of training points is divisible by the batch_size
     //      - if there is no remainder, we will be updating the parameters (num training points) / (batch_size) times
     //      - if there is a remainder, we will update the parameters |_ (num training points) / (batch_size) _| times
@@ -165,7 +161,7 @@ void Model<LossFunction>::Test(DataSet &test_set, bool verbose)
 
     }
 
-    std::cout << "model got " << num_correct << " guesses correct out of " << test_set.datapoints.size() << " samples.";
+    std::cout << "model got " << num_correct << " guesses correct out of " << test_set.datapoints.size() << " samples.\n";
 }
 
 #endif //ANN_MODEL_IMPL_HXX

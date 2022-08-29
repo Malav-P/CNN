@@ -34,6 +34,9 @@ using LayerTypes = boost::variant<
         Softmax*
         >;
 
+
+#include "../lin_alg/data_types.hxx"
+
 #include "convolution.hxx"
 #include "linear.hxx"
 #include "max_pool.hxx"

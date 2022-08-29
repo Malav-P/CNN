@@ -2,9 +2,7 @@
 // Created by malav on 6/21/2022.
 //
 
-#include "../classes/layers/linear.hxx"
-#include "../classes/activation functions/activation_types.hxx"
-#include <iostream>
+#include "../classes/layers/layer_types.hxx"
 
 int main()
 {

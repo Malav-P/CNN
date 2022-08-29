@@ -2,8 +2,7 @@
 // Created by malav on 6/20/2022.
 //
 
-#include "../classes/layers/max_pool.hxx"
-#include <iostream>
+#include "../classes/layers/layer_types.hxx"
 
 int main()
 {

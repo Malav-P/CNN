@@ -5,7 +5,6 @@
 #ifndef ANN_MAX_POOL_HXX
 #define ANN_MAX_POOL_HXX
 
-#include "../lin_alg/vector.hxx"
 
 class MaxPool {
     public:

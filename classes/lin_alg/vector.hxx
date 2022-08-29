@@ -5,9 +5,7 @@
 #ifndef ANN_VECTOR_HXX
 #define ANN_VECTOR_HXX
 
-#include "../prereqs.hxx"
 #include "data_types.hxx"
-#include <iostream>
 
 template<typename T = double>
 class Vector {
@@ -88,7 +86,6 @@ class Vector {
         void print();
 
         //! ----------------------------------------------------------------------------------------------------------
-
 
     private:
 

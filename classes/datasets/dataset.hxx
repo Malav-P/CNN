@@ -6,7 +6,6 @@
 #define ANN_DATASET_HXX
 
 #include "../prereqs.hxx"
-#include <vector>
 #include "../lin_alg/data_types.hxx"
 
 using Vector_Pair = std::pair<Vector<double>, Vector<double>>;

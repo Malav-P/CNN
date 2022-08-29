@@ -5,7 +5,6 @@
 #ifndef ANN_LINEAR_HXX
 #define ANN_LINEAR_HXX
 
-#include "../lin_alg/data_types.hxx"
 
 //! a linear class which applies a transformation of the form
 //! z = f( Wx + b). W is a weight matrix and b is a bias. f is an activation function
@@ -38,12 +37,6 @@ class Linear {
         // send vector backwards through layer, computing gradients and input error dLdX
         void Backward(const Vector<double>& dLdZ, Vector<double>& dLdX);
 
-        // return out shape of layer
-        Dims const& out_shape() const {return _out;}
-
-        // return in shape of layer
-        Dims const& in_shape() const {return _in;}
-
         // update the weights and biases according to their gradients
         template<typename Optimizer>
         void Update_Params(Optimizer* optimizer, size_t normalizer);
@@ -52,11 +45,17 @@ class Linear {
 
         //! OTHER ----------------------------------------------------------------------------------------------------
 
-        // get the weight matrix (FOR TESTING)
+        // get the weight matrix
         Mat<double> const& get_weights() const {return _weights;}
 
-        // get local output (FOR TESTING)
+        // get local output
         Vector<double> const& get_local_output() const {return _local_output;}
+
+        // return out shape of layer
+        Dims const& out_shape() const {return _out;}
+
+        // return in shape of layer
+        Dims const& in_shape() const {return _in;}
 
         //! ---------------------------------------------------------------------------------------------------------
     private:

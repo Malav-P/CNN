@@ -6,8 +6,7 @@
 #define ANN_LINEAR_CPP
 
 #include "linear.hxx"
-#include <random>
-#include <ctime>
+
 
 template<typename activ_func>
 Linear<activ_func>::Linear(size_t in_size, size_t out_size)
@@ -22,8 +21,14 @@ Linear<activ_func>::Linear(size_t in_size, size_t out_size)
 , _dLdB(out_size)
 {
 
-    // create a normal distribution for He initialization
-    std::default_random_engine generator;
+    // get the current time to seed the random number generator
+    typedef std::chrono::high_resolution_clock myclock;
+    myclock::time_point beginning = myclock::now();
+    myclock::duration d = myclock::now() - beginning;
+    unsigned seed2 = d.count();
+
+    // seed the random number generator
+    std::default_random_engine generator(seed2);
     std::normal_distribution<double> distribution(0, 2.0/_in.height);
 
     // He initialize the weights
@@ -44,8 +49,15 @@ Linear<activ_func>::Linear(size_t in_size, size_t out_size, double leaky_param)
 , _biases(out_size)
 , _dLdB(out_size)
 {
-    // create a normal distribution for He initialization
-    std::default_random_engine generator(1);
+
+    // get the current time to seed the random number generator
+    typedef std::chrono::high_resolution_clock myclock;
+    myclock::time_point beginning = myclock::now();
+    myclock::duration d = myclock::now() - beginning;
+    unsigned seed2 = d.count();
+
+    // seed the random number generator
+    std::default_random_engine generator(seed2);
     std::normal_distribution<double> distribution(0, 2.0/_in.height);
 
     // He initialize the weights
@@ -106,8 +118,5 @@ void Linear<activ_func>::Update_Params(Optimizer* optimizer, size_t normalizer)
     _dLdW.fill(0);
 
 }
-
-
-
 
 #endif //ANN_LINEAR_CPP

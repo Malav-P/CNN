@@ -5,10 +5,10 @@
 #ifndef ANN_MODEL_HXX
 #define ANN_MODEL_HXX
 
-#include <vector>
 #include "layers/layer_types.hxx"
 #include "helpers/visitors.hxx"
 #include "datasets/dataset.hxx"
+
 
 template<typename LossFunction>
 class Model {

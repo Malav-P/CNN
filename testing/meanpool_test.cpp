@@ -3,9 +3,7 @@
 //
 
 
-#include "../classes/layers/mean_pool.hxx"
-#include <iostream>
-
+#include "../classes/layers/layer_types.hxx"
 int main()
 {
     size_t in_width = 4;

@@ -11,6 +11,8 @@ class Mat;
 template <typename T>
 class Vector;
 
+#include "../prereqs.hxx"
+
 #include "vector.hxx"
 #include "mat.hxx"
 
