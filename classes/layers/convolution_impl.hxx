@@ -192,9 +192,6 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     // return filter to original, non-rotated state
     _filter.set_rot(0);
 
-    // reshape dLdX matrix to remove padded rows and columns
-    dLdX_matrix.crop(_padleft, _padright, _padtop, _padbottom);
-
     // flatten matrix into vector, assign it to dLdX
     dLdX = dLdX_matrix.flatten();
 }
