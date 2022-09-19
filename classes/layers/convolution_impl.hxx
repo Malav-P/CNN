@@ -16,10 +16,9 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double>& f
   _padright(padright),
   _padtop(padtop),
   _padbottom(padbottom),
-  _local_input((in_width + padleft + padright) * (in_height + padtop + padbottom)),
-  _kernel( (std::floor((in_width + padleft + padright - filter.get_cols())/stride_h) + 1) * (std::floor((in_height + padbottom + padtop - filter.get_rows())/stride_v) + 1), (in_width + padright + padleft)*(in_height + padtop + padbottom)),
+  _local_input((in_height + padtop + padbottom),(in_width + padleft + padright) ),
   _filter(filter),
-  _dLdW((std::floor((in_width + padleft + padright - filter.get_cols())/stride_h) + 1) * (std::floor((in_height + padbottom + padtop - filter.get_rows())/stride_v) + 1), (in_width + padright + padleft)*(in_height + padtop + padbottom))
+  dLdF(filter.get_rows(), filter.get_cols())
 {
 
     // calculate total number of vertical and horizontal strides
@@ -43,11 +42,9 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
         _padtop = 0;
         _padbottom = 0;
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
-        _local_input = Vector<double>((in_width + _padleft + _padright) * (in_height + _padtop + _padbottom));
-        _kernel = Mat<double>( (std::floor((_in.width - filter.get_cols())/stride_h) + 1) * (std::floor((_in.height - filter.get_rows())/stride_v) + 1), (_in.width)*(_in.height));
+        _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright)  );
         _filter = filter;
-        _dLdW = Mat<double>((std::floor((_in.width - filter.get_cols())/stride_h) + 1) * (std::floor((_in.height - filter.get_rows())/stride_v) + 1), (_in.width)*(_in.height));
-
+        dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
     }
     else
     {
@@ -71,12 +68,9 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
 
         // rest of member variables
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
-        _local_input = Vector<double>((in_width + _padleft + _padright) * (in_height + _padtop + _padbottom));
-        _kernel = Mat<double>( (std::floor((in_width + _padleft + _padright - filter.get_cols())/stride_h) + 1) * (std::floor((in_height + _padbottom + _padtop - filter.get_rows())/stride_v) + 1), (in_width + _padright + _padleft)*(in_height + _padtop + _padbottom));
+        _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright));
         _filter = filter;
-        _dLdW = Mat<double>((std::floor((in_width + _padleft + _padright - filter.get_cols())/stride_h) + 1) * (std::floor((in_height + _padbottom + _padtop - filter.get_rows())/stride_v) + 1), (in_width + _padright + _padleft)*(in_height + _padtop + _padbottom));
-
-
+        dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
     }
 
 
@@ -87,8 +81,6 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
     // specify output shape
     _out = {num_h_strides, num_v_strides};
 
-    // initialize variables for the for loop
-    size_t krnl_row, fltr_col, fltr_row, offset;
 }
 
 void Convolution::Forward(Vector<double> &input, Vector<double> &output)
@@ -109,7 +101,7 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
     {
         for (size_t j = 0; j < output_image.get_cols(); j++)
         {
-            output_image(i,j) = _local_input.partial_dot(_filter, {i,j});
+            output_image(i,j) = _local_input.partial_dot(_filter, {i*_v_str,j*_h_str});
         }
     }
 
@@ -137,14 +129,14 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     size_t filter_width = _filter.get_cols();
 
     // reformatted output
-    Mat<double> reformatted_output(m + p%filter_height + (m-1)*(_v_str - 1), n+ q%filter_width + (n-1)*(_h_str -1));
+    Mat<double> reformatted_output(m + ((p-filter_height)%_v_str) + (m-1)*(_v_str - 1), n+ ((q - filter_width)%_h_str) + (n-1)*(_h_str -1));
 
     // fill in reformatted output matrix with the correct values
     for (size_t i = 0; i < dLdY_matrix.get_rows(); i++)
     {
         for (size_t j = 0; j < dLdY_matrix.get_cols(); j++)
         {
-            reformatted_output(i*(_v_str-1), j*(_h_str-1)) = dLdY_matrix(i,j);
+            reformatted_output(i*(_v_str), j*(_h_str)) = dLdY_matrix(i,j);
         }
     }
 
@@ -192,23 +184,21 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     // return filter to original, non-rotated state
     _filter.set_rot(0);
 
+    // crop the matrix (depad the matrix)
+    dLdX_matrix.crop(_padleft, _padright, _padtop, _padbottom);
+
     // flatten matrix into vector, assign it to dLdX
     dLdX = dLdX_matrix.flatten();
 }
 
-// TODO: THIS NEEDS TO BE REDONE
 template<typename Optimizer>
 void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 {
-    // positions in the kernel that had zeros are parameters that are not meant to be learned. We must
-    // set the same positions in _dLdW to zero before updating the _kernel
-    _dLdW.keep(_indices);
-
     // update the weights according to the optimizer
-    (*optimizer).Forward(_kernel, _dLdW, normalizer);
+    (*optimizer).Forward(_filter, dLdF, normalizer);
 
     // fill the gradient with zeros
-    _dLdW.fill(0);
+    dLdF.fill(0);
 }
 
 

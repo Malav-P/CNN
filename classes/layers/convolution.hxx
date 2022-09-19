@@ -22,7 +22,7 @@ class Convolution {
         Convolution(size_t in_width, size_t in_height, const Mat<double>& filter, size_t stride_h , size_t stride_v , bool padding = false);
 
         // release allocated memory for Convolution object
-        ~Convolution() {delete[] _indices;}
+        ~Convolution() = default;
 
         //! -----------------------------------------------------------------------------------------------------------
 
@@ -49,25 +49,18 @@ class Convolution {
         //! OTHER ----------------------------------------------------------------------------------------------------
 
         // access the kernel (FOR TESTING PURPOSES)
-        Mat<double> const& get_kernel()  const {return _kernel;}
+        Mat<double> const& get_filter()  const {return _filter;}
 
-        // access the indices
-        Dims* const& get_indices() const {return _indices;}
+        // access the local input
+
+        Mat<double> const& get_local_input() const {return _local_input;}
+
         //! -----------------------------------------------------------------------------------------------------------
 
     private:
 
-        // stores the _data for the kernel as toeplitz matrix
-        Mat<double> _kernel {};
-
         // stores the filter
         Mat<double> _filter {};
-
-        // keep track of important indices in kernel
-        Dims* _indices {nullptr};
-
-        // locally stored gradients dL/dW
-        Mat<double> _dLdW {};
 
         // locally stored filter gradient dLdF
         Mat<double> dLdF {};

@@ -34,8 +34,8 @@ public:
             {
                 case 0 : // convolutional layer
                 {
-                    size_t rows = boost::get<Convolution*>(layer)->get_kernel().get_rows();
-                    size_t cols = boost::get<Convolution*>(layer)->get_kernel().get_cols();
+                    size_t rows = boost::get<Convolution*>(layer)->get_filter().get_rows();
+                    size_t cols = boost::get<Convolution*>(layer)->get_filter().get_cols();
 
                     velocities_mat[i] = new Mat<double>(rows, cols);
                     velocities_vec[i] = nullptr;

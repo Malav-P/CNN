@@ -341,6 +341,9 @@ template<typename T>
 void Mat<T>::crop(size_t crop_left, size_t crop_right, size_t crop_top, size_t crop_bottom)
 {
 
+    // if no cropping, return the original matrix unchanged
+    if (crop_left == 0 && crop_right == 0 && crop_top == 0 && crop_bottom == 0) {return;}
+
     // decrease number of rows and cols
     int _rows_new = _rows - crop_top - crop_bottom;
     int _cols_new = _cols - crop_left - crop_right;

@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
     Model<CrossEntropy> model;
 
-    double fltr_arr[9] = {0,0,0,0,1,0,0,0,0};
+    double fltr_arr[9] = {1,1,1,1,1,1,1,1,1};
     Mat<double> fltr(3, fltr_arr);
 
     model.Add<Convolution>(  28    // input width
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
                            , fltr // filter
                            , 1    // horizontal stride length
                            , 1    // vertical stride length
-                           , true
+                           , false
                            );
 
     model.Add<MaxPool>(  model.get_outshape(0).width   // input width = 3
@@ -50,6 +50,11 @@ int main(int argc, char* argv[])
                        , 1  // horizontal stride length
                        , 1  // vertical stride length
                        );
+
+//    model.Add<Linear<RelU>>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
+//                            , 50                                                               // output size
+//                            , 0  //Leaky RelU parameter
+//                            );
 
 
     model.Add<Linear<RelU>>(  model.get_outshape(1).width * model.get_outshape(1).height  // input size
@@ -67,9 +72,10 @@ int main(int argc, char* argv[])
     DataSet container = read_mnist(N_TRAIN);
     DataSet test_set = read_mnist(N_TEST, 1);
 
+    //Momentum optimizer(model, 0.1, 0.9);
     SGD optimizer;
 
-    model.Train(&optimizer, container, 5);
+    model.Train(&optimizer, container, 50);
     model.Test(test_set, false);
 
     //! -----------------------------------------------------------------

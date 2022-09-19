@@ -274,10 +274,8 @@ void Model<LossFunction>::print()
             {
                 Convolution* ptr = boost::get<Convolution*>(layer);
 
-                std::cout << "This was a Convolutional Layer \n The kernel as a matrix is shown below:\n\n";
-                ptr->get_kernel().print();
-
-                std::cout << "\nThe filter itself is shown below: \n ";
+                std::cout << "This was a Convolutional Layer \n The filter is shown below:\n\n";
+                ptr->get_filter().print();
 
                   break;
             }
@@ -302,9 +300,9 @@ void Model<LossFunction>::print()
 
                 std::cout << "This was a Linear<RelU> Layer\n";
                 std::cout << "The weight matrix is : \n \n";
-                ptr->get_weights().print();
+                //ptr->get_weights().print();
                 std::cout << "The bias vector is  : \n \n";
-                ptr->get_biases().print();
+                //ptr->get_biases().print();
 
                 break;
             }
@@ -315,9 +313,9 @@ void Model<LossFunction>::print()
 
                 std::cout << "This was a Linear<Sigmoid> Layer\n";
                 std::cout << "The weight matrix is : \n \n";
-                ptr->get_weights().print();
+                //ptr->get_weights().print();
                 std::cout << "The bias vector is  : \n \n";
-                ptr->get_biases().print();
+                //ptr->get_biases().print();
 
 
                 break;
@@ -329,9 +327,9 @@ void Model<LossFunction>::print()
 
                 std::cout << "This was a Linear<Tanh> Layer\n";
                 std::cout << "The weight matrix is : \n \n";
-                ptr->get_weights().print();
+                //ptr->get_weights().print();
                 std::cout << "The bias vector is  : \n \n";
-                ptr->get_biases().print();
+                //ptr->get_biases().print();
 
 
                 break;
