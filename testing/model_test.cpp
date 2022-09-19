@@ -71,5 +71,36 @@ int main(int argc, char* argv[])
 
     model.Train(&optimizer, container, 5);
     model.Test(test_set, false);
+
+    //! -----------------------------------------------------------------
+    char yn;
+
+    std::cout << "Resume program ? y/n \n";
+    std::cin >> yn;
+
+    if (yn == 'y')
+    {
+        std::cout << "Would you like to print the model summary? y/n \n";
+        std::cin >> yn;
+
+        if (yn == 'y')
+        {
+            // print the model summary
+            model.print();
+        }
+
+        else if (yn == 'n')
+        {
+            // exit program
+            std::cout << "Program exiting ... \n";
+            return 0;
+        }
+    }
+
+    else if (yn == 'n')
+    {
+        std::cout << "Program exiting ... \n";
+        return 0;
+    }
 }
 

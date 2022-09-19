@@ -18,14 +18,7 @@ int main()
         std::cout << "\n";
     }
 
-    for (size_t i = 0; i<conv.get_kernel().get_rows(); i++)
-    {
-        for (size_t j = 0; j<conv.get_kernel().get_cols(); j++)
-        {
-            std::cout << conv.get_kernel()(i,j) << " ";
-        }
-        std::cout << "\n";
-    }
+    conv.get_kernel().print();
 
     std::cout << "\n";
 
@@ -85,12 +78,5 @@ int main()
 
     std::cout <<"\n";
 
-    for (size_t i = 0; i<conv.get_kernel().get_rows(); i++)
-    {
-        for (size_t j = 0; j<conv.get_kernel().get_cols(); j++)
-        {
-            std::cout << conv.get_kernel()(i,j) << " ";
-        }
-        std::cout << "\n";
-    }
+    conv.get_kernel().print();
 }

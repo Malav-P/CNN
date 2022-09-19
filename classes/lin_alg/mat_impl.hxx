@@ -259,7 +259,7 @@ T Mat<T>::partial_dot(const Mat<T>& other, Dims p)
     assert(p.height < _rows && p.width < _cols);
 
     // overlapping matrix must be within bounds of this matrix
-    assert(p.width + other._rows <= _rows && p.height + other._cols <= _cols);
+    assert(p.height + other._rows <= _rows && p.width + other._cols <= _cols);
 
     // initialize return variable;
     T answer = 0;
@@ -335,6 +335,50 @@ void Mat<T>::padding(size_t padleft, size_t padright, size_t padtop, size_t padb
     _rows += padtop + padbottom;
     _cols += padleft + padright;
 }
+//! ---------------------------------------------------------------------------------------
+//!  crop the matrix------------------------------------------------------------------------------------
+template<typename T>
+void Mat<T>::crop(size_t crop_left, size_t crop_right, size_t crop_top, size_t crop_bottom)
+{
+
+    // decrease number of rows and cols
+    int _rows_new = _rows - crop_top - crop_bottom;
+    int _cols_new = _cols - crop_left - crop_right;
+
+    // if this is not true, then we have tried to crop out more rows (or cols) than there are that exist or we have
+    // cropped the matrix to have zero rows(or cols). In this case we need to throw an assertion error.
+    if(!(_rows_new > 0 && _cols_new > 0))
+    {
+        std::cout << "You have tried to crop a matrix! \nHowever you have tried to crop out more rows (or cols) than there are that exist or \nyou have cropped the matrix to have zero rows(or cols).\nProgram is terminating...\n" ;
+        exit(1);
+    }
+
+    // copy data to local variable
+    T tmp[_rows * _cols];
+    std::memcpy(tmp, _data, sizeof(T) * _rows *_cols);
+
+
+    // reallocate memory
+    delete[] _data;
+    _data = new T[_rows_new * _cols_new]{0};
+
+
+    // do cropping operation
+    for (size_t i = crop_top; i < _rows - crop_bottom; i++)
+    {
+        for (size_t j = crop_left; j < _cols - crop_right; j++)
+        {
+            _data[(i-crop_top) * _cols_new + (j-crop_left)] = tmp[i * (_cols) + j];
+        }
+    }
+
+    // change member variable states
+    _rows -= crop_top + crop_bottom;
+    _cols -= crop_left + crop_right;
+}
+
+
+//! ---------------------------------------------------------------------------------------
 //! flatten matrix into vector ------------------------------------------------------------------
 template<typename T>
 Vector<T> Mat<T>::flatten()
@@ -414,7 +458,21 @@ void Mat<T>::rotate_once()
     _rot %= 4;
 }
 
+//! print the matrix------------------------------------------------------------------------------------
+template<typename T>
+void Mat<T>::print() const
+{
+    std::cout << "\n";
+    for (size_t i = 0; i<_rows; i++)
+    {
+        for (size_t j = 0; j<_cols; j++)
+        {
+            std::cout << (*this)(i, j) << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+}
 
-//! ---------------------------------------------------------------------------------------
 
 #endif //ANN_MAT_IMPL_HXX

@@ -5,7 +5,7 @@
 #ifndef ANN_PAIR_HXX
 #define ANN_PAIR_HXX
 
-template<typename T1 = unsigned int, typename T2 = unsigned int>
+template<typename T1 = size_t , typename T2 = size_t>
 class Dimensions {
     public:
 

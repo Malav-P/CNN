@@ -60,14 +60,20 @@ class Convolution {
         // stores the _data for the kernel as toeplitz matrix
         Mat<double> _kernel {};
 
+        // stores the filter
+        Mat<double> _filter {};
+
         // keep track of important indices in kernel
         Dims* _indices {nullptr};
 
         // locally stored gradients dL/dW
         Mat<double> _dLdW {};
 
+        // locally stored filter gradient dLdF
+        Mat<double> dLdF {};
+
         // locally stored input
-        Vector<double> _local_input {};
+        Mat<double> _local_input {};
 
         // horizontal stride length
         size_t _h_str {1};

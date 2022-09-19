@@ -51,6 +51,9 @@ class Model {
         // test the network
         void Test(DataSet& test_set, bool verbose = false /* args to be filled */ );
 
+        // print model summary
+        void print();
+
 
     private:
         std::vector<LayerTypes> network;

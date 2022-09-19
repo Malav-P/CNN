@@ -263,4 +263,95 @@ Model<LossFunction>::~Model()
 
 }
 
+template<typename LossFunction>
+void Model<LossFunction>::print()
+{
+    for (LayerTypes layer: network)
+    {
+        switch (layer.which())
+        {
+            case 0 : // convolutional layer
+            {
+                Convolution* ptr = boost::get<Convolution*>(layer);
+
+                std::cout << "This was a Convolutional Layer \n The kernel as a matrix is shown below:\n\n";
+                ptr->get_kernel().print();
+
+                std::cout << "\nThe filter itself is shown below: \n ";
+
+                  break;
+            }
+
+            case 1 : // maxpool layer
+            {
+                std::cout << "This was a Maxpool Layer, no parameters are to be learned. \n\n";
+
+                break;
+            }
+
+            case 2 : // meanpool layer
+            {
+                std::cout << "This was a Meanpool Layer, no parameters are to be learned. \n\n";
+
+                break;
+            }
+
+            case 3 : // Linear<RelU> layer
+            {
+                Linear<RelU>* ptr = boost::get<Linear<RelU>*>(layer);
+
+                std::cout << "This was a Linear<RelU> Layer\n";
+                std::cout << "The weight matrix is : \n \n";
+                ptr->get_weights().print();
+                std::cout << "The bias vector is  : \n \n";
+                ptr->get_biases().print();
+
+                break;
+            }
+
+            case 4 : // Linear<Sigmoid> layer
+            {
+                Linear<Sigmoid>* ptr = boost::get<Linear<Sigmoid>*>(layer);
+
+                std::cout << "This was a Linear<Sigmoid> Layer\n";
+                std::cout << "The weight matrix is : \n \n";
+                ptr->get_weights().print();
+                std::cout << "The bias vector is  : \n \n";
+                ptr->get_biases().print();
+
+
+                break;
+            }
+
+            case 5 : // Linear<Tanh> layer
+            {
+                Linear<Tanh>* ptr = boost::get<Linear<Tanh>*>(layer);
+
+                std::cout << "This was a Linear<Tanh> Layer\n";
+                std::cout << "The weight matrix is : \n \n";
+                ptr->get_weights().print();
+                std::cout << "The bias vector is  : \n \n";
+                ptr->get_biases().print();
+
+
+                break;
+            }
+
+            case 6 : // Softmax layer
+            {
+                std::cout << "This was a Softmax Layer, no parameters are to be learned. \n\n";
+
+                break;
+            }
+
+
+            default : // nothing to do
+            {
+                break;
+            }
+        }
+    }
+
+}
+
 #endif //ANN_MODEL_IMPL_HXX

@@ -48,6 +48,9 @@ class Linear {
         // get the weight matrix
         Mat<double> const& get_weights() const {return _weights;}
 
+        // get the biases
+        Vector<double> const& get_biases() const {return _biases;}
+
         // get local output
         Vector<double> const& get_local_output() const {return _local_output;}
 
