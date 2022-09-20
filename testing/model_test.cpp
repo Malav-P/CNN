@@ -8,23 +8,30 @@
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3)
+    if (argc != 4)
     {
-        std::cout << "program takes two arguments\n usage is ./model_test <N_TRAIN> <N_TEST>\n";
+        std::cout << "program takes three arguments\n usage is ./model_test <N_TRAIN> <N_TEST> <N_epochs\n";
     }
 
     int N_TRAIN = std::stoi(argv[1]);
     int N_TEST = std::stoi(argv[2]);
+    int N_EPOCHS = std::stoi(argv[3]);
 
     if (N_TRAIN < 0)
     {
-        std::cout << "usage is ./model_test <N_TRAIN> <N_TEST> where N_TRAIN is a positive integer\n";
+        std::cout << "N_TRAIN must be a positive integer\n";
         exit(1);
     }
 
     if (N_TEST < 0)
     {
-        std::cout << "usage is ./model_test <N_TRAIN> <N_TEST> where N_TEST is a positive integer\n";
+        std::cout << "N_TEST must be a positive integer\n";
+        exit(1);
+    }
+
+    if (N_EPOCHS <= 0)
+    {
+        std::cout << "N_EPOCHS must be a positive integer\n";
         exit(1);
     }
 
@@ -32,7 +39,7 @@ int main(int argc, char* argv[])
 
     Model<CrossEntropy> model;
 
-    double fltr_arr[9] = {1,1,1,1,1,1,1,1,1};
+    double fltr_arr[9] = {0,-1,0,-1,5,-1,0,-1,0};
     Mat<double> fltr(3, fltr_arr);
 
     model.Add<Convolution>(  28    // input width
@@ -51,22 +58,16 @@ int main(int argc, char* argv[])
                        , 1  // vertical stride length
                        );
 
-//    model.Add<Linear<RelU>>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
-//                            , 50                                                               // output size
-//                            , 0  //Leaky RelU parameter
-//                            );
 
-
-    model.Add<Linear<RelU>>(  model.get_outshape(1).width * model.get_outshape(1).height  // input size
-                            , 10                                                                 // output size
-                            , 0.1  // leaky RelU parameter
+    model.Add<Linear<RelU>>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
+                            , 10                                                              // output size
+                            , 0.1  //Leaky RelU parameter
                             );
+
 
 
     model.Add<Softmax>(model.get_outshape(2).width * model.get_outshape(2).height // input size
                         );
-
-
 
 
     DataSet container = read_mnist(N_TRAIN);
@@ -75,7 +76,7 @@ int main(int argc, char* argv[])
     //Momentum optimizer(model, 0.1, 0.9);
     SGD optimizer;
 
-    model.Train(&optimizer, container, 50);
+    model.Train(&optimizer, container, 50, N_EPOCHS);
     model.Test(test_set, false);
 
     //! -----------------------------------------------------------------

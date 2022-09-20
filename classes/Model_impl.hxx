@@ -90,7 +90,7 @@ void Model<LossFunction>::Update_Params(Optimizer* optimizer, size_t normalizer)
 
 template<typename LossFunction>
 template<typename Optimizer>
-void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, size_t batch_size /* args TBD */)
+void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, size_t batch_size, size_t epochs /* args TBD */)
 {
 
     // determine if number of training points is divisible by the batch_size
@@ -110,28 +110,31 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
     //      - if we have sent a batch_size amount of data points forward and backward after this last pass, update the
     //        parameters in the networks using Update_Params function
 
-    Vector<double> output, dLdY, dLdX;
-    size_t count = 0;
+    for (size_t i = 0; i < epochs ; i++) {
 
-    for (Vector_Pair datapoint : training_set.datapoints)
-    {
-        // make forward pass, datapoint.first is the input
-        Forward((datapoint.first), output);
+        Vector<double> output, dLdY, dLdX;
+        size_t count = 0;
 
-        // compute dLdY, datapoint.second is the label
-        dLdY = loss.grad(output, (datapoint.second));
+        for (Vector_Pair datapoint: training_set.datapoints) {
+            // make forward pass, datapoint.first is the input
+            Forward((datapoint.first), output);
+
+            // compute dLdY, datapoint.second is the label
+            dLdY = loss.grad(output, (datapoint.second));
 
 
-        // make a backward pass
-        Backward(dLdY, dLdX);
-        count += 1;
+            // make a backward pass
+            Backward(dLdY, dLdX);
+            count += 1;
 
-        // update parameters if we have propagated batch_size number of samples
-        if (count % batch_size == 0) { Update_Params(optimizer, batch_size); }
+            // update parameters if we have propagated batch_size number of samples
+            if (count % batch_size == 0) { Update_Params(optimizer, batch_size); }
+        }
+
+        // if remainder exists we can update the model with the remaining datapoints
+        if (remainder != 0) { Update_Params(optimizer, remainder); }
+
     }
-
-    // if remainder exists we can update the model with the remaining datapoints
-    if (remainder != 0) { Update_Params(optimizer, remainder);}
 
 }
 
