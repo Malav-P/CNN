@@ -8,23 +8,12 @@ int main()
     int vec[4] = {1,2,3,4};
 
     Mat<int> v(2, 4, arr);
-    v.padding(0, 1, 2, 3);
+    v.padding(1, 1, 1, 1);
 
-    for (size_t i = 0; i<v.get_rows(); i++)
-    {
-        for (size_t j = 0; j<v.get_cols(); j++)
-        {
-            std::cout << v(i,j) << " ";
-        }
-        std::cout << "\n";
-    }
+    v.print();
+
+    v.crop(1,1,1,1);
+    v.print();
 
 
-//    Vector<int> vector{4, vec};
-//    Vector<int> result = v*vector;
-//
-//    for (size_t i = 0; i<2; i++)
-//    {
-//        std::cout << result[i] << " ";
-//    }
 }

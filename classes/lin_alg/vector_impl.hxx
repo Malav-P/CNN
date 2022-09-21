@@ -300,7 +300,7 @@ Vector<T> Vector<T>::edivide(const Vector<T> &other)
 
 //!  print vector --------------------------------------------------------------------
 template<typename T>
-void Vector<T>::print()
+void Vector<T>::print() const
 {
     for (size_t i = 0; i < _length; i++)
     {

@@ -27,7 +27,7 @@ class Model {
         // train the network on the _data
 
         template<typename Optimizer>
-        void Train(Optimizer* opt, DataSet& training_set, size_t batch_size /* args to be filled */ );
+        void Train(Optimizer* opt, DataSet& training_set, size_t batch_size, size_t epochs /* args to be filled */ );
 
         // return outshape of a layer
         Dims get_outshape(size_t idx){ return boost::apply_visitor(Outshape_visitor(), network[idx]);}
@@ -50,6 +50,9 @@ class Model {
 
         // test the network
         void Test(DataSet& test_set, bool verbose = false /* args to be filled */ );
+
+        // print model summary
+        void print();
 
 
     private:

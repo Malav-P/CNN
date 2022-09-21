@@ -84,6 +84,9 @@ class Mat {
         // add padding to matrix
         void padding(size_t padleft, size_t padright, size_t padtop, size_t padbottom);
 
+        // crop the matrix/ remove padded rows from matrix
+        void crop(size_t crop_left, size_t crop_right, size_t crop_top, size_t crop_bottom);
+
         // create a Vector object out of this object
         Vector<T> flatten();
 
@@ -98,6 +101,9 @@ class Mat {
 
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
+
+        // print the matrix
+        void print() const;
 
         //! --------------------------------------------------------------------------------------------------------
 

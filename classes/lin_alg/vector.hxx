@@ -83,7 +83,7 @@ class Vector {
         size_t const& get_len() const {return _length;}
 
         // print the vector elements
-        void print();
+        void print() const;
 
         //! ----------------------------------------------------------------------------------------------------------
 
