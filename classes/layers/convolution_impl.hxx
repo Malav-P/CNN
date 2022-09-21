@@ -18,7 +18,7 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double>& f
   _padbottom(padbottom),
   _local_input((in_height + padtop + padbottom),(in_width + padleft + padright) ),
   _filter(filter),
-  dLdF(filter.get_rows(), filter.get_cols())
+  _dLdF(filter.get_rows(), filter.get_cols())
 {
 
     // calculate total number of vertical and horizontal strides
@@ -44,7 +44,7 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
         _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright)  );
         _filter = filter;
-        dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
+        _dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
     }
     else
     {
@@ -70,7 +70,7 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
         _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright));
         _filter = filter;
-        dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
+        _dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
     }
 
 
@@ -148,11 +148,11 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     {
         for (size_t j = 0; j < num_h_strides; j++)
         {
-            dLdF(i,j) = _local_input.partial_dot(reformatted_output, {i,j});
+            _dLdF(i, j) = _local_input.partial_dot(reformatted_output, {i, j});
         }
     }
 
-    // this concludes the calculation of dLdF
+    // this concludes the calculation of _dLdF
 
     // we move to calculation of dLdX
 
@@ -195,10 +195,10 @@ template<typename Optimizer>
 void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 {
     // update the weights according to the optimizer
-    (*optimizer).Forward(_filter, dLdF, normalizer);
+    (*optimizer).Forward(_filter, _dLdF, normalizer);
 
     // fill the gradient with zeros
-    dLdF.fill(0);
+    _dLdF.fill(0);
 }
 
 

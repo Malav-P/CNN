@@ -61,8 +61,8 @@ class Convolution {
         // stores the filter
         Mat<double> _filter {};
 
-        // locally stored filter gradient dLdF
-        Mat<double> dLdF {};
+        // locally stored filter gradient _dLdF
+        Mat<double> _dLdF {};
 
         // locally stored input
         Mat<double> _local_input {};
