@@ -5,7 +5,6 @@
 #ifndef ANN_CONVOLUTION_HXX
 #define ANN_CONVOLUTION_HXX
 
-
 class Convolution {
     public:
 

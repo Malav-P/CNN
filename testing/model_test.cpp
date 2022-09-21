@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
                            , false
                            );
 
-    model.Add<MaxPool>(  model.get_outshape(0).width   // input width = 3
-                       , model.get_outshape(0).height  // input height = 3
+    model.Add<MaxPool>(  model.get_outshape(0).width   // input width
+                       , model.get_outshape(0).height  // input height
                        , 2  // filter width
                        , 2  // filter height
                        , 1  // horizontal stride length
@@ -82,32 +82,21 @@ int main(int argc, char* argv[])
     //! -----------------------------------------------------------------
     char yn;
 
-    std::cout << "Resume program ? y/n \n";
+    std::cout << "Would you like to print the model summary? y/n \n";
     std::cin >> yn;
 
     if (yn == 'y')
     {
-        std::cout << "Would you like to print the model summary? y/n \n";
-        std::cin >> yn;
-
-        if (yn == 'y')
-        {
-            // print the model summary
-            model.print();
-        }
-
-        else if (yn == 'n')
-        {
-            // exit program
-            std::cout << "Program exiting ... \n";
-            return 0;
-        }
+        // print the model summary
+        model.print();
     }
 
     else if (yn == 'n')
     {
+        // exit program
         std::cout << "Program exiting ... \n";
         return 0;
     }
+
 }
 

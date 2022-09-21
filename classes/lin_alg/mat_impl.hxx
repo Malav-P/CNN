@@ -465,12 +465,14 @@ void Mat<T>::rotate_once()
 template<typename T>
 void Mat<T>::print() const
 {
+    std::cout.precision(9);
+    std::cout.setf(std::ios::fixed, std::ios::floatfield);
     std::cout << "\n";
     for (size_t i = 0; i<_rows; i++)
     {
         for (size_t j = 0; j<_cols; j++)
         {
-            std::cout << (*this)(i, j) << " ";
+            std::cout << std::setw(10) << (*this)(i, j) << " ";
         }
         std::cout << "\n";
     }

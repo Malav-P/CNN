@@ -3,7 +3,7 @@ project(CNN)
 
 set(CMAKE_CXX_STANDARD 14)
 
-include_directories(../../../../../MinGW/include/boost_1_79_0)
+include_directories(/opt/homebrew/include/)
 
 add_executable(linalg_test testing/linalg_test.cpp)
 add_executable(convolution_test testing/convolution_test.cpp)

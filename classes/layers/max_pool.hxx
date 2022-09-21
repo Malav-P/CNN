@@ -67,7 +67,7 @@ class MaxPool {
         // vertical stride_length
         size_t _v_str {0};
 
-        // a vector that keeps track of which indices in the the pooling layer are "winning units"
+        // a vector that keeps track of which indices in the pooling layer are "winning units"
         Vector<size_t> _winners {};
 
 };
