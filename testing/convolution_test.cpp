@@ -10,7 +10,12 @@ int main()
     double fltr_arr[4] = {1,1,1,1};
     Mat<double> fltr(2, fltr_arr);
 
-    Convolution conv(4, 4, fltr, 1,1,false);
+    Convolution conv(4,            // input image width
+                     4,           // input image height
+                     fltr,           // filter
+                     1,            // horizontal stride length
+                     1,            // vertical stride length
+                     false);      // same (true) or valid (false) padding
 
 
 
