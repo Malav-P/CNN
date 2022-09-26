@@ -71,7 +71,6 @@ Below is an example of how to create an instance of the linear layer using the `
 ```C++
          Linear linear_layer( 784    // input size
                             , 10     // output size
-                            , 0.1    // Leaky RelU parameter
                             );
 ```
 
@@ -86,8 +85,8 @@ Currently the source code supports the following activation functions.
 Below is an example of how to instantiate a member of this class
 
 ```C++
-     RelU activation( 0.1    // leaky parameter
-                      1     // input width
+     RelU activation( 0.1     // leaky parameter
+                    , 1       // input width
                     , 380     // input height
                     );
 ```
@@ -142,8 +141,6 @@ See the example code below for constructing a model using the `CrossEntropy` cla
     
     model.Add<Softmax>(model.get_outshape(3).width * model.get_outshape(3).height // input size
     );
-    
-    
 ```
 
 ## Training the Model
