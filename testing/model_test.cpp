@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
                             , 10   // output size
                             );
 
-    model.Add<RelU>(0.1,
+    model.Add<RelU>(    0.1,                                // leaky RelU parameter
                         model.get_outshape(2).width,    // input width
                         model.get_outshape(2).height);  // input height
 

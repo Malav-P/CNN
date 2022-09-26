@@ -64,23 +64,33 @@ Below is example code of how to construct an instance of this class.
 
 ## `Linear`
 
-The [`linear.hxx`](./classes/layers/linear.hxx) file contains the class definition for the linear layer.
-Note that the linear layer is a template class. The template argument when instantiating an object of this 
-class is an activation function class. Currently, the source code supports three activation functions : 
+The [`linear.hxx`](./classes/layers/linear.hxx) file contains the class definition for the linear layer. 
 
-- ReLU activation,  [relU.hxx](classes/layers/relU.hxx)
-- Sigmoid activation,  [sigmoid.hxx](./classes/activation%20functions/)
-- Tanh activation, [tanh.hxx](./classes/activation%20functions/)
 
 Below is an example of how to create an instance of the linear layer using the `RelU` activation function class
 ```C++
-   Linear<RelU> linear_layer( 784    // input size
+         Linear linear_layer( 784    // input size
                             , 10     // output size
                             , 0.1    // Leaky RelU parameter
                             );
 ```
 
+## Activation Functions
 
+Currently the source code supports the following activation functions. 
+
+- ReLU activation,  [relU.hxx](classes/layers/relU.hxx)
+- Sigmoid activation,  [sigmoid.hxx](./classes/layers/sigmoid.hxx)
+- Tanh activation, [tanh.hxx](./classes/layers/tanh.hxx)
+
+Below is an example of how to instantiate a member of this class
+
+```C++
+     RelU activation( 0.1    // leaky parameter
+                      1     // input width
+                    , 380     // input height
+                    );
+```
 ## Output
 
 Currently, the source code supports only a softmax output layer for classification. Below is an example of how
@@ -121,14 +131,16 @@ See the example code below for constructing a model using the `CrossEntropy` cla
     );
     
     
-    model.Add<Linear<RelU>>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
+    model.Add<Linear>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
                             , 10   // output size
-                            , 0.1  // Leaky RelU parameter
+    );
+
+    model.Add<RelU>(    0.1,                            // leaky RelU parameter
+                        model.get_outshape(2).width,    // input width
+                        model.get_outshape(2).height    // input height
     );
     
-    
-    
-    model.Add<Softmax>(model.get_outshape(2).width * model.get_outshape(2).height // input size
+    model.Add<Softmax>(model.get_outshape(3).width * model.get_outshape(3).height // input size
     );
     
     
