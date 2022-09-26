@@ -8,10 +8,8 @@
 #include "linear.hxx"
 
 
-template<typename activ_func>
-Linear<activ_func>::Linear(size_t in_size, size_t out_size)
-: f()
-, _in(1, in_size)
+Linear::Linear(size_t in_size, size_t out_size)
+: _in(1, in_size)
 , _out(1, out_size)
 , _local_input(in_size)
 , _local_output(out_size)
@@ -37,37 +35,8 @@ Linear<activ_func>::Linear(size_t in_size, size_t out_size)
     }
 }
 
-template<typename activ_func>
-Linear<activ_func>::Linear(size_t in_size, size_t out_size, double leaky_param)
-: f(leaky_param)
-, _in(1, in_size)
-, _out(1, out_size)
-, _local_input(in_size)
-, _local_output(out_size)
-, _weights(out_size, in_size)
-, _dLdW(out_size, in_size)
-, _biases(out_size)
-, _dLdB(out_size)
-{
 
-    // get the current time to seed the random number generator
-    typedef std::chrono::high_resolution_clock myclock;
-    myclock::time_point beginning = myclock::now();
-    myclock::duration d = myclock::now() - beginning;
-    unsigned seed2 = d.count();
-
-    // seed the random number generator
-    std::default_random_engine generator(seed2);
-    std::normal_distribution<double> distribution(0, sqrt(2.0/_in.height));
-
-    // He initialize the weights
-    for (size_t i=0; i<_weights.get_rows(); i++) { for (size_t j=0; j<_weights.get_cols(); j++)
-        { _weights(i,j) = distribution(generator); }
-    }
-}
-
-template<typename activ_func>
-void Linear<activ_func>::Forward(const Vector<double> &input, Vector<double> &output)
+void Linear::Forward(const Vector<double> &input, Vector<double> &output)
 {
     //! TODO: ensure that matrix multiplication is compatible with sizes, _weights*input assertion is already done in the operator overload
     assert(output.get_len() == _weights.get_rows());
@@ -78,21 +47,12 @@ void Linear<activ_func>::Forward(const Vector<double> &input, Vector<double> &ou
     // perform Y = Wx + B
     _local_output = (_weights * input) + _biases;
 
-    // perform f(Y)
-    f.func(_local_output, output);
+    // assign _local_output to output of layer
+    output = _local_output;
 }
 
-template<typename activ_func>
-void Linear<activ_func>::Backward(const Vector<double> &dLdZ, Vector<double> &dLdX)
+void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
 {
-    // compute dZdY
-    Vector<double> dZdY(_local_output.get_len());
-    f.deriv(_local_output, dZdY);
-
-
-    // compute dLdY
-    Vector<double> dLdY = dLdZ.eprod(dZdY);
-
 
     // compute dLdX, this vector will be sent to be backpropagated through the previous layer
     dLdX = dLdY*(_weights);
@@ -103,9 +63,8 @@ void Linear<activ_func>::Backward(const Vector<double> &dLdZ, Vector<double> &dL
     _dLdB += dLdY;
 }
 
-template<typename activ_func>
 template<typename Optimizer>
-void Linear<activ_func>::Update_Params(Optimizer* optimizer, size_t normalizer)
+void Linear::Update_Params(Optimizer* optimizer, size_t normalizer)
 {
 
     // update the biases and reset dLdB to zeros. MUST UPDATE BIASES FIRST or else member variable k of momentum optmizer

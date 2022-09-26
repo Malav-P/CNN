@@ -219,36 +219,28 @@ Model<LossFunction>::~Model()
                 break;
             }
 
-            case 3 : // Linear<RelU> layer
+            case 3 : // Linear layer
             {
-                Linear<RelU>* ptr = boost::get<Linear<RelU>*>(layer);
+                Linear* ptr = boost::get<Linear*>(layer);
 
                 delete ptr;
 
                 break;
             }
 
-            case 4 : // Linear<Sigmoid> layer
-            {
-                Linear<Sigmoid>* ptr = boost::get<Linear<Sigmoid>*>(layer);
 
-                delete ptr;
-
-                break;
-            }
-
-            case 5 : // Linear<Tanh> layer
-            {
-                Linear<Tanh>* ptr = boost::get<Linear<Tanh>*>(layer);
-
-                delete ptr;
-
-                break;
-            }
-
-            case 6 : // Softmax layer
+            case 4 : // Softmax layer
             {
                 Softmax* ptr = boost::get<Softmax*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
+            case 5: // RelU layer
+            {
+                RelU* ptr = boost::get<RelU*>(layer);
 
                 delete ptr;
 
@@ -303,11 +295,11 @@ void Model<LossFunction>::print()
                 break;
             }
 
-            case 3 : // Linear<RelU> layer
+            case 3 : // Linear layer
             {
-                Linear<RelU>* ptr = boost::get<Linear<RelU>*>(layer);
+                Linear* ptr = boost::get<Linear*>(layer);
                 std::cout << "-------------------------------------------------------------\n";
-                std::cout << "This was a Linear<RelU> Layer\n";
+                std::cout << "This was a Linear Layer\n";
                 std::cout << "The weight matrix is : \n \n";
                 //ptr->get_weights().print();
                 std::cout << "The bias vector is  : \n \n";
@@ -317,40 +309,20 @@ void Model<LossFunction>::print()
                 break;
             }
 
-            case 4 : // Linear<Sigmoid> layer
-            {
-                Linear<Sigmoid>* ptr = boost::get<Linear<Sigmoid>*>(layer);
-                std::cout << "-------------------------------------------------------------\n";
-                std::cout << "This was a Linear<Sigmoid> Layer\n";
-                std::cout << "The weight matrix is : \n \n";
-                //ptr->get_weights().print();
-                std::cout << "The bias vector is  : \n \n";
-                //ptr->get_biases().print();
-                std::cout << "-------------------------------------------------------------\n\n";
 
-
-                break;
-            }
-
-            case 5 : // Linear<Tanh> layer
-            {
-                Linear<Tanh>* ptr = boost::get<Linear<Tanh>*>(layer);
-                std::cout << "-------------------------------------------------------------\n";
-                std::cout << "This was a Linear<Tanh> Layer\n";
-                std::cout << "The weight matrix is : \n \n";
-                //ptr->get_weights().print();
-                std::cout << "The bias vector is  : \n \n";
-                //ptr->get_biases().print();
-                std::cout << "-------------------------------------------------------------\n\n";
-
-
-                break;
-            }
-
-            case 6 : // Softmax layer
+            case 4 : // Softmax layer
             {
                 std::cout << "-------------------------------------------------------------\n";
                 std::cout << "This was a Softmax Layer, no parameters are to be learned. \n\n";
+                std::cout << "-------------------------------------------------------------\n\n";
+
+                break;
+            }
+
+            case 5 : // RelU layer
+            {
+                std::cout << "-------------------------------------------------------------\n";
+                std::cout << "This was a RelU Layer, no parameters are to be learned. \n\n";
                 std::cout << "-------------------------------------------------------------\n\n";
 
                 break;

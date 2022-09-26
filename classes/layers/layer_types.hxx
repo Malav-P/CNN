@@ -17,21 +17,22 @@ class MaxPool;
 // applies mean pooling operation to incoming _data
 class MeanPool;
 
-// a standard y = f(w*x + b) layer with _weights w, bias b and activation function f
-template<typename activ_func>
+// a standard y = W*x + b layer with _weights W, bias b
 class Linear;
 
 // softmax layer
 class Softmax;
 
+// relU layer
+class RelU;
+
 using LayerTypes = boost::variant<
         Convolution*,
         MaxPool*,
         MeanPool*,
-        Linear<RelU>*,
-        Linear<Sigmoid>*,
-        Linear<Tanh>*,
-        Softmax*
+        Linear*,
+        Softmax*,
+        RelU*
         >;
 
 
@@ -42,4 +43,5 @@ using LayerTypes = boost::variant<
 #include "max_pool.hxx"
 #include "mean_pool.hxx"
 #include "softmax.hxx"
+#include "relU.hxx"
 #endif //ANN_LAYER_TYPES_HXX

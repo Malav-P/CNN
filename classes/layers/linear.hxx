@@ -7,9 +7,7 @@
 
 
 //! a linear class which applies a transformation of the form
-//! z = f( Wx + b). W is a weight matrix and b is a bias. f is an activation function
-
-template<typename activ_func>
+//! Y = Wx + b. W is a weight matrix and b is a bias.
 class Linear {
     public:
 
@@ -20,9 +18,6 @@ class Linear {
 
         // construct Linear Layer with specified input and output sizes
         Linear(size_t in_size, size_t out_size);
-
-        // if a leaky relU parameter is specified, this constructor will be called
-        Linear(size_t in_size, size_t out_size, double leaky_param);
 
         // destructor
         ~Linear() = default;
@@ -35,7 +30,7 @@ class Linear {
         void Forward(const Vector<double>& input, Vector<double>& output);
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(const Vector<double>& dLdZ, Vector<double>& dLdX);
+        void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
@@ -63,8 +58,6 @@ class Linear {
         //! ---------------------------------------------------------------------------------------------------------
     private:
         // NOTE: empty braces call default constructor for that class ( at least i hope it does)
-        // activation function
-        activ_func f {};
 
         // input shape
         Dims _in {0, 0};

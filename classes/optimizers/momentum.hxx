@@ -43,10 +43,10 @@ public:
                     break;
                 }
 
-                case 3 : // Linear<RelU> layer
+                case 3 : // Linear layer
                 {
-                    size_t rows = boost::get<Linear<RelU>*>(layer)->get_weights().get_rows();
-                    size_t cols = boost::get<Linear<RelU>*>(layer)->get_weights().get_cols();
+                    size_t rows = boost::get<Linear*>(layer)->get_weights().get_rows();
+                    size_t cols = boost::get<Linear*>(layer)->get_weights().get_cols();
 
                     velocities_mat[i] = new Mat<double>(rows, cols);
                     velocities_vec[i] = new Vector<double>(rows);
@@ -54,27 +54,7 @@ public:
                     break;
                 }
 
-                case 4 : // Linear<Sigmoid> layer
-                {
-                    size_t rows = boost::get<Linear<Sigmoid>*>(layer)->get_weights().get_rows();
-                    size_t cols = boost::get<Linear<Sigmoid>*>(layer)->get_weights().get_cols();
 
-                    velocities_mat[i] = new Mat<double>(rows, cols);
-                    velocities_vec[i] = new Vector<double>(rows);
-
-                    break;
-                }
-
-                case 5 : // Linear<Tanh> layer
-                {
-                    size_t rows = boost::get<Linear<Tanh>*>(layer)->get_weights().get_rows();
-                    size_t cols = boost::get<Linear<Tanh>*>(layer)->get_weights().get_cols();
-
-                    velocities_mat[i] = new Mat<double>(rows, cols);
-                    velocities_vec[i] = new Vector<double>(rows);
-
-                    break;
-                }
 
                 default : // other layers that dont have weights or biases to train
                 {

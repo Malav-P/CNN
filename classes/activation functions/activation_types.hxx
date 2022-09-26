@@ -11,12 +11,9 @@ class Sigmoid;
 //! tanh activation
 class Tanh;
 
-//! relU activation
-class RelU;
 
 
 #include "../prereqs.hxx"
-#include "relU.hxx"
 #include "sigmoid.hxx"
 #include "tanh.hxx"
 
