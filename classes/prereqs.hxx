@@ -6,10 +6,7 @@
 #define ANN_PREREQS_HXX
 
 #include <cstdlib>
-
-
 #include <cassert>
-
 #include <cstring>
 #include <cmath>
 #include <chrono>

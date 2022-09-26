@@ -7,7 +7,7 @@
 
 #include "convolution.hxx"
 
-Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double>& filter, size_t stride_h, size_t stride_v, size_t padleft,
+Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft,
                          size_t padright, size_t padtop, size_t padbottom)
 : _in(in_width + padleft + padright, in_height + padtop + padbottom),
   _h_str(stride_h),
@@ -17,23 +17,40 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double>& f
   _padtop(padtop),
   _padbottom(padbottom),
   _local_input((in_height + padtop + padbottom),(in_width + padleft + padright) ),
-  _filter(filter),
-  _dLdF(filter.get_rows(), filter.get_cols())
+  _filter(filter_height, filter_width),
+  _dLdF(filter_height, filter_width)
 {
 
     // calculate total number of vertical and horizontal strides
-    size_t num_v_strides = std::floor((_in.height - filter.get_rows()) / _v_str) + 1;
-    size_t num_h_strides = std::floor((_in.width - filter.get_cols()) / _h_str) + 1;
+    size_t num_v_strides = std::floor((_in.height - filter_height) / _v_str) + 1;
+    size_t num_h_strides = std::floor((_in.width - filter_width) / _h_str) + 1;
 
     // specify output shape
     _out = {num_h_strides, num_v_strides};
 
+    // get the current time to seed the random number generator
+    typedef std::chrono::high_resolution_clock myclock;
+    myclock::time_point beginning = myclock::now();
+    myclock::duration d = myclock::now() - beginning;
+    unsigned seed2 = d.count();
+
+    // seed the random number generator
+    std::default_random_engine generator(seed2);
+    std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
+
+    // Glorot initialize the weights
+    for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++)
+        { _filter(i,j) = distribution(generator); }
+    }
+
 }
 
-Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &filter, size_t stride_h, size_t stride_v,
+Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h, size_t stride_v,
                          bool padding)
                          :_h_str(stride_h),
-                          _v_str(stride_v)
+                          _v_str(stride_v),
+                          _filter(filter_height, filter_width),
+                          _dLdF(filter_height, filter_width)
 {
     if (!padding)
     {
@@ -43,13 +60,11 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
         _padbottom = 0;
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
         _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright)  );
-        _filter = filter;
-        _dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
     }
     else
     {
         // total number of padded rows
-        size_t vert_pad = (in_height - 1) * stride_v - in_height + filter.get_rows();
+        size_t vert_pad = (in_height - 1) * stride_v - in_height + filter_height;
 
         // number of padded rows at top of matrix
         _padtop = std::floor(vert_pad/2.0);
@@ -58,7 +73,7 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
         _padbottom = std::ceil(vert_pad/2.0);
 
         // total number of padded columns
-        size_t hor_pad = (in_width - 1) * stride_h - in_width + filter.get_cols();
+        size_t hor_pad = (in_width - 1) * stride_h - in_width + filter_width;
 
         // number of padded columns to left of matrix
         _padleft = std::floor(hor_pad/2.0);
@@ -69,17 +84,30 @@ Convolution::Convolution(size_t in_width, size_t in_height, const Mat<double> &f
         // rest of member variables
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
         _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright));
-        _filter = filter;
-        _dLdF = Mat<double>(filter.get_rows(), filter.get_cols());
     }
 
 
     // calculate total number of vertical and horizontal strides
-    size_t num_v_strides = std::floor((_in.height - filter.get_rows()) / _v_str) + 1;
-    size_t num_h_strides = std::floor((_in.width - filter.get_cols()) / _h_str) + 1;
+    size_t num_v_strides = std::floor((_in.height - filter_height) / _v_str) + 1;
+    size_t num_h_strides = std::floor((_in.width - filter_width) / _h_str) + 1;
 
     // specify output shape
     _out = {num_h_strides, num_v_strides};
+
+    // get the current time to seed the random number generator
+    typedef std::chrono::high_resolution_clock myclock;
+    myclock::time_point beginning = myclock::now();
+    myclock::duration d = myclock::now() - beginning;
+    unsigned seed2 = d.count();
+
+    // seed the random number generator
+    std::default_random_engine generator(seed2);
+    std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
+
+    // Glorot initialize the weights
+    for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++)
+        { _filter(i,j) = distribution(generator); }
+    }
 
 }
 

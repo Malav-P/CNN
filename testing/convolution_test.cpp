@@ -7,12 +7,11 @@
 
 int main()
 {
-    double fltr_arr[4] = {1,1,1,1};
-    Mat<double> fltr(2, fltr_arr);
 
     Convolution conv(4,            // input image width
                      4,           // input image height
-                     fltr,           // filter
+                     2,           // filter width
+                     2,          // filter height
                      1,            // horizontal stride length
                      1,            // vertical stride length
                      false);      // same (true) or valid (false) padding
@@ -37,14 +36,8 @@ int main()
 
     conv.get_local_input().print();
 
-    for (size_t i = 0; i<conv.out_shape().height; i++)
-    {
-        for (size_t j = 0; j<conv.out_shape().width; j++)
-        {
-            std::cout << output[conv.out_shape().width*i + j] << " ";
-        }
-        std::cout << "\n";
-    }
+    Mat<double> output_matrix = output.reshape(conv.out_shape().height, conv.out_shape().width);
+    output_matrix.print();
 
     std::cout << "\n";
 

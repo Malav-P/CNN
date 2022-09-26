@@ -14,11 +14,11 @@ class Convolution {
         Convolution() = default;
 
         // create Convolution object from given parameters
-        Convolution(size_t in_width, size_t in_height, const Mat<double>& filter, size_t stride_h , size_t stride_v , size_t padleft,
+        Convolution(size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h , size_t stride_v , size_t padleft,
                     size_t padright, size_t padtop, size_t padbottom);
 
         // create Convolution object from given parameters
-        Convolution(size_t in_width, size_t in_height, const Mat<double>& filter, size_t stride_h , size_t stride_v , bool padding = false);
+        Convolution(size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h , size_t stride_v , bool padding = false);
 
         // release allocated memory for Convolution object
         ~Convolution() = default;

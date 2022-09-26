@@ -39,12 +39,11 @@ int main(int argc, char* argv[])
 
     Model<CrossEntropy> model;
 
-    double fltr_arr[9] = {0,-1,0,-1,5,-1,0,-1,0};
-    Mat<double> fltr(3, fltr_arr);
 
     model.Add<Convolution>(  28    // input width
                            , 28    // input height
-                           , fltr // filter
+                           , 3     // filter width
+                           , 3     // filter height
                            , 1    // horizontal stride length
                            , 1    // vertical stride length
                            , false
@@ -54,14 +53,14 @@ int main(int argc, char* argv[])
                        , model.get_outshape(0).height  // input height
                        , 2  // filter width
                        , 2  // filter height
-                       , 1  // horizontal stride length
-                       , 1  // vertical stride length
+                       , 2  // horizontal stride length
+                       , 2  // vertical stride length
                        );
 
 
     model.Add<Linear<RelU>>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
-                            , 10                                                              // output size
-                            , 0.1  //Leaky RelU parameter
+                            , 10   // output size
+                            , 0.1  // Leaky RelU parameter
                             );
 
 

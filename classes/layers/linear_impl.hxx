@@ -29,7 +29,7 @@ Linear<activ_func>::Linear(size_t in_size, size_t out_size)
 
     // seed the random number generator
     std::default_random_engine generator(seed2);
-    std::normal_distribution<double> distribution(0, 2.0/_in.height);
+    std::normal_distribution<double> distribution(0, sqrt(2.0/_in.height));
 
     // He initialize the weights
     for (size_t i=0; i<_weights.get_rows(); i++) { for (size_t j=0; j<_weights.get_cols(); j++)
@@ -58,7 +58,7 @@ Linear<activ_func>::Linear(size_t in_size, size_t out_size, double leaky_param)
 
     // seed the random number generator
     std::default_random_engine generator(seed2);
-    std::normal_distribution<double> distribution(0, 2.0/_in.height);
+    std::normal_distribution<double> distribution(0, sqrt(2.0/_in.height));
 
     // He initialize the weights
     for (size_t i=0; i<_weights.get_rows(); i++) { for (size_t j=0; j<_weights.get_cols(); j++)
