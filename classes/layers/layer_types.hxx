@@ -5,7 +5,6 @@
 #ifndef ANN_LAYER_TYPES_HXX
 #define ANN_LAYER_TYPES_HXX
 
-#include "../activation functions/activation_types.hxx"
 #include <boost/variant.hpp>
 
 // convolutional layer
@@ -26,13 +25,21 @@ class Softmax;
 // relU layer
 class RelU;
 
+// Sigmoid layer
+class Sigmoid;
+
+// Tanh layer
+class Tanh;
+
 using LayerTypes = boost::variant<
         Convolution*,
         MaxPool*,
         MeanPool*,
         Linear*,
         Softmax*,
-        RelU*
+        RelU*,
+        Sigmoid*,
+        Tanh*
         >;
 
 
@@ -44,4 +51,6 @@ using LayerTypes = boost::variant<
 #include "mean_pool.hxx"
 #include "softmax.hxx"
 #include "relU.hxx"
+#include "sigmoid.hxx"
+#include "tanh.hxx"
 #endif //ANN_LAYER_TYPES_HXX

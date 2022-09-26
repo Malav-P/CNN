@@ -1,18 +1,16 @@
 //
-// Created by malav on 5/3/2022.
+// Created by malav on 9/25/2022.
 //
 
-#ifndef ANN_RELU_HXX
-#define ANN_RELU_HXX
+#ifndef CNN_SIGMOID_HXX
+#define CNN_SIGMOID_HXX
 
-class RelU {
+
+class Sigmoid {
     public:
 
         // default constructor
-        RelU(size_t input_width, size_t input_height);
-
-        // constructor, alpha =/= 0 implies a leaky relU unit, alpha usually greater than 0
-        RelU(double Alpha, size_t input_width, size_t input_height);
+        Sigmoid(size_t input_width, size_t input_height);
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
@@ -31,16 +29,13 @@ class RelU {
 
         // return in shape of layer
         Dims const& in_shape() const {return _in;}
-
         //! ----------------------------------------------------------------------------------------------------------
 
     private:
 
-        // leaky reLU parameter
-        double alpha {0};
 
         // local input to layer
-        Vector<double> _local_input;
+        Vector<double> _local_input {};
 
         // input shape of layer
         Dims _in {0,0};
@@ -58,5 +53,6 @@ class RelU {
 
 
 
-#include "relU_impl.hxx"
-#endif //ANN_RELU_HXX
+
+#include "./sigmoid_impl.hxx"
+#endif //CNN_SIGMOID_HXX

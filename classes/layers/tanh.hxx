@@ -1,18 +1,14 @@
 //
-// Created by malav on 5/3/2022.
+// Created by malav on 9/25/2022.
 //
 
-#ifndef ANN_RELU_HXX
-#define ANN_RELU_HXX
+#ifndef CNN_TANH_HXX
+#define CNN_TANH_HXX
 
-class RelU {
+class Tanh {
     public:
-
         // default constructor
-        RelU(size_t input_width, size_t input_height);
-
-        // constructor, alpha =/= 0 implies a leaky relU unit, alpha usually greater than 0
-        RelU(double Alpha, size_t input_width, size_t input_height);
+        Tanh(size_t input_width, size_t input_height);
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
@@ -31,7 +27,6 @@ class RelU {
 
         // return in shape of layer
         Dims const& in_shape() const {return _in;}
-
         //! ----------------------------------------------------------------------------------------------------------
 
     private:
@@ -46,7 +41,6 @@ class RelU {
         Dims _in {0,0};
 
         // output shape of layer
-
         Dims _out{0,0};
 
         // apply function to input
@@ -58,5 +52,5 @@ class RelU {
 
 
 
-#include "relU_impl.hxx"
-#endif //ANN_RELU_HXX
+#include "tanh_impl.hxx"
+#endif //CNN_TANH_HXX

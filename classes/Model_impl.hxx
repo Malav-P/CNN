@@ -247,6 +247,23 @@ Model<LossFunction>::~Model()
                 break;
             }
 
+            case 6: // Sigmoid Layer
+            {
+                Sigmoid* ptr = boost::get<Sigmoid*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+            case 7: // Tanh Layer
+            {
+                Tanh* ptr = boost::get<Tanh*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
 
             default : // nothing to do
             {
@@ -328,6 +345,22 @@ void Model<LossFunction>::print()
                 break;
             }
 
+            case 6: // Sigmoid Layer
+            {
+                std::cout << "-------------------------------------------------------------\n";
+                std::cout << "This was a Sigmoid Layer, no parameters are to be learned. \n\n";
+                std::cout << "-------------------------------------------------------------\n\n";
+
+                break;
+            }
+            case 7: // Tanh Layer
+            {
+                std::cout << "-------------------------------------------------------------\n";
+                std::cout << "This was a Tanh Layer, no parameters are to be learned. \n\n";
+                std::cout << "-------------------------------------------------------------\n\n";
+
+                break;
+            }
 
             default : // nothing to do
             {
