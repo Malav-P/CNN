@@ -16,33 +16,23 @@ int main()
 
     std::cout << "\n\n";
 
-    Linear<Sigmoid> linear(in_size, out_size);
+    Linear linear(in_size, out_size);
 
     Vector<double> input(in_size, arr);
     Vector<double> output(out_size);
 
     linear.Forward(input, output);
 
-    for (size_t i = 0; i<linear.get_local_output().get_len(); i++){
-        std::cout << linear.get_local_output()[i] << " ";
-    }
+    linear.get_local_output().print();
+
     std::cout << "\n\n";
 
-    for (size_t i = 0; i<linear.get_local_output().get_len(); i++){
-        std::cout << output[i] << " ";
-    }
+    output.print();
 
     std::cout << "\n\n";
 
 
-    for (size_t i = 0; i<linear.get_weights().get_rows(); i++)
-    {
-        for (size_t j = 0; j<linear.get_weights().get_cols(); j++)
-        {
-            std::cout << linear.get_weights()(i,j) << " ";
-        }
-        std::cout << "\n";
-    }
+    linear.get_weights().print();
 
     double out_arr[4] = {4, 2, 2, 4};
 

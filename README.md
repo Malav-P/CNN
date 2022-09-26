@@ -68,9 +68,9 @@ The [`linear.hxx`](./classes/layers/linear.hxx) file contains the class definiti
 Note that the linear layer is a template class. The template argument when instantiating an object of this 
 class is an activation function class. Currently, the source code supports three activation functions : 
 
-- ReLU activation,  [relU.hxx](./classes/activation%20functions/relU.hxx)
-- Sigmoid activation,  [sigmoid.hxx](./classes/activation%20functions/sigmoid.hxx)
-- Tanh activation, [tanh.hxx](./classes/activation%20functions/tanh.hxx)
+- ReLU activation,  [relU.hxx](classes/layers/relU.hxx)
+- Sigmoid activation,  [sigmoid.hxx](./classes/activation%20functions/)
+- Tanh activation, [tanh.hxx](./classes/activation%20functions/)
 
 Below is an example of how to create an instance of the linear layer using the `RelU` activation function class
 ```C++

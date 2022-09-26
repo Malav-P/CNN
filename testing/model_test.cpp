@@ -58,14 +58,15 @@ int main(int argc, char* argv[])
                        );
 
 
-    model.Add<Linear<RelU>>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
+    model.Add<Linear>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
                             , 10   // output size
-                            , 0.1  // Leaky RelU parameter
                             );
 
+    model.Add<RelU>(0.1,
+                        model.get_outshape(2).width,    // input width
+                        model.get_outshape(2).height);  // input height
 
-
-    model.Add<Softmax>(model.get_outshape(2).width * model.get_outshape(2).height // input size
+    model.Add<Softmax>(model.get_outshape(3).width * model.get_outshape(3).height // input size
                         );
 
 
