@@ -31,6 +31,7 @@ class Sigmoid;
 // Tanh layer
 class Tanh;
 
+
 using LayerTypes = boost::variant<
         Convolution*,
         MaxPool*,
@@ -53,4 +54,5 @@ using LayerTypes = boost::variant<
 #include "relU.hxx"
 #include "sigmoid.hxx"
 #include "tanh.hxx"
+
 #endif //ANN_LAYER_TYPES_HXX

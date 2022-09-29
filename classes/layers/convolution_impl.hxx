@@ -6,8 +6,9 @@
 #define ANN_CONVOLUTION_IMPL_HXX
 
 #include "convolution.hxx"
+#include "../lin_alg/miscellaneous_helpers.hxx"
 
-Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft,
+Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft,
                          size_t padright, size_t padtop, size_t padbottom)
 : _in(in_width + padleft + padright, in_height + padtop + padbottom),
   _h_str(stride_h),
@@ -16,9 +17,8 @@ Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width,
   _padright(padright),
   _padtop(padtop),
   _padbottom(padbottom),
-  _local_input((in_height + padtop + padbottom),(in_width + padleft + padright) ),
-  _filter(filter_height, filter_width),
-  _dLdF(filter_height, filter_width)
+  _filter(filter_height, filter_width, in_maps),
+  _dLdF(filter_height, filter_width, in_maps)
 {
 
     // calculate total number of vertical and horizontal strides
@@ -39,18 +39,20 @@ Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width,
     std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
 
     // Glorot initialize the weights
-    for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++)
-        { _filter(i,j) = distribution(generator); }
-    }
+    for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++){ for (size_t k = 0; k < in_maps; k++){
+         _filter(i,j,k) = distribution(generator);
+    }}}
+
+    _local_input.resize(in_maps);
 
 }
 
-Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h, size_t stride_v,
+Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size_t filter_width, size_t filter_height, size_t stride_h, size_t stride_v,
                          bool padding)
                          :_h_str(stride_h),
                           _v_str(stride_v),
-                          _filter(filter_height, filter_width),
-                          _dLdF(filter_height, filter_width)
+                          _filter(filter_height, filter_width, in_maps),
+                          _dLdF(filter_height, filter_width, in_maps)
 {
     if (!padding)
     {
@@ -58,8 +60,8 @@ Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width,
         _padright = 0;
         _padtop = 0;
         _padbottom = 0;
-        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
-        _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright)  );
+        _in = {in_width, in_height};
+
     }
     else
     {
@@ -83,7 +85,6 @@ Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width,
 
         // rest of member variables
         _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
-        _local_input = Mat<double>((in_height + _padtop + _padbottom),(in_width + _padleft + _padright));
     }
 
 
@@ -105,31 +106,41 @@ Convolution::Convolution(size_t in_width, size_t in_height, size_t filter_width,
     std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
 
     // Glorot initialize the weights
-    for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++)
-        { _filter(i,j) = distribution(generator); }
-    }
+    for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++) { for (size_t k = 0; k< in_maps; k++){
+         _filter(i,j, k) = distribution(generator);
+    }}}
+
+    _local_input.resize(in_maps);
 
 }
 
-void Convolution::Forward(Vector<double> &input, Vector<double> &output)
+void Convolution::Forward(std::vector<Vector<double>>& input, Vector<double> &output)
 {
     // note that input length matching with _in parameters is indirectly checked in the matrix*vector operator overload
 
     // this routine can be optimized (we take a vector, turn it into matrix, pad it, then flatten back to vector)
     // find a way to do the padding with the vector itself
-    _local_input = input.reshape(_in.height - _padtop - _padbottom, _in.width - _padleft - _padright);
-    _local_input.padding(_padleft, _padright, _padtop, _padbottom);
 
+    size_t i = 0;
+    for (Vector<double>& vec : input)
+    {
+        _local_input[i] = vec.reshape(_in.height - _padtop - _padbottom, _in.width - _padleft - _padright);
+        _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
+        i++;
+    }
+
+
+    Cuboid<double> input_cube = cubify(_local_input);
 
     // initialize return variable
     Mat<double> output_image(_out.height, _out.width);
 
     // do convolution
-    for (size_t i = 0; i < output_image.get_rows(); i++)
+    for (i = 0; i < output_image.get_rows(); i++)
     {
         for (size_t j = 0; j < output_image.get_cols(); j++)
         {
-            output_image(i,j) = _local_input.partial_dot(_filter, {i*_v_str,j*_h_str});
+            output_image(i,j) = input_cube.partial_dot(_filter, {i*_v_str,j*_h_str, 0});
         }
     }
 
@@ -140,12 +151,10 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
 
 
 
-void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
+void Convolution::Backward(Vector<double> &dLdY, std::vector<Vector<double>> &dLdX)
 {
     // reshape dLdY into a matrix
     Mat<double> dLdY_matrix = dLdY.reshape(_out.height, _out.width);
-
-
 
     size_t m = _out.height;
     size_t n = _out.width;
@@ -168,17 +177,20 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
         }
     }
 
-    // convolve the input image with reformatted output with unit strides
+    // convolve the input images with reformatted output with unit strides
     size_t num_v_strides = std::floor((_in.height - reformatted_output.get_rows())) + 1;
     size_t num_h_strides = std::floor((_in.width - reformatted_output.get_cols())) + 1;
-
-    for (size_t i = 0; i < num_v_strides; i++)
+    for (size_t k = 0; k< _filter.get_depth(); k++)
     {
-        for (size_t j = 0; j < num_h_strides; j++)
+        for (size_t i = 0; i < num_v_strides; i++)
         {
-            _dLdF(i, j) = _local_input.partial_dot(reformatted_output, {i, j});
+            for (size_t j = 0; j < num_h_strides; j++)
+            {
+                _dLdF(i, j, k) = _local_input[k].partial_dot(reformatted_output, {i, j});
+            }
         }
     }
+
 
     // this concludes the calculation of _dLdF
 
@@ -197,26 +209,37 @@ void Convolution::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     assert(num_v_strides == _in.height);
     assert(num_h_strides == _in.width);
 
-    // create a return variable
-    Mat<double> dLdX_matrix(num_v_strides, num_h_strides);
 
-    // iterate through return variable
-    for (size_t i = 0; i < dLdX_matrix.get_rows(); i++)
+    std::vector<Mat<double>> filter_as_list = cube_to_matarray(_filter);
+
+    std::vector<Mat<double>> dLdX_matrices(_filter.get_depth());
+
+    for (size_t k = 0; k< _filter.get_depth(); k++)
     {
-        for (size_t j = 0; j < dLdX_matrix.get_cols(); j++)
+        Mat<double> mat(num_v_strides, num_h_strides);
+        for (size_t i = 0; i < num_v_strides; i++)
         {
-            dLdX_matrix(i,j) = reformatted_output.partial_dot(_filter, {i,j});
+            for (size_t j = 0; j < num_h_strides; j++)
+            {
+                mat(i,j) = reformatted_output.partial_dot(filter_as_list[k], {i,j});
+            }
         }
+        dLdX_matrices[k] = mat;
     }
+
 
     // return filter to original, non-rotated state
     _filter.set_rot(0);
 
-    // crop the matrix (depad the matrix)
-    dLdX_matrix.crop(_padleft, _padright, _padtop, _padbottom);
+    // crop the matrices (depad the matrix)
+    size_t i = 0;
+    for (Mat<double>& mat : dLdX_matrices)
+    {
+        mat.crop(_padleft, _padright, _padtop, _padbottom);
+        dLdX[i] = mat.flatten();
+        i++;
+    }
 
-    // flatten matrix into vector, assign it to dLdX
-    dLdX = dLdX_matrix.flatten();
 }
 
 template<typename Optimizer>

@@ -27,4 +27,29 @@ class Dimensions {
     T2 height {0};
 };
 
+template<typename T1 = size_t , typename T2 = size_t, typename T3 = size_t>
+class Dimensions3 {
+public:
+
+    Dimensions3() = default;
+
+    Dimensions3(T1 in_width, T2 in_height, T3 in_depth)
+            : width(in_width),
+              height(in_height),
+              depth(in_depth)
+    {}
+
+    friend bool operator==(const Dimensions3& l, const Dimensions3& r)
+    {
+        if (l.width == r.width && l.height == r.height && l.depth == r.depth) {return true;}
+        else {return false;}
+    }
+
+    T1 width {0};
+
+    T2 height {0};
+
+    T3 depth {0};
+};
+
 #endif //ANN_PAIR_HXX
