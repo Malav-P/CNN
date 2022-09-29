@@ -18,7 +18,8 @@ Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size
   _padtop(padtop),
   _padbottom(padbottom),
   _filter(filter_height, filter_width, in_maps),
-  _dLdF(filter_height, filter_width, in_maps)
+  _dLdF(filter_height, filter_width, in_maps),
+  _local_input(in_maps)
 {
 
     // calculate total number of vertical and horizontal strides
@@ -43,7 +44,6 @@ Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size
          _filter(i,j,k) = distribution(generator);
     }}}
 
-    _local_input.resize(in_maps);
 
 }
 
@@ -52,7 +52,8 @@ Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size
                          :_h_str(stride_h),
                           _v_str(stride_v),
                           _filter(filter_height, filter_width, in_maps),
-                          _dLdF(filter_height, filter_width, in_maps)
+                          _dLdF(filter_height, filter_width, in_maps),
+                          _local_input(in_maps)
 {
     if (!padding)
     {
@@ -60,7 +61,7 @@ Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size
         _padright = 0;
         _padtop = 0;
         _padbottom = 0;
-        _in = {in_width, in_height};
+        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
 
     }
     else
@@ -110,8 +111,6 @@ Convolution::Convolution(size_t in_maps, size_t in_width, size_t in_height, size
          _filter(i,j, k) = distribution(generator);
     }}}
 
-    _local_input.resize(in_maps);
-
 }
 
 void Convolution::Forward(std::vector<Vector<double>>& input, Vector<double> &output)
@@ -128,7 +127,6 @@ void Convolution::Forward(std::vector<Vector<double>>& input, Vector<double> &ou
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
         i++;
     }
-
 
     Cuboid<double> input_cube = cubify(_local_input);
 
