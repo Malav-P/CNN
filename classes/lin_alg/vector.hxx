@@ -51,6 +51,9 @@ class Vector {
         // multiply operator (scalar)
         Vector<T> operator * (double c);
 
+        // *= operator (scalar)
+        void operator *= (double c);
+
         // multiply operator (vector)
         Mat<T> operator * (const Vector<T>& other);
 

@@ -8,7 +8,8 @@
 int main()
 {
 
-    Convolution conv(2,            // number of input maps
+    Convolution conv(2,           // number of input maps
+                     2,         // number of output maps
                      4,            // input image width
                      4,           // input image height
                      2,           // filter width
@@ -19,7 +20,7 @@ int main()
 
 
 
-    conv.get_filter().print();
+    conv.print_filters();
 
     std::cout << "\n";
 
@@ -40,21 +41,27 @@ int main()
     inputs[0] = input;
     inputs[1] = second_input;
 
-    Vector<double> output(conv.out_shape().height * conv.out_shape().width);
+    std::vector<Vector<double>> outputs(2);
 
-    conv.Forward(inputs, output);
+    conv.Forward(inputs, outputs);
 
-    Mat<double> output_matrix = output.reshape(conv.out_shape().height, conv.out_shape().width);
+    Mat<double> output_matrix = outputs[1].reshape(conv.out_shape().height, conv.out_shape().width);
     output_matrix.print();
 
-    std::cout << "\n";
 
-    Vector<double> dLdY(conv.out_shape().width * conv.out_shape().height);
-    dLdY.fill(1);
+    Vector<double> dLdY1(conv.out_shape().width * conv.out_shape().height);
+    dLdY1.fill(1);
+
+    Vector<double>dLdY2(conv.out_shape().width * conv.out_shape().height);
+    dLdY2.fill(1);
+
+    std::vector<Vector<double>> dLdYs(2);
+    dLdYs[0] = dLdY1;
+    dLdYs[1] = dLdY2;
 
     std::vector<Vector<double>> dLdX(2);
 
-    conv.Backward(dLdY, dLdX);
+    conv.Backward(dLdYs, dLdX);
 
     // choose an optimizer
     SGD optimizer(0.1);
@@ -62,6 +69,6 @@ int main()
     // update parameters for optimizer
     conv.Update_Params(&optimizer,1);
 
-
-    conv.get_filter().print();
+    // print updated filters
+    conv.print_filters();
 }
