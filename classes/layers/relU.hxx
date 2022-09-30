@@ -9,10 +9,10 @@ class RelU {
     public:
 
         // default constructor
-        RelU(size_t input_width, size_t input_height);
+        RelU(size_t input_width, size_t input_height, size_t input_depth);
 
         // constructor, alpha =/= 0 implies a leaky relU unit, alpha usually greater than 0
-        RelU(double Alpha, size_t input_width, size_t input_height);
+        RelU(double Alpha, size_t input_width, size_t input_height, size_t input_depth);
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
