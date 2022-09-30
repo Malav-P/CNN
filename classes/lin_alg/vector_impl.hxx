@@ -328,4 +328,19 @@ void Vector<T>::operator*=(double c)
 }
 
 //! -----------------------------------------------------------------------------------
+
+template<typename T>
+Vector<T> Vector<T>::merge(const Vector<T> &other)
+{
+
+    // initialize return variable
+    Vector<T> obj(_length + other._length);
+
+    // copy over data
+    std::memcpy(obj._data, _data, sizeof(T) * _length);
+    std::memcpy(obj._data + _length, other._data, sizeof(T) * other._length);
+
+    // return result
+    return obj;
+}
 #endif //ANN_VECTOR_CPP

@@ -12,7 +12,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                          size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft, size_t padright,
                          size_t padtop,
                          size_t padbottom)
-: _in(in_width + padleft + padright, in_height + padtop + padbottom),
+: _in(in_width + padleft + padright, in_height + padtop + padbottom, in_maps),
   _h_str(stride_h),
   _v_str(stride_v),
   _padleft(padleft),
@@ -31,7 +31,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
     size_t num_h_strides = std::floor((_in.width - filter_width) / _h_str) + 1;
 
     // specify output shape
-    _out = {num_h_strides, num_v_strides};
+    _out = {num_h_strides, num_v_strides, out_maps};
 
     // get the current time to seed the random number generator
     typedef std::chrono::high_resolution_clock myclock;
@@ -74,7 +74,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         _padright = 0;
         _padtop = 0;
         _padbottom = 0;
-        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
+        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom, in_maps};
 
     }
     else
@@ -98,7 +98,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         _padright = std::ceil(hor_pad/2.0);
 
         // rest of member variables
-        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom};
+        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom, in_maps};
     }
 
 
@@ -109,7 +109,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
     size_t num_h_strides = std::floor((_in.width - filter_width) / _h_str) + 1;
 
     // specify output shape
-    _out = {num_h_strides, num_v_strides};
+    _out = {num_h_strides, num_v_strides, out_maps};
 
     // get the current time to seed the random number generator
     typedef std::chrono::high_resolution_clock myclock;
@@ -138,22 +138,25 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
 }
 
-void Convolution::Forward(std::vector<Vector<double>>& input, std::vector<Vector<double>> &output)
+void Convolution::Forward(Vector<double> &input, Vector<double> &output)
 {
     // note that input length matching with _in parameters is indirectly checked in the matrix*vector operator overload
 
     // this routine can be optimized (we take a vector, turn it into matrix, pad it, then flatten back to vector)
     // find a way to do the padding with the vector itself
 
-    size_t i = 0;
-    for (Vector<double>& vec : input)
+    size_t rows = _in.height-_padbottom-_padtop;
+    size_t cols = _in.width - _padleft - _padright;
+
+    for (size_t i = 0; i < _filters[0].get_depth(); i++)
     {
-        _local_input[i] = vec.reshape(_in.height - _padtop - _padbottom, _in.width - _padleft - _padright);
+        _local_input[i] = Mat<double>(rows, cols, input.get_data() + i*rows*cols);
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
-        i++;
     }
 
     Cuboid<double> input_cube = cubify(_local_input);
+
+    Vector<double> OUTPUT;
 
     // initialize return variable
     Mat<double> output_image(_out.height, _out.width);
@@ -161,20 +164,20 @@ void Convolution::Forward(std::vector<Vector<double>>& input, std::vector<Vector
     for (size_t k = 0; k < _filters.size(); k++) {
 
         // do convolution
-        for (i = 0; i < output_image.get_rows(); i++) {
+        for (size_t i = 0; i < output_image.get_rows(); i++) {
             for (size_t j = 0; j < output_image.get_cols(); j++) {
                 output_image(i, j) = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
             }
         }
-
-        output[k] = output_image.flatten();
+        OUTPUT = OUTPUT.merge(output_image.flatten());
     }
 
+    output = OUTPUT;
 }
 
 
 
-void Convolution::Backward(std::vector<Vector<double>> &dLdYs, std::vector<Vector<double>> &dLdXs)
+void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 {
 
     size_t m = _out.height;
@@ -186,11 +189,11 @@ void Convolution::Backward(std::vector<Vector<double>> &dLdYs, std::vector<Vecto
     size_t filter_height = _filters[0].get_rows();
     size_t filter_width = _filters[0].get_cols();
 
-    size_t idx = 0;
-    for (Vector<double>& dLdY: dLdYs)
+
+    for (size_t idx = 0; idx < _filters.size() ; idx++)
     {
         // reshape dLdY into a matrix
-        Mat<double> dLdY_matrix = dLdY.reshape(_out.height, _out.width);
+        Mat<double> dLdY_matrix(m, n, dLdYs.get_data() + idx*m*n);
 
         // reformatted output
         Mat<double> reformatted_output(m + ((p-filter_height)%_v_str) + (m-1)*(_v_str - 1), n+ ((q - filter_width)%_h_str) + (n-1)*(_h_str -1));
@@ -257,26 +260,21 @@ void Convolution::Backward(std::vector<Vector<double>> &dLdYs, std::vector<Vecto
         _filters[idx].set_rot(0);
 
         // crop the matrices (depad the matrix)
-        size_t i = 0;
+        Vector<double> flattened_dLdX_matrices;
+
         for (Mat<double>& mat : dLdX_matrices)
         {
             mat.crop(_padleft, _padright, _padtop, _padbottom);
+            flattened_dLdX_matrices = flattened_dLdX_matrices.merge(mat.flatten());
 
-            // unsure about this +=, look into it more. May need to instead average each dLdX[i] at the end of
-            // the global loop
-            dLdXs[i] += mat.flatten();
-            i++;
         }
-
-        // this should be very last item executed in each loop
-        idx++;
+        // unsure about this +=, look into it more. May need to instead average each dLdX[i] at the end of
+        // the global loop
+        dLdXs += flattened_dLdX_matrices;
     }
 
     // we are averaging the loss gradient over the total number of filters
-    for (Vector<double>& dLdX : dLdXs)
-    {
-        dLdX *= 1.0/_filters.size();
-    }
+        dLdXs *= 1.0/_filters.size();
 
 }
 

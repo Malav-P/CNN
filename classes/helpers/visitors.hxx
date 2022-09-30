@@ -11,20 +11,20 @@
 
 using Dims = Dimensions<>;
 
-class Outshape_visitor : public boost::static_visitor<Dims>
+class Outshape_visitor : public boost::static_visitor<Dims3>
 {
 public:
 
     template<typename T>
-    Dims operator()(T* operand) const { return (*operand).out_shape(); }
+    Dims3 operator()(T* operand) const { return (*operand).out_shape(); }
 };
 
-class Inshape_visitor : public boost::static_visitor<Dims>
+class Inshape_visitor : public boost::static_visitor<Dims3>
 {
 public:
 
     template<typename T>
-    Dims operator()(T* operand) const { return (*operand).in_shape(); }
+    Dims3 operator()(T* operand) const { return (*operand).in_shape(); }
 };
 
 class Forward_visitor : public boost::static_visitor<>

@@ -35,15 +35,15 @@ public:
             {
                 case 0 : // convolutional layer
                 {
-                    size_t rows = boost::get<Convolution*>(layer)->get_filter().get_rows();
-                    size_t cols = boost::get<Convolution*>(layer)->get_filter().get_cols();
-                    size_t depth= boost::get<Convolution*>(layer)->get_filter().get_depth();
-
-                    velocities_cub[i] = new Cuboid<double>(rows, cols, depth);
-                    velocities_mat[i] = nullptr;
-                    velocities_vec[i] = nullptr;
-
-                    break;
+//                    size_t rows = boost::get<Convolution*>(layer)->get_filter().get_rows();
+//                    size_t cols = boost::get<Convolution*>(layer)->get_filter().get_cols();
+//                    size_t depth= boost::get<Convolution*>(layer)->get_filter().get_depth();
+//
+//                    velocities_cub[i] = new Cuboid<double>(rows, cols, depth);
+//                    velocities_mat[i] = nullptr;
+//                    velocities_vec[i] = nullptr;
+//
+//                    break;
                 }
 
                 case 3 : // Linear layer

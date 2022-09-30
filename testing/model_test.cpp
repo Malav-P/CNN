@@ -41,26 +41,27 @@ int main(int argc, char* argv[])
 
 
     model.Add<Convolution>(  1      // input feature maps
-                           , 16    // output feature maps
+                           , 4    // output feature maps
                            , 28    // input width
                            , 28    // input height
                            , 3     // filter width
                            , 3     // filter height
                            , 1    // horizontal stride length
                            , 1    // vertical stride length
-                           , false
+                           , true
                            );
 
-    model.Add<MaxPool>(  model.get_outshape(0).width   // input width
-                       , model.get_outshape(0).height  // input height
-                       , 2  // filter width
-                       , 2  // filter height
-                       , 2  // horizontal stride length
-                       , 2  // vertical stride length
-                       );
+    model.Add<MaxPooling>(   4                                 // in maps
+                           , model.get_outshape(0).width   // input width
+                           , model.get_outshape(0).height  // input height
+                           , 2  // filter width
+                           , 2  // filter height
+                           , 2  // horizontal stride length
+                           , 2  // vertical stride length
+                           );
 
 
-    model.Add<Linear>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
+    model.Add<Linear>(4*model.get_outshape(1).width * model.get_outshape(1).height  // input size
                             , 10   // output size
                             );
 

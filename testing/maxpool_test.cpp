@@ -18,26 +18,24 @@ int main()
     double test_input2[16] = {12, 46, 4, 3, 6, 98, 387, 6, 39, 91, 74, 98, 5, 43, 5, 3};
     Vector<double> input2(in_width*in_height, test_input2);
 
-    std::vector<Vector<double>> inputs(2);
-    inputs[0] = input;
-    inputs[1] = input2;
+    Vector<double> inputs = input.merge(input2);
 
     MaxPooling pool_lyr(2, in_width, in_height, field_width, field_height, 2, 2);
 
-    std::vector<Vector<double>> outputs(2);
+    Vector<double> outputs;
 
       pool_lyr.Forward(inputs, outputs);
 
-    Mat<double> matrix_input = inputs[1].reshape(in_height, in_width);
+    Mat<double> matrix_input(in_height, in_width, inputs.get_data() + 0*in_height*in_width);
     matrix_input.print();
 
-    Mat<double> matrix_output = outputs[1].reshape(pool_lyr.out_shape().height, pool_lyr.out_shape().width);
+    Mat<double> matrix_output(pool_lyr.out_shape().height, pool_lyr.out_shape().width, outputs.get_data() + 0*pool_lyr.out_shape().width*pool_lyr.out_shape().height);
     matrix_output.print();
 
     std::cout << "\n";
 
     for (size_t i=0; i<pool_lyr.out_shape().width * pool_lyr.out_shape().height; i++)
     {
-        std::cout << pool_lyr.get_pool_vector()[1].get_winners()[i] << " ";
+        std::cout << pool_lyr.get_pool_vector()[0].get_winners()[i] << " ";
     }
 }

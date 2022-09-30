@@ -10,14 +10,14 @@
 
 
 RelU::RelU(size_t input_width, size_t input_height):
-        _in(input_width, input_height),
-        _out(input_width, input_height)
+        _in(input_width, input_height,1),
+        _out(input_width, input_height,1)
 {}
 
 RelU::RelU(double Alpha, size_t input_width, size_t input_height):
         alpha(Alpha),
-        _in(input_width, input_height),
-        _out(input_width, input_height)
+        _in(input_width, input_height,1),
+        _out(input_width, input_height,1)
 {
     if (Alpha < 0) {alpha = 0;} //! alpha cannot be negative
 }

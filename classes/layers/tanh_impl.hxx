@@ -9,8 +9,8 @@
 
 
 Tanh::Tanh(size_t input_width, size_t input_height):
-        _in(input_width, input_height),
-        _out(input_width, input_height)
+        _in(input_width, input_height,1),
+        _out(input_width, input_height,1)
 {}
 
 void Tanh::Forward(const Vector<double> &input, Vector<double> &output)

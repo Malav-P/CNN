@@ -33,16 +33,16 @@ class Convolution {
         //! BOOST::APPLY_VISITOR FUNCTIONS ----------------------------------------------------------------------------
 
         // send feature through the convolutional layer
-        void Forward(std::vector<Vector<double>>& input, std::vector<Vector<double>> &output);
+        void Forward(Vector<double> &input, Vector<double> &output);
 
         // send feature backward through convolutional layer, keeping track of gradients
-        void Backward(std::vector<Vector<double>> &dLdYs, std::vector<Vector<double>>& dLdXs);
+        void Backward(Vector<double> &dLdYs, Vector<double> &dLdXs);
 
         // get output shape of convolution
-        Dims const& out_shape() const {return _out;}
+        Dims3 const& out_shape() const {return _out;}
 
-        // get input shape of convolution
-        Dims const& in_shape() const {return _in;}
+        // get input shape of convolution (without padding!)
+        Dims3  in_shape() const  {return {_in.width - _padleft - _padright, _in.height - _padtop - _padbottom, _in.depth};}
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
@@ -81,10 +81,10 @@ class Convolution {
         size_t _v_str {1};
 
         // input image shape
-        Dims _in {0, 0};
+        Dims3 _in {0, 0,0};
 
         // output image shape
-        Dims _out {0, 0};
+        Dims3 _out {0, 0,0};
 
         // padding
         size_t _padleft {0};

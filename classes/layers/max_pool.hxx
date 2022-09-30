@@ -31,10 +31,10 @@ class MaxPool {
         void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
 
         // get output shape of pooling layer
-        Dims const& out_shape() const {return _out;}
+        Dims3 const& out_shape() const {return _out;}
 
         // get input shape of pooling layer
-        Dims const& in_shape() const {return _in;}
+        Dims3 const& in_shape() const {return _in;}
 
         // update parameters in this layer (during learning)
         template<typename Optimizer>
@@ -53,10 +53,10 @@ class MaxPool {
         Pair max_value(Pair* arr, size_t n);
 
         // input shape
-        Dims _in {0, 0};
+        Dims3 _in {0, 0,1};
 
         // output shape
-        Dims _out {0, 0};
+        Dims3 _out {0, 0,1};
 
         // field shape
         Dims _field {0, 0};

@@ -20,9 +20,9 @@ void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
 
     for (LayerTypes layer : network)
     {
-        Dims out_shape = boost::apply_visitor(Outshape_visitor(), layer);
+        Dims3 out_shape = boost::apply_visitor(Outshape_visitor(), layer);
 
-        visitor.output = new Vector<double>(out_shape.width*out_shape.height);
+        visitor.output = new Vector<double>(out_shape.width*out_shape.height*out_shape.depth);
         boost::apply_visitor(visitor, layer);
 
         delete visitor.input;
@@ -49,9 +49,9 @@ void Model<LossFunction>::Backward(Vector<double> &dLdY, Vector<double>& dLdX)
     {
         LayerTypes layer = network[i];
 
-        Dims in_shape =  boost::apply_visitor(Inshape_visitor(), layer);
+        Dims3 in_shape =  boost::apply_visitor(Inshape_visitor(), layer);
 
-        visitor.dLdX = new Vector<double>(in_shape.width * in_shape.height);
+        visitor.dLdX = new Vector<double>(in_shape.width * in_shape.height * in_shape.depth);
         boost::apply_visitor(visitor, layer);
 
         delete visitor.dLdY;
@@ -264,6 +264,15 @@ Model<LossFunction>::~Model()
                 break;
             }
 
+            case 8 : // MaxPooling Layer
+            {
+                MaxPooling* ptr = boost::get<MaxPooling*>(layer);
+
+                delete ptr;
+
+                break;
+            }
+
 
             default : // nothing to do
             {
@@ -287,7 +296,7 @@ void Model<LossFunction>::print()
                 Convolution* ptr = boost::get<Convolution*>(layer);
                 std::cout << "-------------------------------------------------------------\n";
                 std::cout << "CONV Layer \n The filter is shown below:\n\n";
-                ptr->get_filter().print();
+                ptr->print_filters();
                 std::cout << "-------------------------------------------------------------\n\n";
 
                 break;

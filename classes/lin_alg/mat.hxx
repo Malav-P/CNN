@@ -6,6 +6,7 @@
 #define ANN_MAT_HXX
 
 #include "data_types.hxx"
+#include "vector.hxx"
 
 
 template<typename T = double>

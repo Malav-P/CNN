@@ -30,7 +30,7 @@ class Model {
         void Train(Optimizer* opt, DataSet& training_set, size_t batch_size, size_t epochs /* args to be filled */ );
 
         // return outshape of a layer
-        Dims get_outshape(size_t idx){ return boost::apply_visitor(Outshape_visitor(), network[idx]);}
+        Dims3 get_outshape(size_t idx){ return boost::apply_visitor(Outshape_visitor(), network[idx]);}
 
         // make a forward pass through the network
         void Forward(Vector<double>& input, Vector<double>& output);

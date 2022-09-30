@@ -37,31 +37,34 @@ int main()
     Vector<double> input = in.flatten();
     Vector<double> second_input = second.flatten();
 
-    std::vector<Vector<double>> inputs(2);
-    inputs[0] = input;
-    inputs[1] = second_input;
+    input = input.merge(second_input);
 
-    std::vector<Vector<double>> outputs(2);
+//    std::vector<Vector<double>> inputs(2);
+//    inputs[0] = input;
+//    inputs[1] = second_input;
 
-    conv.Forward(inputs, outputs);
+    Vector<double> output;
 
-    Mat<double> output_matrix = outputs[1].reshape(conv.out_shape().height, conv.out_shape().width);
+    conv.Forward(input, output);
+
+    Mat<double> output_matrix(conv.out_shape().height, conv.out_shape().width, output.get_data());
     output_matrix.print();
 
 
     Vector<double> dLdY1(conv.out_shape().width * conv.out_shape().height);
-    dLdY1.fill(1);
+    dLdY1.fill(0.1);
 
     Vector<double>dLdY2(conv.out_shape().width * conv.out_shape().height);
-    dLdY2.fill(1);
+    dLdY2.fill(0.1);
 
     std::vector<Vector<double>> dLdYs(2);
     dLdYs[0] = dLdY1;
     dLdYs[1] = dLdY2;
 
-    std::vector<Vector<double>> dLdX(2);
+    Vector<double> dLdX;
 
-    conv.Backward(dLdYs, dLdX);
+    dLdY1 = dLdY1.merge(dLdY2);
+    conv.Backward(dLdY1, dLdX);
 
     // choose an optimizer
     SGD optimizer(0.1);

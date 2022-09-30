@@ -24,16 +24,16 @@ class MaxPooling {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(std::vector<Vector<double>>& input, std::vector<Vector<double>>& output);
+        void Forward(Vector<double> &input, Vector<double> &output);
 
         // send feature backward through the MaxPool layer
-        void Backward(std::vector<Vector<double>> &dLdY, std::vector<Vector<double>> &dLdX);
+        void Backward(Vector<double> &dLdY, Vector<double> &dLdX);
 
         // get output shape of pooling layer
-        Dims const& out_shape() const {return _out;}
+        Dims3 const& out_shape() const {return _out;}
 
         // get input shape of pooling layer
-        Dims const& in_shape() const {return _in;}
+        Dims3 const& in_shape() const {return _in;}
 
         // update parameters in this layer (during learning)
         template<typename Optimizer>
@@ -48,10 +48,10 @@ class MaxPooling {
     private:
 
         // input shape
-        Dims _in {0, 0};
+        Dims3 _in {0, 0,0};
 
         // output shape
-        Dims _out {0, 0};
+        Dims3 _out {0, 0,0};
 
         // field shape
         Dims _field {0, 0};
