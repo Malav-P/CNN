@@ -40,7 +40,9 @@ int main(int argc, char* argv[])
     Model<CrossEntropy> model;
 
 
-    model.Add<Convolution>(  28    // input width
+    model.Add<Convolution>(  1      // input feature maps
+                           , 16    // output feature maps
+                           , 28    // input width
                            , 28    // input height
                            , 3     // filter width
                            , 3     // filter height

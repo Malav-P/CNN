@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(/opt/homebrew/include/)
 
 add_executable(linalg_test testing/linalg_test.cpp)
-add_executable(convolution_test testing/convolution_test.cpp)
+add_executable(convolution_test testing/convolution_test.cpp classes/layers/max_pooling.hxx classes/layers/max_pooling_impl.hxx)
 add_executable(maxpool_test testing/maxpool_test.cpp)
 add_executable(meanpool_test testing/meanpool_test.cpp)
 add_executable(linear_test testing/linear_test.cpp)
