@@ -37,14 +37,13 @@ class MaxPooling;
 
 using LayerTypes = boost::variant<
         Convolution*,
-        MaxPool*,
+        MaxPooling*,
         MeanPool*,
         Linear*,
         Softmax*,
         RelU*,
         Sigmoid*,
-        Tanh*,
-        MaxPooling*
+        Tanh*
         >;
 
 

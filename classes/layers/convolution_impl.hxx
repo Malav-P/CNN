@@ -156,7 +156,7 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
 
     Cuboid<double> input_cube = cubify(_local_input);
 
-    Vector<double> OUTPUT;
+//    Vector<double> OUTPUT;
 
     // initialize return variable
     Mat<double> output_image(_out.height, _out.width);
@@ -166,13 +166,11 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
         // do convolution
         for (size_t i = 0; i < output_image.get_rows(); i++) {
             for (size_t j = 0; j < output_image.get_cols(); j++) {
-                output_image(i, j) = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
+//                output_image(i, j) = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
+                output[k*_out.height*_out.width + i*_out.width + j] = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
             }
         }
-        OUTPUT = OUTPUT.merge(output_image.flatten());
     }
-
-    output = OUTPUT;
 }
 
 
@@ -189,8 +187,11 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
     size_t filter_height = _filters[0].get_rows();
     size_t filter_width = _filters[0].get_cols();
 
+    size_t N_filters = _filters.size();
+    size_t N_in_maps = _filters[0].get_depth();
 
-    for (size_t idx = 0; idx < _filters.size() ; idx++)
+
+    for (size_t idx = 0; idx < N_filters ; idx++)
     {
         // reshape dLdY into a matrix
         Mat<double> dLdY_matrix(m, n, dLdYs.get_data() + idx*m*n);
@@ -208,10 +209,10 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         }
 
         // convolve the input images with reformatted output with unit strides
-        size_t num_v_strides = std::floor((_in.height - reformatted_output.get_rows())) + 1;
-        size_t num_h_strides = std::floor((_in.width - reformatted_output.get_cols())) + 1;
+        size_t num_v_strides = std::floor((p - reformatted_output.get_rows())) + 1;
+        size_t num_h_strides = std::floor((q - reformatted_output.get_cols())) + 1;
 
-        for (size_t k = 0; k< _filters[0].get_depth(); k++)
+        for (size_t k = 0; k < N_in_maps; k++)
         {
             for (size_t i = 0; i < num_v_strides; i++)
             {
@@ -232,8 +233,8 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         // rotate filter by 180 degrees
         _filters[idx].set_rot(2);
 
-        num_v_strides = std::floor((reformatted_output.get_rows() - _filters[idx].get_rows())) + 1;
-        num_h_strides = std::floor((reformatted_output.get_cols()- _filters[idx].get_cols())) + 1;
+        num_v_strides = std::floor((reformatted_output.get_rows() - filter_height)) + 1;
+        num_h_strides = std::floor((reformatted_output.get_cols()- filter_width)) + 1;
 
         // number of strides in each direction should be equal to the dimensions of dLdX_matrix
         assert(num_v_strides == _in.height);
@@ -241,9 +242,9 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 
         auto filter_as_list = cube_to_matarray(_filters[idx]);
 
-        std::vector<Mat<double>> dLdX_matrices(_filters[idx].get_depth());
+        std::vector<Mat<double>> dLdX_matrices(N_in_maps);
 
-        for (size_t k = 0; k< _filters[idx].get_depth(); k++)
+        for (size_t k = 0; k< N_in_maps; k++)
         {
             Mat<double> mat(num_v_strides, num_h_strides);
             for (size_t i = 0; i < num_v_strides; i++)
@@ -253,29 +254,25 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
                     mat(i,j) = reformatted_output.partial_dot(filter_as_list[k], {i,j});
                 }
             }
-            dLdX_matrices[k] = mat;
+            // crop the matrices (depad the matrix)
+            mat.crop(_padleft, _padright, _padtop, _padbottom);
+            for (size_t i = 0; i < mat.get_rows() ; i++)
+            {
+                for (size_t j = 0 ; j< mat.get_cols() ; j++)
+                {
+                    // unsure about this +=, look into it more. May need to instead average each dLdX[i] at the end of
+                    // the global loop
+                    dLdXs[k*mat.get_rows()*mat.get_cols() + i*mat.get_cols() + j] += mat(i,j);
+                }
+            }
+
         }
 
         // return filter to original, non-rotated state
         _filters[idx].set_rot(0);
-
-        // crop the matrices (depad the matrix)
-        Vector<double> flattened_dLdX_matrices;
-
-        for (Mat<double>& mat : dLdX_matrices)
-        {
-            mat.crop(_padleft, _padright, _padtop, _padbottom);
-            flattened_dLdX_matrices = flattened_dLdX_matrices.merge(mat.flatten());
-
-        }
-        // unsure about this +=, look into it more. May need to instead average each dLdX[i] at the end of
-        // the global loop
-        dLdXs += flattened_dLdX_matrices;
     }
-
     // we are averaging the loss gradient over the total number of filters
-        dLdXs *= 1.0/_filters.size();
-
+        dLdXs *= 1.0/N_filters;
 }
 
 template<typename Optimizer>

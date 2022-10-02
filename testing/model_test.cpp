@@ -41,11 +41,11 @@ int main(int argc, char* argv[])
 
 
     model.Add<Convolution>(  1      // input feature maps
-                           , 6    // output feature maps
+                           , 24    // output feature maps
                            , 28    // input width
                            , 28    // input height
-                           , 3     // filter width
-                           , 3     // filter height
+                           , 5     // filter width
+                           , 5     // filter height
                            , 1    // horizontal stride length
                            , 1    // vertical stride length
                            , true
@@ -67,16 +67,12 @@ int main(int argc, char* argv[])
                            , 2  // vertical stride length
                            );
 
-    model.Add<Convolution>(  model.get_outshape(2).depth      // input feature maps
-            , 16    // output feature maps
-            , model.get_outshape(2).width    // input width
-            , model.get_outshape(2).height    // input height
-            , 3     // filter width
-            , 3     // filter height
-            , 1    // horizontal stride length
-            , 1    // vertical stride length
-            , true
-    );
+
+    model.Add<Linear>(   model.get_outshape(2).depth
+                        *model.get_outshape(2).width
+                        *model.get_outshape(2).height  // input size
+                        , 256   // output size
+                            );
 
     model.Add<RelU>(    0.1,                                // leaky RelU parameter
                         model.get_outshape(3).width,    // input width
@@ -84,24 +80,14 @@ int main(int argc, char* argv[])
                         model.get_outshape(3).depth     // input depth
     );
 
-    model.Add<MaxPooling>(   model.get_outshape(4).depth   // in maps
-            , model.get_outshape(4).width   // input width
-            , model.get_outshape(4).height  // input height
-            , 2  // filter width
-            , 2  // filter height
-            , 2  // horizontal stride length
-            , 2  // vertical stride length
+    model.Add<Linear>(   model.get_outshape(4).depth
+                         *model.get_outshape(4).width
+                         *model.get_outshape(4).height  // input size
+            , 10   // output size
     );
 
 
-    model.Add<Linear>(   model.get_outshape(5).depth
-                        *model.get_outshape(5).width
-                        *model.get_outshape(5).height  // input size
-                        , 10   // output size
-                            );
-
-
-    model.Add<Softmax>(model.get_outshape(6).width * model.get_outshape(6).height // input size
+    model.Add<Softmax>(model.get_outshape(5).width * model.get_outshape(5).height // input size
                         );
 
 

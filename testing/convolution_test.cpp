@@ -16,7 +16,7 @@ int main()
                      2,          // filter height
                      1,            // horizontal stride length
                      1,            // vertical stride length
-                     false);      // same (true) or valid (false) padding
+                     true);      // same (true) or valid (false) padding
 
 
 
@@ -43,7 +43,7 @@ int main()
 //    inputs[0] = input;
 //    inputs[1] = second_input;
 
-    Vector<double> output;
+    Vector<double> output(conv.out_shape().width*conv.out_shape().height*conv.out_shape().depth);
 
     conv.Forward(input, output);
 
@@ -61,7 +61,7 @@ int main()
     dLdYs[0] = dLdY1;
     dLdYs[1] = dLdY2;
 
-    Vector<double> dLdX;
+    Vector<double> dLdX(conv.in_shape().width*conv.in_shape().height*conv.in_shape().depth);
 
     dLdY1 = dLdY1.merge(dLdY2);
     conv.Backward(dLdY1, dLdX);
