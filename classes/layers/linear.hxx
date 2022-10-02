@@ -50,20 +50,20 @@ class Linear {
         Vector<double> const& get_local_output() const {return _local_output;}
 
         // return out shape of layer
-        Dims const& out_shape() const {return _out;}
+        Dims3 const& out_shape() const {return _out;}
 
         // return in shape of layer
-        Dims const& in_shape() const {return _in;}
+        Dims3 const& in_shape() const {return _in;}
 
         //! ---------------------------------------------------------------------------------------------------------
     private:
         // NOTE: empty braces call default constructor for that class ( at least i hope it does)
 
         // input shape
-        Dims _in {0, 0};
+        Dims3 _in {0, 0,1};
 
         // output shape
-        Dims _out {0,0};
+        Dims3 _out {0,0,1};
 
         // locally stored input
         Vector<double> _local_input {};

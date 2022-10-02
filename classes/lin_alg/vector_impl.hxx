@@ -97,6 +97,14 @@ Vector<T> &Vector<T>::operator=(Vector<T> &&other) noexcept {
 template<typename T>
 Vector<T> &Vector<T>::operator+=(const Vector<T> &other)
 {
+    // if this vector has just been instantiated it will have no data and no length, thus we must use
+    // the copy assignment operator for this case.
+    if (_length == 0)
+    {
+        (*this) = other;
+        return (*this);
+    }
+
     // assert that RHS and LHS have same dimensions
     assert(_length == other._length);
 
@@ -310,5 +318,29 @@ void Vector<T>::print() const
     std::cout << "\n";
 }
 
+template<typename T>
+void Vector<T>::operator*=(double c)
+{
+    for (size_t i = 0; i < _length; i++)
+    {
+        _data[i] *= c;
+    }
+}
+
 //! -----------------------------------------------------------------------------------
+
+template<typename T>
+Vector<T> Vector<T>::merge(const Vector<T> &other)
+{
+
+    // initialize return variable
+    Vector<T> obj(_length + other._length);
+
+    // copy over data
+    std::memcpy(obj._data, _data, sizeof(T) * _length);
+    std::memcpy(obj._data + _length, other._data, sizeof(T) * other._length);
+
+    // return result
+    return obj;
+}
 #endif //ANN_VECTOR_CPP

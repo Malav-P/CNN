@@ -51,6 +51,9 @@ class Vector {
         // multiply operator (scalar)
         Vector<T> operator * (double c);
 
+        // *= operator (scalar)
+        void operator *= (double c);
+
         // multiply operator (vector)
         Mat<T> operator * (const Vector<T>& other);
 
@@ -59,6 +62,9 @@ class Vector {
 
         // minus operator
         Vector<T> operator - (const Vector<T>& other);
+
+        // merge two vectors
+        Vector<T> merge (const Vector<T>& other);
 
         //! ----------------------------------------------------------------------------------------------------------
 
@@ -81,6 +87,9 @@ class Vector {
 
         // get the _length of vector (read only)
         size_t const& get_len() const {return _length;}
+
+        // get the data (read only)
+        T* const& get_data() const {return _data;}
 
         // print the vector elements
         void print() const;

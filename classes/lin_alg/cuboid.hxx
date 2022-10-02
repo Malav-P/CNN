@@ -1,98 +1,87 @@
 //
-// Created by malav on 4/26/2022.
+// Created by malav on 9/28/2022.
 //
 
-#ifndef ANN_MAT_HXX
-#define ANN_MAT_HXX
+#ifndef CNN_CUBOID_HXX
+#define CNN_CUBOID_HXX
+
 
 #include "data_types.hxx"
-#include "vector.hxx"
 
 
 template<typename T = double>
-class Mat {
+class Cuboid {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ETC --------------------------------------------------------
 
         // default constructor
-        Mat() = default;
+        Cuboid() = default;
 
         // constructor
-        explicit Mat(size_t side_len, T* arr = nullptr);
+        explicit Cuboid(size_t side_len, T* arr = nullptr);
 
         // constructor
-        Mat(size_t num_r, size_t num_c, T* arr = nullptr);
+        Cuboid(size_t num_r, size_t num_c, size_t num_d, T* arr = nullptr);
 
         // copy constructor
-        Mat(const Mat<T>& other);
+        Cuboid(const Cuboid<T>& other);
 
         // move constructor
-        Mat(Mat<T>&& other) noexcept;
+        Cuboid(Cuboid<T>&& other) noexcept;
 
         // destructor
-        ~Mat() { delete[] _data; }
+        ~Cuboid() { delete[] _data; }
 
         //! --------------------------------------------------------------------------------------------------------
 
         //! ASSIGNMENT, BINARY, UNARY OPERATORS -------------------------------------------------------------------
         // copy assignment operator
-        Mat<T>& operator=(const Mat<T>& rhs);
+        Cuboid<T>& operator=(const Cuboid<T>& rhs);
 
         // move assignment operator
-        Mat<T>& operator=(Mat<T>&& other) noexcept ;
+        Cuboid<T>& operator=(Cuboid<T>&& other) noexcept ;
 
         // += operator
-        Mat<T>& operator+=(const Mat<T>& other);
+        Cuboid<T>& operator+=(const Cuboid<T>& other);
+
 
         // + operator
-        Mat<T> operator+(const Mat<T>& rhs);
+        Cuboid<T> operator+(const Cuboid<T>& rhs);
 
         // index operator
-        T& operator()(size_t i, size_t j);
+        T& operator()(size_t i, size_t j, size_t k);
 
         // const index operator
-        const T& operator()(size_t i, size_t j) const;
-
-        // multiply operator (matrix)
-        Mat<T> operator * (const Mat<T>& other);
+        const T& operator()(size_t i, size_t j, size_t k) const;
 
         // multiply operator (scalar)
-        Mat<T> operator * (double c);
+        Cuboid<T> operator * (double c);
 
-        // multiply operator (vector)
-        Vector<T> operator * (const Vector<T>& other);
+
+
 
         //! -------------------------------------------------------------------------------------------------------
 
         //! OTHER -------------------------------------------------------------------------------------------------
 
         // compute inner product between two Matrices
-        T dot(const Mat<T>& other);
+        T dot(const Cuboid<T>& other);
 
         // compute partial inner product with given Dims of starting indices
-        T partial_dot(const Mat<T>& other, Dims p);
+        T partial_dot(const Cuboid<T>& other, Dims3 p);
 
         // keep values in certain indices, and set all others to zero. indices must be sorted in increasing row, increasing column order
-        void keep(Dims* indices);
+        void keep(Dims3* indices);
 
-        // fill matrix with a value
+        // fill cuboid with a value
         void fill(T t);
 
-        // set the rotation state of the matrix and restructure _data
+        // set the rotation state of the cuboid and restructure _data
         void set_rot(size_t n = 0);
-
-        // add padding to matrix
-        void padding(size_t padleft, size_t padright, size_t padtop, size_t padbottom);
-
-        // crop the matrix/ remove padded rows from matrix
-        void crop(size_t crop_left, size_t crop_right, size_t crop_top, size_t crop_bottom);
 
         // create a Vector object out of this object
         Vector<T> flatten();
-
-        // transpose the matrix
-        Mat<T> transpose();
 
         // get number of rows of matrix (read only)
         size_t const& get_rows() const {return _rows;}
@@ -100,10 +89,13 @@ class Mat {
         // get number of cols of matrix (read only)
         size_t const& get_cols() const {return _cols;}
 
+        // get depth of cuboid
+        size_t const& get_depth() const {return _depth;}
+
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
 
-        // print the matrix
+        // print the cuboid
         void print() const;
 
         //! --------------------------------------------------------------------------------------------------------
@@ -120,6 +112,9 @@ class Mat {
         // number of rows
         size_t _rows {0};
 
+        // depth
+        size_t _depth {0};
+
         // rotation state, 0 = no rotate; 1 = 90 degrees clockwise; 2 = 180 degrees clockwise; 3 = 270 degrees clockwise
         size_t _rot {0};
 
@@ -127,9 +122,8 @@ class Mat {
         T* _data {nullptr};
 
         friend class Vector<T>;
+        friend class Mat<T>;
 };
 
-
-
-#include "mat_impl.hxx"
-#endif //ANN_MAT_HXX
+#include "cuboid_impl.hxx"
+#endif //CNN_CUBOID_HXX

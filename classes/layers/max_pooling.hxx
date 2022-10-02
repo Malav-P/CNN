@@ -1,34 +1,33 @@
 //
-// Created by malav on 4/26/2022.
+// Created by Malav Patel on 9/29/22.
 //
 
-#ifndef ANN_MAX_POOL_HXX
-#define ANN_MAX_POOL_HXX
+#ifndef CNN_MAX_POOLING_HXX
+#define CNN_MAX_POOLING_HXX
 
-
-class MaxPool {
+class MaxPooling {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
         // create a MaxPool object
-        MaxPool() = default;
+        MaxPooling() = default;
 
         // create MaxPool object from given parameters
-        MaxPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
+        MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
         // release allocated memory for MaxPool object
-        ~MaxPool() = default;
+        ~MaxPooling() = default;
 
         //!------------------------------------------------------------------------------------------------------------
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(Vector<double>& input, Vector<double>& output);
+        void Forward(Vector<double> &input, Vector<double> &output);
 
         // send feature backward through the MaxPool layer
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
+        void Backward(Vector<double> &dLdY, Vector<double> &dLdX);
 
         // get output shape of pooling layer
         Dims3 const& out_shape() const {return _out;}
@@ -44,19 +43,15 @@ class MaxPool {
 
 
         //! OTHER ---------------------------------------------------------------------------------------------------
-        // access the _winners (FOR TESTING PURPOSES)
-        Vector<size_t> const& get_winners()  const {return _winners;}
+        std::vector<MaxPool> const & get_pool_vector() const {return pool_vector;}
         //! ---------------------------------------------------------------------------------------------------------
     private:
 
-        // helper function for Forward. Returns max value of an array of elements
-        Pair max_value(Pair* arr, size_t n);
-
         // input shape
-        Dims3 _in {0, 0,1};
+        Dims3 _in {0, 0,0};
 
         // output shape
-        Dims3 _out {0, 0,1};
+        Dims3 _out {0, 0,0};
 
         // field shape
         Dims _field {0, 0};
@@ -67,10 +62,11 @@ class MaxPool {
         // vertical stride_length
         size_t _v_str {0};
 
-        // a vector that keeps track of which indices in the pooling layer are "winning units"
-        Vector<size_t> _winners {};
+        // vector of individual MaxPool Objects
+        std::vector<MaxPool> pool_vector;
 
 };
 
-#include "max_pool_impl.hxx"
-#endif //ANN_MAX_POOL_HXX
+
+#include "max_pooling_impl.hxx"
+#endif //CNN_MAX_POOLING_HXX

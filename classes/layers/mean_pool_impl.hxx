@@ -8,7 +8,7 @@
 #include "mean_pool.hxx"
 
 MeanPool::MeanPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride)
-: _in(in_width, in_height),
+: _in(in_width, in_height,1),
   _field(fld_width, fld_height),
   _h_str(h_stride),
   _v_str(v_stride)
@@ -18,7 +18,7 @@ MeanPool::MeanPool(size_t in_width, size_t in_height, size_t fld_width, size_t f
     size_t num_h_strides = std::floor((_in.width - _field.width) / _h_str) + 1;
 
     // specify output shape of mean pool layer
-    _out = {num_h_strides, num_v_strides} ;
+    _out = {num_h_strides, num_v_strides,1} ;
 }
 
 void

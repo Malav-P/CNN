@@ -68,10 +68,10 @@ class Softmax {
         }
 
         // get input shape
-        Dims in_shape() const {return {1, _size};}
+        Dims3 in_shape() const {return {1, _size,1};}
 
         // get output shape
-        Dims out_shape() const {return in_shape();}
+        Dims3 out_shape() const {return in_shape();}
 
         // update parameters for the layer
         template<typename Optimizer>

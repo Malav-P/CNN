@@ -21,6 +21,7 @@ public:
     Momentum(Model<L>& model, double learn_rate, double beta)
     : alpha(learn_rate),
       beta(beta),
+      velocities_cub(new Cuboid<double>*[model.get_size()]),
       velocities_mat(new Mat<double>*[model.get_size()]),
       velocities_vec(new Vector<double>*[model.get_size()]),
       model_size(model.get_size())
@@ -34,13 +35,15 @@ public:
             {
                 case 0 : // convolutional layer
                 {
-                    size_t rows = boost::get<Convolution*>(layer)->get_filter().get_rows();
-                    size_t cols = boost::get<Convolution*>(layer)->get_filter().get_cols();
-
-                    velocities_mat[i] = new Mat<double>(rows, cols);
-                    velocities_vec[i] = nullptr;
-
-                    break;
+//                    size_t rows = boost::get<Convolution*>(layer)->get_filter().get_rows();
+//                    size_t cols = boost::get<Convolution*>(layer)->get_filter().get_cols();
+//                    size_t depth= boost::get<Convolution*>(layer)->get_filter().get_depth();
+//
+//                    velocities_cub[i] = new Cuboid<double>(rows, cols, depth);
+//                    velocities_mat[i] = nullptr;
+//                    velocities_vec[i] = nullptr;
+//
+//                    break;
                 }
 
                 case 3 : // Linear layer
@@ -48,6 +51,7 @@ public:
                     size_t rows = boost::get<Linear*>(layer)->get_weights().get_rows();
                     size_t cols = boost::get<Linear*>(layer)->get_weights().get_cols();
 
+                    velocities_cub[i] = nullptr;
                     velocities_mat[i] = new Mat<double>(rows, cols);
                     velocities_vec[i] = new Vector<double>(rows);
 
@@ -58,6 +62,7 @@ public:
 
                 default : // other layers that dont have weights or biases to train
                 {
+                    velocities_cub[i] = nullptr;
                     velocities_mat[i] = nullptr;
                     velocities_vec[i] = nullptr;
 
@@ -73,13 +78,31 @@ public:
         for (size_t i = 0; i < model_size ; i++)
         {
             // free the pointers in the array
+            delete velocities_cub[i];
             delete velocities_mat[i];
             delete velocities_vec[i];
         }
 
         // free the pointer to array of pointer
+        delete[] velocities_cub;
         delete[] velocities_mat;
         delete[] velocities_vec;
+    }
+
+
+    void Forward(Cuboid<double>& weights, Cuboid<double>& gradient, size_t normalizer)
+    {
+        // velocity = beta * velocity + (1 - beta) * (1/normalizer) * gradient
+        // this routine is inefficient with operator overloads since multiple for loops will be called for each
+        // operator overload. Consider using a single loop over the indices i, j to complete this task
+        (*velocities_cub[k]) = ((*velocities_cub[k]) * beta) + (gradient * ((1.0 - beta) * (1.0/normalizer)));
+
+        // update weights
+        weights += (*velocities_cub[k]) * (-alpha);
+
+        // need to move k to next nonnull layer
+        k+=1;
+        while ((k<model_size) && (velocities_cub[k] == nullptr && velocities_mat[k] == nullptr)) {k++;}
     }
 
     // apply optimizer to matrix objects
@@ -93,9 +116,10 @@ public:
         // update weights
         weights += (*velocities_mat[k]) * (-alpha);
 
-        // move the index k to the next nonnull layer in the network
+        // need to move k to the next nonnull layer
+        // need to move k to next nonnull layer
         k+=1;
-        while (k<model_size && velocities_mat[k] == nullptr) {k++;}
+        while ((k<model_size) && (velocities_cub[k] == nullptr && velocities_mat[k] == nullptr)) {k++;}
     }
 
     // biases = biases - alpha * gradient
@@ -146,6 +170,9 @@ private:
 
     // exponential average hyperparameter
     double beta {0.9};
+
+    // pointer to an array of pointer of velocities for cuboid objects
+    Cuboid<double>** velocities_cub {nullptr};
 
     // pointer to an array of pointers of velocities for matrix objects
     Mat<double>** velocities_mat {nullptr};

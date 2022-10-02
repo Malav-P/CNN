@@ -8,6 +8,7 @@
 #include "Model.hxx"
 
 #include "optimizers/optimizers.hxx"
+#include "helpers/progress_bar.hxx"
 
 template<typename LossFunction>
 void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
@@ -20,9 +21,9 @@ void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
 
     for (LayerTypes layer : network)
     {
-        Dims out_shape = boost::apply_visitor(Outshape_visitor(), layer);
+        Dims3 out_shape = boost::apply_visitor(Outshape_visitor(), layer);
 
-        visitor.output = new Vector<double>(out_shape.width*out_shape.height);
+        visitor.output = new Vector<double>(out_shape.width*out_shape.height*out_shape.depth);
         boost::apply_visitor(visitor, layer);
 
         delete visitor.input;
@@ -49,9 +50,9 @@ void Model<LossFunction>::Backward(Vector<double> &dLdY, Vector<double>& dLdX)
     {
         LayerTypes layer = network[i];
 
-        Dims in_shape =  boost::apply_visitor(Inshape_visitor(), layer);
+        Dims3 in_shape =  boost::apply_visitor(Inshape_visitor(), layer);
 
-        visitor.dLdX = new Vector<double>(in_shape.width * in_shape.height);
+        visitor.dLdX = new Vector<double>(in_shape.width * in_shape.height * in_shape.depth);
         boost::apply_visitor(visitor, layer);
 
         delete visitor.dLdY;
@@ -93,6 +94,12 @@ template<typename Optimizer>
 void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, size_t batch_size, size_t epochs /* args TBD */)
 {
 
+    // initialize progress bar
+    ProgressBar bar;
+    bar.set_bar_width(60);
+    bar.fill_bar_progress_with("■");
+    bar.fill_bar_remainder_with(" ");
+
     // determine if number of training points is divisible by the batch_size
     //      - if there is no remainder, we will be updating the parameters (num training points) / (batch_size) times
     //      - if there is a remainder, we will update the parameters |_ (num training points) / (batch_size) _| times
@@ -128,14 +135,23 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
             count += 1;
 
             // update parameters if we have propagated batch_size number of samples
-            if (count % batch_size == 0) { Update_Params(optimizer, batch_size); }
+            if (count % batch_size == 0)
+            {
+                Update_Params(optimizer, batch_size);
+                bar.update(100*(count + i*num_training_points)/(epochs*num_training_points));
+            }
         }
 
         // if remainder exists we can update the model with the remaining datapoints
-        if (remainder != 0) { Update_Params(optimizer, remainder); }
+        if (remainder != 0)
+        {
+            Update_Params(optimizer, remainder);
+            bar.update(100*(count + i*num_training_points)/(epochs*num_training_points));
+        }
 
     }
 
+    std::cout<<"\n";
 }
 
 template<typename LossFunction>
@@ -201,9 +217,9 @@ Model<LossFunction>::~Model()
                 break;
             }
 
-            case 1 : // maxpool layer
+            case 1 : // maxpooling layer
             {
-                MaxPool* ptr = boost::get<MaxPool*>(layer);
+                MaxPooling* ptr = boost::get<MaxPooling*>(layer);
 
                 delete ptr;
 
@@ -264,7 +280,6 @@ Model<LossFunction>::~Model()
                 break;
             }
 
-
             default : // nothing to do
             {
                 break;
@@ -287,16 +302,16 @@ void Model<LossFunction>::print()
                 Convolution* ptr = boost::get<Convolution*>(layer);
                 std::cout << "-------------------------------------------------------------\n";
                 std::cout << "CONV Layer \n The filter is shown below:\n\n";
-                ptr->get_filter().print();
+                ptr->print_filters();
                 std::cout << "-------------------------------------------------------------\n\n";
 
                 break;
             }
 
-            case 1 : // maxpool layer
+            case 1 : // maxpooling layer
             {
                 std::cout << "-------------------------------------------------------------\n";
-                std::cout << "MAXPOOL Layer, no parameters to be learned. \n\n";
+                std::cout << "MAXPOOLING Layer, no parameters to be learned. \n\n";
                 std::cout << "-------------------------------------------------------------\n\n";
 
                 break;

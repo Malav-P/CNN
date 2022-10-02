@@ -18,11 +18,8 @@ class SGD {
     : alpha(learn_rate)
     {}
 
-    // weights = weights - (alpha/normalizer) * gradient
-    void Forward(Mat<double>& weights, Mat<double>& gradient, size_t normalizer) { weights += gradient * (-alpha/normalizer);}
-
-    // biases = biases - alpha * gradient
-    void Forward(Vector<double>& biases, Vector<double>& gradient, size_t normalizer) {biases += gradient * (-alpha/normalizer);}
+    template<typename T>
+    void Forward(T& weights, T& gradient, size_t normalizer) {weights += gradient * (-alpha/normalizer);}
 
     // reset the optimizer for another pass through the network
     void reset() {/*nothing to do */}

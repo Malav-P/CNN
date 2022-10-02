@@ -23,10 +23,10 @@ class Tanh {
         void Update_Params(Optimizer* optimizer, size_t normalizer){/* nothing to do, no parameters to be learned in this layer*/}
 
         // return out shape of layer
-        Dims const& out_shape() const {return _out;}
+        Dims3 const& out_shape() const {return _out;}
 
         // return in shape of layer
-        Dims const& in_shape() const {return _in;}
+        Dims3 const& in_shape() const {return _in;}
         //! ----------------------------------------------------------------------------------------------------------
 
     private:
@@ -38,10 +38,10 @@ class Tanh {
         Vector<double> _local_input;
 
         // input shape of layer
-        Dims _in {0,0};
+        Dims3 _in {0,0,1};
 
         // output shape of layer
-        Dims _out{0,0};
+        Dims3 _out{0,0,1};
 
         // apply function to input
         double func(double input);
