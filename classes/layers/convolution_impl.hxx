@@ -2,8 +2,8 @@
 // Created by malav on 6/17/2022.
 //
 
-#ifndef ANN_CONVOLUTION_IMPL_HXX
-#define ANN_CONVOLUTION_IMPL_HXX
+#ifndef CNN_CONVOLUTION_IMPL_HXX
+#define CNN_CONVOLUTION_IMPL_HXX
 
 #include "convolution.hxx"
 #include "../lin_alg/miscellaneous_helpers.hxx"
@@ -12,9 +12,9 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                          size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft, size_t padright,
                          size_t padtop,
                          size_t padbottom)
-: _in(in_width + padleft + padright, in_height + padtop + padbottom, in_maps),
-  _h_str(stride_h),
+: _h_str(stride_h),
   _v_str(stride_v),
+  _in(in_width + padleft + padright, in_height + padtop + padbottom, in_maps),
   _padleft(padleft),
   _padright(padright),
   _padtop(padtop),
@@ -299,4 +299,4 @@ void Convolution::print_filters()
 }
 
 
-#endif //ANN_CONVOLUTION_IMPL_HXX
+#endif //CNN_CONVOLUTION_IMPL_HXX

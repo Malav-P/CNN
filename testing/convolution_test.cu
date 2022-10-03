@@ -16,7 +16,7 @@ int main()
                      2,          // filter height
                      1,            // horizontal stride length
                      1,            // vertical stride length
-                     true);      // same (true) or valid (false) padding
+                     false);      // same (true) or valid (false) padding
 
 
 

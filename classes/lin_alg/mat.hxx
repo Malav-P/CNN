@@ -111,20 +111,20 @@ class Mat {
 
     private:
 
-        // helper for set_rot, rotate matrix CW by 90 degrees
-        void rotate_once();
-
         // number of columns
-        size_t _cols {0};
+        size_t _rows {0};
 
         // number of rows
-        size_t _rows {0};
+        size_t _cols {0};
 
         // rotation state, 0 = no rotate; 1 = 90 degrees clockwise; 2 = 180 degrees clockwise; 3 = 270 degrees clockwise
         size_t _rot {0};
 
         // pointer to _data
         T* _data {nullptr};
+
+        // helper for set_rot, rotate matrix CW by 90 degrees
+        void rotate_once();
 
         friend class Vector<T>;
 };

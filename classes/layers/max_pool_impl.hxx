@@ -29,7 +29,7 @@ MaxPool::Forward(Vector<double> &input, Vector<double> &output)
     assert(input.get_len() == _in.width*_in.height);
 
     // initialize array for temporary value storage
-    Pair buffer[_field.width * _field.height];
+    Pair buffer[_field.width*_field.height];
 
     // do max pooling operation
     for (size_t v_stride = 0; v_stride < _out.height; v_stride++) {for (size_t h_stride = 0; h_stride < _out.width; h_stride++)

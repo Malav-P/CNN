@@ -13,6 +13,7 @@ template<typename T>
 Mat<T>::Mat(size_t side_len, T* arr)
 : _rows(side_len)
 , _cols(side_len)
+, _rot(0)
 , _data(new T[side_len * side_len]{0})
 {
     if(arr != nullptr)
@@ -28,6 +29,7 @@ template<typename T>
 Mat<T>::Mat(size_t num_r, size_t num_c, T* arr)
 : _rows(num_r)
 , _cols(num_c)
+, _rot(0)
 , _data(new T[num_r * num_c]{0})
 {
     if(arr != nullptr)
@@ -52,10 +54,10 @@ Mat<T>::Mat(const Mat<T>& other)
 //! move constructor -------------------------------------------------------------
 template<typename T>
 Mat<T>::Mat(Mat<T> &&other) noexcept
-        : _data(other._data)
-        , _rows(other._rows)
+        :_rows(other._rows)
         , _cols(other._cols)
         , _rot(other._rot)
+        , _data(other._data)
 {
     // remove pointer to other data
     other._data = nullptr;

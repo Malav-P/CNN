@@ -9,11 +9,11 @@
 
 MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height,
                        size_t h_stride, size_t v_stride):
-                       pool_vector(in_maps),
                        _in(in_width, in_height, in_maps),
                        _field(fld_width, fld_height),
                        _h_str(h_stride),
-                       _v_str(v_stride)
+                       _v_str(v_stride),
+                       pool_vector(in_maps)
 {
     for (size_t i = 0; i < in_maps; i++)
     {

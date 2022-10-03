@@ -103,14 +103,11 @@ class Cuboid {
 
     private:
 
-        // helper for set_rot, rotate matrix CW by 90 degrees
-        void rotate_once();
+        // number of rows
+        size_t _rows {0};
 
         // number of columns
         size_t _cols {0};
-
-        // number of rows
-        size_t _rows {0};
 
         // depth
         size_t _depth {0};
@@ -120,6 +117,9 @@ class Cuboid {
 
         // pointer to _data
         T* _data {nullptr};
+
+        // helper for set_rot, rotate matrix CW by 90 degrees
+        void rotate_once();
 
         friend class Vector<T>;
         friend class Mat<T>;

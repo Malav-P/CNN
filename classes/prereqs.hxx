@@ -20,7 +20,7 @@
 
 using Pair = std::pair<size_t, double>;
 using Dims = Dimensions<>;
-using Dims3 = Dimensions3<>;
+using Dims3 = Dimensions3<size_t, size_t, size_t>;
 
 
 #endif //ANN_PREREQS_HXX

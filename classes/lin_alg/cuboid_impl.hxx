@@ -14,6 +14,7 @@ Cuboid<T>::Cuboid(size_t side_len, T* arr)
         : _rows(side_len)
         , _cols(side_len)
         , _depth(side_len)
+        , _rot(0)
         , _data(new T[side_len * side_len * side_len]{0})
 {
     if(arr != nullptr)
@@ -30,6 +31,7 @@ Cuboid<T>::Cuboid(size_t num_r, size_t num_c, size_t num_d, T* arr)
         : _rows(num_r)
         , _cols(num_c)
         , _depth(num_d)
+        , _rot(0)
         , _data(new T[num_r * num_c * num_d]{0})
 {
     if(arr != nullptr)
@@ -55,11 +57,11 @@ Cuboid<T>::Cuboid(const Cuboid<T>& other)
 //! move constructor -------------------------------------------------------------
 template<typename T>
 Cuboid<T>::Cuboid(Cuboid<T> &&other) noexcept
-        : _data(other._data)
-        , _rows(other._rows)
+        :_rows(other._rows)
         , _cols(other._cols)
         , _depth(other._depth)
         , _rot(other._rot)
+        , _data(other._data)
 {
     // remove pointer to other data
     other._data = nullptr;

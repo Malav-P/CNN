@@ -15,7 +15,7 @@ DataSet read_mnist(size_t N_SAMPLES, size_t train_or_test)
 
     FILE *fp;
 
-    int row, col, label;
+    size_t row, col, label;
 
     char buf[10000];
     double label_buf[10]{0};

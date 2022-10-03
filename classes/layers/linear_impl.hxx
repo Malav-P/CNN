@@ -14,8 +14,8 @@ Linear::Linear(size_t in_size, size_t out_size)
 , _local_input(in_size)
 , _local_output(out_size)
 , _weights(out_size, in_size)
-, _dLdW(out_size, in_size)
 , _biases(out_size)
+, _dLdW(out_size, in_size)
 , _dLdB(out_size)
 {
 

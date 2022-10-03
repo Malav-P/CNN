@@ -65,15 +65,6 @@ class Convolution {
 
     private:
 
-        // stores the filter
-        std::vector<Cuboid<double>> _filters {};
-
-        // locally stored filter gradient _dLdF
-        std::vector<Cuboid<double>> _dLdFs {};
-
-        // locally stored input feature maps
-        std::vector<Mat<double>> _local_input {};
-
         // horizontal stride length
         size_t _h_str {1};
 
@@ -81,7 +72,7 @@ class Convolution {
         size_t _v_str {1};
 
         // input image shape
-        Dims3 _in {0, 0,0};
+        Dims3 _in ;
 
         // output image shape
         Dims3 _out {0, 0,0};
@@ -97,6 +88,15 @@ class Convolution {
 
         // padding
         size_t _padbottom {0};
+
+        // stores the filter
+        std::vector<Cuboid<double>> _filters {};
+
+        // locally stored filter gradient _dLdF
+        std::vector<Cuboid<double>> _dLdFs {};
+
+        // locally stored input feature maps
+        std::vector<Mat<double>> _local_input {};
 
 
 };

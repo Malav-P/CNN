@@ -4,6 +4,7 @@
 
 #ifndef ANN_LAYER_TYPES_HXX
 #define ANN_LAYER_TYPES_HXX
+#define USE_BOOST_WINDOWS_H_
 
 #include <boost/variant.hpp>
 

@@ -53,16 +53,16 @@ class MaxPool {
         Pair max_value(Pair* arr, size_t n);
 
         // input shape
-        Dims3 _in {0, 0,1};
+        Dims3 _in{0, 0,1};
 
         // output shape
-        Dims3 _out {0, 0,1};
+        Dims3 _out{0, 0,1};
 
         // field shape
-        Dims _field {0, 0};
+        Dims _field{0, 0};
 
         // horizontal stride_length
-        size_t _h_str {0};
+        size_t _h_str{0};
 
         // vertical stride_length
         size_t _v_str {0};
