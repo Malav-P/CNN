@@ -6,6 +6,8 @@
 
 int main()
 {
+
+//    MaxPool d[4];
     size_t in_width = 4;
     size_t in_height = 4;
 
@@ -22,7 +24,8 @@ int main()
 
     MaxPooling pool_lyr(2, in_width, in_height, field_width, field_height, 2, 2);
 
-    Vector<double> outputs;
+    Vector<double> outputs(8);
+    outputs.fill(1);
 
       pool_lyr.Forward(inputs, outputs);
 

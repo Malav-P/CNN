@@ -11,7 +11,7 @@ class Dimensions {
 
     Dimensions() = default;
 
-    Dimensions(T1 in_width, T2 in_height)
+    __host__ __device__ Dimensions(T1 in_width, T2 in_height)
     : width(in_width),
       height(in_height)
     {}
@@ -33,7 +33,7 @@ public:
 
     Dimensions3() = default;
 
-    Dimensions3(T1 in_width, T2 in_height, T3 in_depth)
+    __host__ __device__ Dimensions3(T1 in_width, T2 in_height, T3 in_depth)
             : width(in_width),
               height(in_height),
               depth(in_depth)

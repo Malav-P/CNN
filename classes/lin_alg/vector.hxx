@@ -17,16 +17,16 @@ class Vector {
         Vector() = default;
 
         // constructor
-        explicit Vector(size_t n, T* arr = nullptr);
+        __host__ __device__ explicit Vector(size_t n, T* arr = nullptr);
 
         // copy constructor
-        Vector(const Vector& other);
+        __host__ __device__ Vector(const Vector& other);
 
         // move constructor
-        Vector(Vector<T>&& other) noexcept;
+        __host__ __device__ Vector(Vector<T>&& other) noexcept;
 
         // destructor
-        ~Vector() {delete[] _data;}
+        __host__ __device__ ~Vector(){delete[] _data;}
         //! ----------------------------------------------------------------------------------------------------------
 
         //! ASSIGNMENT, BINARY, UNARY OPERATORS -----------------------------------------------------------------------
@@ -40,10 +40,10 @@ class Vector {
         Vector<T>& operator+=(const Vector<T>& other);
 
         // indexing operator
-        T& operator[](size_t idx);
+        __host__ __device__ T& operator[](size_t idx);
 
         // const indexing operator
-        const T& operator[](size_t idx) const;
+        __host__ __device__ const T& operator[](size_t idx) const;
 
         // multiply operator (matrix)
         Vector<T> operator * (Mat<T>& other);
@@ -86,10 +86,13 @@ class Vector {
         Vector<T> edivide(const Vector<T>& other);
 
         // get the _length of vector (read only)
-        size_t const& get_len() const {return _length;}
+        __host__ __device__ size_t const& get_len() const {return _length;}
 
         // get the data (read only)
-        T* const& get_data() const {return _data;}
+        __host__ __device__ T* const& get_data() const {return _data;}
+
+        // get the data (read and write)
+        __host__ __device__ T*  & get_data() {return _data;}
 
         // print the vector elements
         void print() const;

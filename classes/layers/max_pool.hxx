@@ -17,24 +17,30 @@ class MaxPool {
         // create MaxPool object from given parameters
         MaxPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
+        // move assignment operator
+        MaxPool& operator=(MaxPool&& other) noexcept;
+
+        // move constructor
+        MaxPool(MaxPool&& other) noexcept;
+
         // release allocated memory for MaxPool object
-        ~MaxPool() = default;
+        ~MaxPool() {delete[] _winners; }
 
         //!------------------------------------------------------------------------------------------------------------
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(Vector<double>& input, Vector<double>& output);
+        __host__ __device__ void Forward(Vector<double>& input, Vector<double>& output);
 
         // send feature backward through the MaxPool layer
         void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
 
         // get output shape of pooling layer
-        Dims3 const& out_shape() const {return _out;}
+        __host__ __device__ Dims3 const& out_shape() const {return _out;}
 
         // get input shape of pooling layer
-        Dims3 const& in_shape() const {return _in;}
+        __host__ __device__ Dims3 const& in_shape() const {return _in;}
 
         // update parameters in this layer (during learning)
         template<typename Optimizer>
@@ -45,12 +51,18 @@ class MaxPool {
 
         //! OTHER ---------------------------------------------------------------------------------------------------
         // access the _winners (FOR TESTING PURPOSES)
-        Vector<size_t> const& get_winners()  const {return _winners;}
+        __host__ __device__ size_t* & get_winners()   {return _winners;}
         //! ---------------------------------------------------------------------------------------------------------
     private:
 
+        friend class MaxPooling;
+
         // helper function for Forward. Returns max value of an array of elements
-        Pair max_value(Pair* arr, size_t n);
+        __host__ __device__ Pair max_value(Pair* arr, size_t n);
+
+    public:
+        // a vector that keeps track of which indices in the pooling layer are "winning units"
+        size_t* _winners {nullptr};
 
         // input shape
         Dims3 _in{0, 0,1};
@@ -67,8 +79,8 @@ class MaxPool {
         // vertical stride_length
         size_t _v_str {0};
 
-        // a vector that keeps track of which indices in the pooling layer are "winning units"
-        Vector<size_t> _winners {};
+
+
 
 };
 

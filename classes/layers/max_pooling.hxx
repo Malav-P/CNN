@@ -10,21 +10,18 @@ class MaxPooling {
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        // create a MaxPool object
-        MaxPooling() = default;
-
         // create MaxPool object from given parameters
         MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
         // release allocated memory for MaxPool object
-        ~MaxPooling() = default;
+        ~MaxPooling(){delete[] pool_vector;}
 
         //!------------------------------------------------------------------------------------------------------------
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(Vector<double> &input, Vector<double> &output);
+        __host__ void Forward(Vector<double> &input, Vector<double> &output);
 
         // send feature backward through the MaxPool layer
         void Backward(Vector<double> &dLdY, Vector<double> &dLdX);
@@ -43,7 +40,7 @@ class MaxPooling {
 
 
         //! OTHER ---------------------------------------------------------------------------------------------------
-        std::vector<MaxPool> const & get_pool_vector() const {return pool_vector;}
+        MaxPool*  get_pool_vector() const {return pool_vector;}
         //! ---------------------------------------------------------------------------------------------------------
     private:
 
@@ -63,7 +60,10 @@ class MaxPooling {
         size_t _v_str {0};
 
         // vector of individual MaxPool Objects
-        std::vector<MaxPool> pool_vector;
+        MaxPool* pool_vector {nullptr};
+
+        // size of pool_vector
+        size_t _in_maps {0};
 
 };
 

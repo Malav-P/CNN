@@ -10,6 +10,7 @@
 
 //!  constructor ---------------------------------------------------------------------------
 template<typename T>
+__host__
 Vector<T>::Vector(size_t n, T *arr)
 : _length(n)
 , _data(new T[n]{0})
@@ -17,13 +18,18 @@ Vector<T>::Vector(size_t n, T *arr)
     if (arr != nullptr)
     {
         // TODO : currently no way to ensure arr has n elements in it
-        std::memcpy(_data, arr, sizeof(T) * n);
+//        std::memcpy(_data, arr, sizeof(T) * n);
+        for (size_t i = 0; i< n ; i++)
+        {
+            _data[i] = arr[i];
+        }
     }
 }
 //! ---------------------------------------------------------------------------
 
 //! copy constructor ----------------------------------------------------------------------
 template<typename T>
+__host__ __device__
 Vector<T>::Vector(const Vector &other)
 : _length(other._length),
   _data(new T[_length])
@@ -119,12 +125,12 @@ Vector<T> &Vector<T>::operator+=(const Vector<T> &other)
 
 //! indexing operator ---------------------------------------------------------------------
 template<typename T>
-T &Vector<T>::operator[](size_t idx) { return _data[idx]; }
+__host__ __device__ T &Vector<T>::operator[](size_t idx) { return _data[idx]; }
 //! ---------------------------------------------------------------------
 
 //! const indexing operator ---------------------------------------------------------------------
 template<typename T>
-const T &Vector<T>::operator[](size_t idx) const { return _data[idx]; }
+__host__ __device__ const T &Vector<T>::operator[](size_t idx) const { return _data[idx]; }
 //! ---------------------------------------------------------------------
 
 //! multiply operator (matrix)---------------------------------------------------------------------
