@@ -75,6 +75,7 @@ MaxPool::Forward(Vector<double> &input, Vector<double> &output)
     // check to make sure input length matches the input shape of pooling layer
     assert(input.get_len() == _in.width*_in.height);
 
+
     // initialize array for temporary value storage
     Pair* buffer = new Pair[_field.width*_field.height];
 

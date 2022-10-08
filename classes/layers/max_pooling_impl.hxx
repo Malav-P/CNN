@@ -26,6 +26,47 @@ MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t
 }
 
 __global__
+void Child_Kernel(double *d_in, double *d_out, MaxPool* d_pool)
+{
+    size_t v_stride = threadIdx.y;
+    size_t h_stride = threadIdx.x;
+
+    size_t _v_str = d_pool->_v_str;
+    size_t _h_str = d_pool->_h_str;
+    Dims3 _in     = d_pool->_in;
+    Dims3 _out    = d_pool->_out;
+    Dims  _field  = d_pool->_field;
+    size_t * winners = d_pool->_winners;
+
+    // initialize array for temporary value storage
+    Pair* buffer = new Pair[_field.width*_field.height];
+
+    // calculate offset in data stored in vector
+    size_t offset = _v_str * v_stride * (_in.width) + _h_str * h_stride;
+
+    // store values for this window into the buffer
+    for (size_t j = 0; j < _field.height; j++)
+    {
+        for (size_t i = 0; i < _field.width; i++)
+        {
+            buffer[j * _field.width + i] = {offset + j * _in.width + i, d_in[offset + j * _in.width + i]};
+        }
+    }
+
+    // calculate max value and index of max value for this window
+    Pair winner = d_pool->max_value(buffer, _field.width * _field.height);
+
+    // store max value into output
+    d_out[v_stride*_out.width + h_stride] = winner.height;
+
+    // store max value's index
+    winners[v_stride * _out.width + h_stride] = winner.width;
+
+    // delete allocated memory
+    delete[] buffer;
+}
+
+__global__
 void Parent_Kernel(double *d_in, double *d_out, MaxPool* d_pool, size_t inmaps)
 {
 
@@ -34,21 +75,15 @@ void Parent_Kernel(double *d_in, double *d_out, MaxPool* d_pool, size_t inmaps)
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    Vector<double> in_vec(_in.height*_in.width, d_in + idx *_in.height * _in.width);
-    Vector<double> out_vec(_out.height*_out.width);
+    double* in = d_in + idx *_in.height * _in.width;
+    double* out = d_out + idx * _out.height * _out.width;
 
     if (idx < inmaps)
     {
-        d_pool[idx].Forward(in_vec, out_vec);
+        dim3 numBlocks(1,1);
+        dim3 threadsPerBlock(_out.width, _out.height);
+        Child_Kernel<<<numBlocks, threadsPerBlock>>>(in, out,  &(d_pool[idx]));
     }
-
-
-     //this can be replaced with a memcpy (it is more efficient)
-    for (size_t i = 0; i < out_vec.get_len(); i++)
-    {
-        d_out[idx * _out.height*_out.width + i ] = out_vec[i];
-    }
-
 
 
 }
@@ -88,8 +123,6 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 
         cudaMemcpy(&(d_elem->_winners), &(d_winners[i]), sizeof(size_t*), cudaMemcpyHostToDevice);
     }
-
-
 
     // copy output to device
     double* d_output;

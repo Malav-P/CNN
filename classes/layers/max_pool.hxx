@@ -53,7 +53,7 @@ class MaxPool {
         // access the _winners (FOR TESTING PURPOSES)
         __host__ __device__ size_t* & get_winners()   {return _winners;}
         //! ---------------------------------------------------------------------------------------------------------
-    private:
+    public:
 
         friend class MaxPooling;
 
@@ -78,9 +78,6 @@ class MaxPool {
 
         // vertical stride_length
         size_t _v_str {0};
-
-
-
 
 };
 
