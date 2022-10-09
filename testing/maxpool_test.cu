@@ -28,18 +28,29 @@ int main()
 
       pool_lyr.Forward(inputs, outputs);
 
-    Mat<double> matrix_input(in_height, in_width, inputs.get_data() + 1*in_height*in_width);
+    Mat<double> matrix_input(in_height, in_width, inputs.get_data() + 0*in_height*in_width);
     matrix_input.print();
 
-    Mat<double> matrix_output(pool_lyr.out_shape().height, pool_lyr.out_shape().width, outputs.get_data() + 1*pool_lyr.out_shape().width*pool_lyr.out_shape().height);
+    Mat<double> matrix_output(pool_lyr.out_shape().height, pool_lyr.out_shape().width, outputs.get_data() + 0*pool_lyr.out_shape().width*pool_lyr.out_shape().height);
     matrix_output.print();
 
     std::cout << "\n";
 
     for (size_t i=0; i<pool_lyr.out_shape().width * pool_lyr.out_shape().height; i++)
     {
-        std::cout << pool_lyr.get_pool_vector()[1].get_winners()[i] << " ";
+        std::cout << pool_lyr.get_pool_vector()[0].get_winners()[i] << " ";
     }
+
+    Dims3 _in = pool_lyr.in_shape();
+
+    std::cout<< "\n";
+    outputs.print();
+
+    Vector<double> dLdX(_in.width*_in.height*_in.depth);
+
+    pool_lyr.Backward(outputs, dLdX);
+    std::cout<< "\n";
+    dLdX.print();
 
 
 }

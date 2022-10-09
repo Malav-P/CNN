@@ -116,10 +116,11 @@ void Parent_Kernel(double *d_in, double *d_out, MaxPool* d_pool, size_t inmaps)
     double* in = d_in + idx *_in.height * _in.width;
     double* out = d_out + idx * _out.height * _out.width;
 
+    dim3 numBlocks(1,1);
+    dim3 threadsPerBlock(_out.width, _out.height);
+
     if (idx < inmaps)
     {
-        dim3 numBlocks(1,1);
-        dim3 threadsPerBlock(_out.width, _out.height);
         Child_Kernel<<<numBlocks, threadsPerBlock>>>(in, out,  &(d_pool[idx]));
     }
 
@@ -169,21 +170,84 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
     cudaProfilerStop();
 }
 
+__global__
+void Backward_Child_Kernel(double *d_in, double *d_out, MaxPool* d_pool_obj, size_t N)
+{
 
+
+    int index = threadIdx.x;
+    size_t* winners = d_pool_obj->_winners;
+
+    if (index < N)
+    {
+        d_out[winners[index]] = d_in[index];
+    }
+
+
+}
+
+__global__
+void Backward_Parent_Kernel(double *d_dLdY, double *d_dLdX, MaxPool* d_pool, size_t inmaps)
+{
+
+    Dims3 _in = d_pool[0].in_shape();
+    Dims3 _out = d_pool[0].out_shape();
+
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    double* in = d_dLdY + idx *_out.height * _out.width;
+    double* out = d_dLdX + idx * _in.height * _in.width;
+
+    size_t N = _out.width*_out.height;
+    if (idx < inmaps)
+    {
+        Backward_Child_Kernel<<<1, N >>>(in, out, &(d_pool[idx]), N);
+    }
+
+
+}
 
 void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
 {
-    Vector<double> OUTPUT;
-    for (size_t i = 0; i < _in_maps ; i++)
-    {
 
-        Vector<double> out(_in.height*_in.width);
-        Vector<double> in(_out.height * _out.width, dLdY.get_data() + i *_out.height * _out.width);
-        pool_vector[i].Backward(in, out);
+    // for profiling, can be removed
+    cudaProfilerStart();
 
-        OUTPUT = OUTPUT.merge(out);
-    }
-    dLdX = OUTPUT;
+    // copy output to device
+    double* d_dLdX;
+    cudaMalloc(&d_dLdX, _in.height*_in.width*_in.depth*sizeof(double));
+    cudaMemcpy( d_dLdX, dLdX.get_data(), _in.height*_in.width*_in.depth*sizeof(double), cudaMemcpyHostToDevice);
+
+    // copy input to device
+    double* d_dLdY;
+    cudaMalloc(&d_dLdY, _out.width*_out.height*_out.depth*sizeof(double));
+    cudaMemcpy( d_dLdY, dLdY.get_data(), _out.width*_out.height*_out.depth*sizeof(double), cudaMemcpyHostToDevice);
+
+    Backward_Parent_Kernel<<<_in_maps, 1 >>>(d_dLdY, d_dLdX, d_poolvec, _in_maps);
+
+    // retrieve data from device and put it into return variable
+    cudaMemcpy(dLdX.get_data(), d_dLdX, _in.height*_in.width*_in.depth*sizeof(double), cudaMemcpyDeviceToHost);
+
+    // free device memory
+
+    cudaFree(d_dLdY);
+    cudaFree(d_dLdX);
+
+    // for profiling, can be removed
+    cudaProfilerStop();
+
+    //! CPU version
+//    Vector<double> OUTPUT;
+//    for (size_t i = 0; i < _in_maps ; i++)
+//    {
+//
+//        Vector<double> out(_in.height*_in.width);
+//        Vector<double> in(_out.height * _out.width, dLdY.get_data() + i *_out.height * _out.width);
+//        pool_vector[i].Backward(in, out);
+//
+//        OUTPUT = OUTPUT.merge(out);
+//    }
+//    dLdX = OUTPUT;
 }
 
 
