@@ -26,7 +26,12 @@ class Convolution {
                     size_t filter_height, size_t stride_h, size_t stride_v, bool padding = false);
 
         // release allocated memory for Convolution object
-        ~Convolution() = default;
+        ~Convolution()
+        {
+            delete[] _filters;
+            delete[] _dLdFs;
+            delete[] _local_input;
+        }
 
         //! -----------------------------------------------------------------------------------------------------------
 
@@ -53,17 +58,17 @@ class Convolution {
         //! OTHER ----------------------------------------------------------------------------------------------------
 
         // access the kernel (FOR TESTING PURPOSES)
-        std::vector<Cuboid<double>> const& get_filters()  const {return _filters;}
+        Cuboid<double>* const& get_filters()  const {return _filters;}
 
         // access the local input
-        std::vector<Mat<double>> const& get_local_input() const {return _local_input;}
+        Mat<double>* const& get_local_input() const {return _local_input;}
 
         // print the filters
         void print_filters();
 
         //! -----------------------------------------------------------------------------------------------------------
 
-    private:
+    public:
 
         // horizontal stride length
         size_t _h_str {1};
@@ -90,13 +95,13 @@ class Convolution {
         size_t _padbottom {0};
 
         // stores the filter
-        std::vector<Cuboid<double>> _filters {};
+        Cuboid<double>* _filters {nullptr};
 
         // locally stored filter gradient _dLdF
-        std::vector<Cuboid<double>> _dLdFs {};
+        Cuboid<double>* _dLdFs {nullptr};
 
         // locally stored input feature maps
-        std::vector<Mat<double>> _local_input {};
+        Mat<double>* _local_input {nullptr};
 
 
 };

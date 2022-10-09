@@ -10,7 +10,7 @@
 
 //!  constructor ---------------------------------------------------------------------------
 template<typename T>
-__host__
+__host__ __device__
 Vector<T>::Vector(size_t n, T *arr)
 : _length(n)
 , _data(new T[n]{0})
@@ -18,11 +18,11 @@ Vector<T>::Vector(size_t n, T *arr)
     if (arr != nullptr)
     {
         // TODO : currently no way to ensure arr has n elements in it
-//        std::memcpy(_data, arr, sizeof(T) * n);
-        for (size_t i = 0; i< n ; i++)
-        {
-            _data[i] = arr[i];
-        }
+        std::memcpy(_data, arr, sizeof(T) * n);
+//        for (size_t i = 0; i< n ; i++)
+//        {
+//            _data[i] = arr[i];
+//        }
     }
 }
 //! ---------------------------------------------------------------------------

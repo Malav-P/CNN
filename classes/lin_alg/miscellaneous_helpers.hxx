@@ -9,12 +9,12 @@
 
 // cubify an array of matrices
 template<typename T>
-Cuboid<T> cubify(std::vector<Mat<T>> &matrix_list)
+Cuboid<T> cubify(Mat<T>* matrix_list, size_t len)
 {
     //TODO : ensure that the dimensions of all matrices are the same before we cubify!
 
     // initialize return variable
-    Cuboid<T> obj(matrix_list[0].get_rows(), matrix_list[0].get_cols(), matrix_list.size());
+    Cuboid<T> obj(matrix_list[0].get_rows(), matrix_list[0].get_cols(), len);
 
     // do cubify operation
     for (size_t i = 0; i < obj.get_rows() ; i++){ for (size_t j = 0 ; j < obj.get_cols() ; j++) { for (size_t k = 0; k< obj.get_depth(); k++){

@@ -211,7 +211,7 @@ T Cuboid<T>::dot(const Cuboid<T>& other)
 
 //! compute dot product between overlapping parts of cuboids ---------------------------------
 template<typename T>
-T Cuboid<T>::partial_dot(const Cuboid<T>& other, Dims3 p)
+__host__ __device__ T Cuboid<T>::partial_dot(const Cuboid<T>& other, Dims3 p)
 {
     // starting indices must be within bounds of matrix
     assert(p.height < _rows && p.width < _cols && p.depth < _depth);

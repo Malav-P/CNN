@@ -19,9 +19,9 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
   _padright(padright),
   _padtop(padtop),
   _padbottom(padbottom),
-  _filters(out_maps),
-  _dLdFs(out_maps),
-  _local_input(in_maps)
+  _filters(new Cuboid<double>[out_maps]),
+  _dLdFs(new Cuboid<double>[out_maps]),
+  _local_input(new Mat<double>[in_maps])
 {
 
 
@@ -44,17 +44,17 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
     std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
 
     // allocate memory for an initialize filters
-    for (size_t i = 0; i< _filters.size(); i++)
+    for (size_t i = 0; i< out_maps; i++)
     {
         _filters[i] = Cuboid<double>(filter_height, filter_width, in_maps);
         _dLdFs[i] = Cuboid<double>(filter_height, filter_width, in_maps);
     }
 
     // Glorot initialize the weights
-    for (Cuboid<double>& _filter : _filters)
+    for (size_t m = 0 ; m < out_maps ; m++)
     {
         for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++){ for (size_t k = 0; k < in_maps; k++){
-                    _filter(i,j,k) = distribution(generator);
+                    _filters[m](i,j,k) = distribution(generator);
                 }}}
     }
 
@@ -64,9 +64,9 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                          size_t filter_height, size_t stride_h, size_t stride_v, bool padding)
                          :_h_str(stride_h),
                           _v_str(stride_v),
-                          _filters(out_maps),
-                          _dLdFs(out_maps),
-                          _local_input(in_maps)
+                          _filters(new Cuboid<double>[out_maps]),
+                          _dLdFs(new Cuboid<double>[out_maps]),
+                          _local_input(new Mat<double>[in_maps])
 {
     if (!padding)
     {
@@ -122,17 +122,17 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
     std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
 
     // initialize filters
-    for (size_t i = 0; i< _filters.size(); i++)
+    for (size_t i = 0; i< out_maps; i++)
     {
         _filters[i] = Cuboid<double>(filter_height, filter_width, in_maps);
         _dLdFs[i] = Cuboid<double>(filter_height, filter_width, in_maps);
     }
 
     // Glorot initialize the weights
-    for (Cuboid<double>& _filter : _filters)
+    for (size_t m = 0; m < out_maps; m++)
     {
         for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++) { for (size_t k = 0; k< in_maps; k++){
-             _filter(i,j, k) = distribution(generator);
+             _filters[m](i,j, k) = distribution(generator);
         }}}
     }
 
@@ -154,23 +154,37 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
 
-    Cuboid<double> input_cube = cubify(_local_input);
+    Cuboid<double> input_cube = cubify(_local_input, _in.depth);
 
-//    Vector<double> OUTPUT;
 
     // initialize return variable
     Mat<double> output_image(_out.height, _out.width);
 
-    for (size_t k = 0; k < _filters.size(); k++) {
-
+    for (size_t k = 0; k < _out.depth; k++)
+    {
         // do convolution
         for (size_t i = 0; i < output_image.get_rows(); i++) {
             for (size_t j = 0; j < output_image.get_cols(); j++) {
-//                output_image(i, j) = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
                 output[k*_out.height*_out.width + i*_out.width + j] = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
             }
         }
     }
+}
+
+__global__
+void Conv_Parent_Kernel(double* d_out, Cuboid<double> &d_in, Convolution* C)
+{
+    int k = threadIdx.z;
+    int i = threadIdx.y;
+    int j = threadIdx.x;
+
+    Dims3 _out    = C->_out;
+    size_t _v_str = C->_v_str;
+    size_t _h_str = C->_h_str;
+    Cuboid<double>* _filters = C->_filters;
+
+
+    d_out[k*_out.height*_out.width + i*_out.width + j] = d_in.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
 }
 
 
@@ -187,7 +201,7 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
     size_t filter_height = _filters[0].get_rows();
     size_t filter_width = _filters[0].get_cols();
 
-    size_t N_filters = _filters.size();
+    size_t N_filters = _out.depth;
     size_t N_in_maps = _filters[0].get_depth();
 
 
@@ -278,7 +292,7 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 template<typename Optimizer>
 void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 {
-    for (size_t i = 0; i < _filters.size(); i++)
+    for (size_t i = 0; i < _out.depth; i++)
     {
         // update the weights according to the optimizer
         (*optimizer).Forward(_filters[i], _dLdFs[i], normalizer);
@@ -291,7 +305,7 @@ void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 
 void Convolution::print_filters()
 {
-    for (size_t i = 0; i < _filters.size(); i++)
+    for (size_t i = 0; i < _out.depth; i++)
     {
         std::cout << "FILTER " << i << "----------------\n\n";
         _filters[i].print();

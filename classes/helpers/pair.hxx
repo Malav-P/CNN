@@ -5,8 +5,19 @@
 #ifndef ANN_PAIR_HXX
 #define ANN_PAIR_HXX
 
+//void *operator new(size_t len) {
+//    void *ptr;
+//    cudaMallocManaged(&ptr, len);
+//    cudaDeviceSynchronize();
+//    return ptr;
+//}
+//
+//void operator delete(void *ptr) {
+//    cudaDeviceSynchronize();
+//    cudaFree(ptr);}
+
 template<typename T1 = size_t , typename T2 = size_t>
-class Dimensions {
+class Dimensions  {
     public:
 
     Dimensions() = default;
@@ -28,7 +39,7 @@ class Dimensions {
 };
 
 template<typename T1 = size_t , typename T2 = size_t, typename T3 = size_t>
-class Dimensions3 {
+class Dimensions3{
 public:
 
     Dimensions3() = default;

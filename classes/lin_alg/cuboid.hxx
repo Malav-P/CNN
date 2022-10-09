@@ -50,10 +50,10 @@ class Cuboid {
         Cuboid<T> operator+(const Cuboid<T>& rhs);
 
         // index operator
-        T& operator()(size_t i, size_t j, size_t k);
+        __host__ __device__ T& operator()(size_t i, size_t j, size_t k);
 
         // const index operator
-        const T& operator()(size_t i, size_t j, size_t k) const;
+        __host__ __device__ const T& operator()(size_t i, size_t j, size_t k) const;
 
         // multiply operator (scalar)
         Cuboid<T> operator * (double c);
@@ -69,7 +69,7 @@ class Cuboid {
         T dot(const Cuboid<T>& other);
 
         // compute partial inner product with given Dims of starting indices
-        T partial_dot(const Cuboid<T>& other, Dims3 p);
+        __host__ __device__ T partial_dot(const Cuboid<T>& other, Dims3 p);
 
         // keep values in certain indices, and set all others to zero. indices must be sorted in increasing row, increasing column order
         void keep(Dims3* indices);

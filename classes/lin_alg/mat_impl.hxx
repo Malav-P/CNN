@@ -392,8 +392,7 @@ Vector<T> Mat<T>::flatten()
     Vector<T> obj(_rows * _cols);
 
     // do flatten operation
-    for (size_t i = 0; i < _rows * _cols; i++)
-    { std::memcpy(obj._data, _data, sizeof(T) * _rows*_cols);}
+    std::memcpy(obj._data, _data, sizeof(T) * _rows*_cols);
 
     // return result
     return obj;

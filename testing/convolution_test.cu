@@ -37,6 +37,7 @@ int main()
     Vector<double> input = in.flatten();
     Vector<double> second_input = second.flatten();
 
+
     input = input.merge(second_input);
 
 //    std::vector<Vector<double>> inputs(2);

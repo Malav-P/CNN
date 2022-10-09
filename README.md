@@ -1,6 +1,8 @@
 # CNN
-An implementation of a convolutional neural network written in C++.
-
+An implementation of a convolutional neural network written in C++. A chosen architecture was able to 
+get 97.58% accuracy on the MNIST test set! (Training did take several hours, the current goal is speeding up 
+the training via parallel programming on the GPU)
+![plot](./CNN_TEST.png)
 # Overview
 
 Provided is a header-only library for the implementation of a convolutional neural network. We break down each of the layers later 

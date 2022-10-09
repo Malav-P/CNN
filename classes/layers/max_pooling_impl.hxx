@@ -6,6 +6,7 @@
 #define CNN_MAX_POOLING_IMPL_HXX
 
 #include "max_pooling.hxx"
+#include "cuda_profiler_api.h"
 
 MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height,
                        size_t h_stride, size_t v_stride):
@@ -92,6 +93,9 @@ void Parent_Kernel(double *d_in, double *d_out, MaxPool* d_pool, size_t inmaps)
 void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 {
 
+    // for profiling, can be removed
+    cudaProfilerStart();
+
     // copy pool_vector to device
     MaxPool* d_poolvec;
     size_t ** d_winners = (size_t**)malloc(sizeof(size_t*)*_in_maps);
@@ -138,6 +142,7 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 
     // launch pool_vector.size number of kernels, each with a single thread
     Parent_Kernel<<<_in_maps, 1 >>>(d_input, d_output, d_poolvec, _in_maps);
+//    Parent_Kernel<<<_in_maps, 1 >>>(input.get_data(), output.get_data(), pool_vector, _in_maps);
     cudaDeviceSynchronize();
 
     // retrieve data from device and put it into return variable
@@ -156,6 +161,9 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
     cudaFree(d_poolvec);
     cudaFree(d_input);
     cudaFree(d_output);
+
+    // for profiling, can be removed
+    cudaProfilerStop();
 }
 
 
