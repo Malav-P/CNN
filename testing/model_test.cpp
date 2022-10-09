@@ -101,23 +101,23 @@ int main(int argc, char* argv[])
     model.Test(test_set, false);
 
     //! -----------------------------------------------------------------
-    char yn;
-
-    std::cout << "Would you like to print the model summary? y/n \n";
-    std::cin >> yn;
-
-    if (yn == 'y')
-    {
-        // print the model summary
-        model.print();
-    }
-
-    else if (yn == 'n')
-    {
-        // exit program
-        std::cout << "Program exiting ... \n";
-        return 0;
-    }
+//    char yn;
+//
+//    std::cout << "Would you like to print the model summary? y/n \n";
+//    std::cin >> yn;
+//
+//    if (yn == 'y')
+//    {
+//        // print the model summary
+//        model.print();
+//    }
+//
+//    else if (yn == 'n')
+//    {
+//        // exit program
+//        std::cout << "Program exiting ... \n";
+//        return 0;
+//    }
 
 }
 
