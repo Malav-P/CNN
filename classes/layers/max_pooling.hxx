@@ -55,7 +55,14 @@ class MaxPooling {
 
 
         //! OTHER ---------------------------------------------------------------------------------------------------
-        MaxPool*  get_pool_vector() const {return pool_vector;}
+        MaxPool*  get_pool_vector() const {
+            for(size_t i = 0 ; i < _in_maps ; i++)
+            {
+                // copy over winners to pool_vector on CPU (not sure if this is necessary?)
+                cudaMemcpy(pool_vector[i]._winners, d_winners[i], _out.height*_out.width*sizeof(size_t), cudaMemcpyDeviceToHost);
+            }
+            return pool_vector;
+        }
         //! ---------------------------------------------------------------------------------------------------------
     private:
 

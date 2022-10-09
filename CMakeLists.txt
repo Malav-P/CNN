@@ -13,7 +13,7 @@ add_executable(cuda_test cuda_test.cu)
 
 add_executable(linalg_test testing/linalg_test.cu)
 add_executable(progress_bar_test testing/progress_bar_test.cu)
-add_executable(convolution_test testing/convolution_test.cu UnifiedMemClass/managed.hxx)
+add_executable(convolution_test testing/convolution_test.cu )
 
 set_target_properties(convolution_test
         PROPERTIES

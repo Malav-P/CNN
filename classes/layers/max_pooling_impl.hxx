@@ -154,12 +154,8 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
     // retrieve data from device and put it into return variable
     cudaMemcpy(output.get_data(), d_output, _out.height*_out.width*_out.depth*sizeof(double), cudaMemcpyDeviceToHost);
 
-    for(size_t i = 0 ; i < _in_maps ; i++)
-    {
-        // copy over winners to pool_vector on CPU (not sure if this is necessary?)
-        cudaMemcpy(pool_vector[i]._winners, d_winners[i], _out.height*_out.width*sizeof(size_t), cudaMemcpyDeviceToHost);
-    }
-
+    // the pool vector is not copied back to the host, unless it is needed! In that case, call get_pool_vector() member function
+    // and the data will be copied to the host
 
     // free device memory
 
