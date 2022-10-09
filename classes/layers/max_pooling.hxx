@@ -14,7 +14,22 @@ class MaxPooling {
         MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
         // release allocated memory for MaxPool object
-        ~MaxPooling(){delete[] pool_vector;}
+        ~MaxPooling()
+        {
+            for(size_t i = 0 ; i < _in_maps ; i++)
+            {
+                //free device memory
+                cudaFree(d_winners[i]);
+            }
+
+            // free memory
+            free(d_winners);
+
+            // free device memory
+            cudaFree(d_poolvec);
+
+            delete[] pool_vector;
+        }
 
         //!------------------------------------------------------------------------------------------------------------
 
@@ -61,6 +76,12 @@ class MaxPooling {
 
         // vector of individual MaxPool Objects
         MaxPool* pool_vector {nullptr};
+
+        // device version of MaxPool Objects
+        MaxPool* d_poolvec {nullptr};
+
+        // device version of _winners attribute of MaxPool class
+        size_t ** d_winners {nullptr};
 
         // size of pool_vector
         size_t _in_maps {0};

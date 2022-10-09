@@ -24,6 +24,43 @@ MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t
 
     _out = pool_vector[0].out_shape();
     _out.depth = in_maps;
+
+
+    // Allocate device struct array
+    cudaMalloc( (void**)&d_poolvec, _in_maps*sizeof(MaxPool));
+
+    // allocate device winners
+    d_winners = (size_t**)malloc(sizeof(size_t*)*_in_maps);
+
+    // copy over data from pool_vector to d_poolvec
+    for (size_t i = 0; i< _in_maps; i++)
+    {
+        // host struct
+        MaxPool* elem = &(pool_vector[i]);
+
+        // device struct
+        MaxPool* d_elem = &(d_poolvec[i]);
+
+        // copy struct from host to device
+        cudaMemcpy(d_elem, elem, sizeof(MaxPool), cudaMemcpyHostToDevice);
+
+        // device array
+
+
+        // length of device array
+        int d_winners_len = _out.width*_out.height;
+
+        // Allocate device pointer
+        cudaMalloc((void**)&(d_winners[i]), d_winners_len*sizeof(size_t));
+
+        // copy pointer content from host to device
+        cudaMemcpy((d_winners[i]), elem->_winners, d_winners_len*sizeof(size_t), cudaMemcpyHostToDevice);
+
+
+        cudaMemcpy(&(d_elem->_winners), &(d_winners[i]), sizeof(size_t*), cudaMemcpyHostToDevice);
+    }
+
+
 }
 
 __global__
@@ -96,37 +133,6 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
     // for profiling, can be removed
     cudaProfilerStart();
 
-    // copy pool_vector to device
-    MaxPool* d_poolvec;
-    size_t ** d_winners = (size_t**)malloc(sizeof(size_t*)*_in_maps);
-    // Allocate device struct array
-    cudaMalloc( (void**)&d_poolvec, _in_maps*sizeof(MaxPool));
-    for (size_t i = 0; i< _in_maps; i++)
-    {
-        // host struct
-        MaxPool* elem = &(pool_vector[i]);
-
-        // device struct
-        MaxPool* d_elem = &(d_poolvec[i]);
-
-        // copy struct from host to device
-        cudaMemcpy(d_elem, elem, sizeof(MaxPool), cudaMemcpyHostToDevice);
-
-        // device array
-
-
-        // length of device array
-        int d_winners_len = _out.width*_out.height;
-
-        // Allocate device pointer
-        cudaMalloc((void**)&(d_winners[i]), d_winners_len*sizeof(size_t));
-
-        // copy pointer content from host to device
-        cudaMemcpy((d_winners[i]), elem->_winners, d_winners_len*sizeof(size_t), cudaMemcpyHostToDevice);
-
-
-        cudaMemcpy(&(d_elem->_winners), &(d_winners[i]), sizeof(size_t*), cudaMemcpyHostToDevice);
-    }
 
     // copy output to device
     double* d_output;
@@ -143,22 +149,19 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
     // launch pool_vector.size number of kernels, each with a single thread
     Parent_Kernel<<<_in_maps, 1 >>>(d_input, d_output, d_poolvec, _in_maps);
 //    Parent_Kernel<<<_in_maps, 1 >>>(input.get_data(), output.get_data(), pool_vector, _in_maps);
-    cudaDeviceSynchronize();
 
     // retrieve data from device and put it into return variable
     cudaMemcpy(output.get_data(), d_output, _out.height*_out.width*_out.depth*sizeof(double), cudaMemcpyDeviceToHost);
 
     for(size_t i = 0 ; i < _in_maps ; i++)
     {
+        // copy over winners to pool_vector on CPU (not sure if this is necessary?)
         cudaMemcpy(pool_vector[i]._winners, d_winners[i], _out.height*_out.width*sizeof(size_t), cudaMemcpyDeviceToHost);
-        //free device memory
-        cudaFree(d_winners[i]);
     }
 
-    // free memory
-    free(d_winners);
+
     // free device memory
-    cudaFree(d_poolvec);
+
     cudaFree(d_input);
     cudaFree(d_output);
 
