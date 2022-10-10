@@ -49,7 +49,7 @@ class Mat {
         Mat<T> operator+(const Mat<T>& rhs);
 
         // index operator
-        T& operator()(size_t i, size_t j);
+        __host__ __device__ T& operator()(size_t i, size_t j);
 
         // const index operator
         const T& operator()(size_t i, size_t j) const;
@@ -95,13 +95,14 @@ class Mat {
         Mat<T> transpose();
 
         // get number of rows of matrix (read only)
-        size_t const& get_rows() const {return _rows;}
+        __host__ __device__ size_t const& get_rows() const {return _rows;}
 
         // get number of cols of matrix (read only)
-        size_t const& get_cols() const {return _cols;}
+        __host__ __device__ size_t const& get_cols() const {return _cols;}
 
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
+
 
         // print the matrix
         void print() const;
@@ -120,13 +121,14 @@ class Mat {
         // rotation state, 0 = no rotate; 1 = 90 degrees clockwise; 2 = 180 degrees clockwise; 3 = 270 degrees clockwise
         size_t _rot {0};
 
-        // pointer to _data
-        T* _data {nullptr};
-
         // helper for set_rot, rotate matrix CW by 90 degrees
         void rotate_once();
 
         friend class Vector<T>;
+    public:
+            // pointer to _data
+            T* _data {nullptr};
+
 };
 
 

@@ -39,7 +39,10 @@ int main()
     Vector<double> out(4, out_arr);
     Vector<double> dLdX(linear.in_shape().width*linear.in_shape().height);
 
+
     linear.Backward(out, dLdX);
+
+    dLdX.print();
 
 }
 

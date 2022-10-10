@@ -33,11 +33,45 @@ Linear::Linear(size_t in_size, size_t out_size)
     for (size_t i=0; i<_weights.get_rows(); i++) { for (size_t j=0; j<_weights.get_cols(); j++)
         { _weights(i,j) = distribution(generator); }
     }
+
+    // Allocate device struct memory
+    cudaMalloc( (void**)&d_weights, sizeof(Mat<double>));
+
+    // Allocate device pointer for weight data
+    cudaMalloc((void**)&(d_weight_data), out_size*in_size*sizeof(double));
+
+    // copy struct from host to device
+    cudaMemcpy(d_weights, &_weights, sizeof(Mat<double>), cudaMemcpyHostToDevice);
+
+    // copy pointer content from host to device
+    cudaMemcpy(d_weight_data, _weights._data, out_size*in_size*sizeof(double), cudaMemcpyHostToDevice);
+
+    cudaMemcpy(&(d_weights->_data), &(d_weight_data), sizeof(double*), cudaMemcpyHostToDevice);
+
 }
 
+__global__
+void Linear_Parent_Kernel(Mat<double>* d_matrix, double* d_in, double* d_out)
+{
+    size_t N_ROWS = d_matrix->get_rows();
+    size_t N_COLS = d_matrix->get_cols();
+
+    int i = threadIdx.x;
+
+    if (i < N_ROWS)
+    {
+        for (size_t j = 0 ; j < N_COLS ; j++)
+        {
+            d_out[i] += (*d_matrix)(i,j) * d_in[j];
+        }
+    }
+}
 
 void Linear::Forward(const Vector<double> &input, Vector<double> &output)
 {
+    // for profiling, can be removed
+    cudaProfilerStart();
+
     //! TODO: ensure that matrix multiplication is compatible with sizes, _weights*input assertion is already done in the operator overload
     assert(output.get_len() == _weights.get_rows());
 
@@ -45,10 +79,38 @@ void Linear::Forward(const Vector<double> &input, Vector<double> &output)
     _local_input = input;
 
     // perform Y = Wx + B
-    _local_output = (_weights * input) + _biases;
+
+    // copy output to device
+    double* d_output;
+    cudaMalloc(&d_output, _out.height*_out.width*_out.depth*sizeof(double));
+    cudaMemcpy( d_output, output.get_data(), _out.height*_out.width*_out.depth*sizeof(double), cudaMemcpyHostToDevice);
+
+    // copy input to device
+    double* d_input;
+    cudaMalloc(&d_input, _in.width*_in.height*_in.depth*sizeof(double));
+    cudaMemcpy( d_input, input.get_data(), _in.width*_in.height*_in.depth*sizeof(double), cudaMemcpyHostToDevice);
+
+    // do matmul on GPU
+    Linear_Parent_Kernel<<<1, _weights.get_rows()>>>(d_weights, d_input, d_output);
+
+    // retrieve data from device and put it into return variable
+    cudaMemcpy(output.get_data(), d_output, _out.height*_out.width*_out.depth*sizeof(double), cudaMemcpyDeviceToHost);
+
+    // free device memory
+    cudaFree(d_output);
+    cudaFree(d_input);
+
+    // for profiling, can be removed
+    cudaProfilerStop();
 
     // assign _local_output to output of layer
-    output = _local_output;
+    _local_output = output;
+
+    //! CPU version
+//    _local_output = (_weights * input) + _biases;
+
+
+//    output = _local_output;
 }
 
 void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX)

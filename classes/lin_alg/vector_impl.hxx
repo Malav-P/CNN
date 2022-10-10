@@ -143,8 +143,8 @@ Vector<T> Vector<T>::operator*(Mat<T> &other)
     // initialize return variable
     Vector<T> obj(other._cols);
 
-    // helper variable
-    Vector<T> col(_length);
+//    // helper variable
+//    Vector<T> col(_length);
 
     // do multiplication operation
     for (size_t col = 0; col < other._cols; col++)
@@ -349,4 +349,6 @@ Vector<T> Vector<T>::merge(const Vector<T> &other)
     // return result
     return obj;
 }
+
+
 #endif //ANN_VECTOR_CPP

@@ -30,6 +30,12 @@ set_target_properties(maxpool_test
 
 add_executable(meanpool_test testing/meanpool_test.cu)
 add_executable(linear_test testing/linear_test.cu)
+
+set_target_properties(linear_test
+        PROPERTIES
+        CUDA_SEPARABLE_COMPILATION ON
+        CUDA_RESOLVE_DEVICE_SYMBOLS ON
+        )
 add_executable(model_test testing/model_test.cu mnist/read_mnist_impl.cu)
 
 set_target_properties(model_test

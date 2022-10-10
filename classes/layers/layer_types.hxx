@@ -7,6 +7,7 @@
 #define USE_BOOST_WINDOWS_H_
 
 #include <boost/variant.hpp>
+#include "cuda_profiler_api.h"
 
 // convolutional layer
 class Convolution;

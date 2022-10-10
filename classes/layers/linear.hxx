@@ -20,7 +20,12 @@ class Linear {
         Linear(size_t in_size, size_t out_size);
 
         // destructor
-        ~Linear() = default;
+        ~Linear()
+        {
+            // free device memory
+            cudaFree(d_weights);
+            cudaFree(d_weight_data);
+        }
 
         //! -----------------------------------------------------------------------------------------------------------
 
@@ -73,6 +78,12 @@ class Linear {
 
         // weight matrix W
         Mat<double> _weights {};
+
+        // weight matrix on device
+        Mat<double>* d_weights {nullptr};
+
+        // weight matrix data on device
+        double* d_weight_data {nullptr};
 
         // bias vector
         Vector<double> _biases {};

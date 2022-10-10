@@ -6,7 +6,7 @@
 #define CNN_MAX_POOLING_IMPL_HXX
 
 #include "max_pooling.hxx"
-#include "cuda_profiler_api.h"
+
 
 MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height,
                        size_t h_stride, size_t v_stride):
