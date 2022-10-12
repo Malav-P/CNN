@@ -122,8 +122,17 @@ void Linear::Forward(Vector<double> &input, Vector<double> &output)
     // copy input to device
     double* d_input = input.port_to_GPU();
 
+    // block size
+    size_t block_size = 512;
+    // number of threads needed
+    size_t N = _weights.get_rows();
+    // number of threads per block
+    dim3 threadsPerBlock(block_size);
+    // number of blocks
+    dim3 numBlocks((N+block_size - 1)/block_size);
+
     // do matmul on GPU
-    matVec_Kernel<<<1, _weights.get_rows()>>>(d_weights, d_input, d_output);
+    matVec_Kernel<<<numBlocks, threadsPerBlock>>>(d_weights, d_input, d_output);
 
     // retrieve data from device and put it into return variable
     cudaMemcpy(output.get_data(), d_output, _out.height*_out.width*_out.depth*sizeof(double), cudaMemcpyDeviceToHost);
@@ -160,8 +169,17 @@ void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     // copy output to GPU
     double* d_dLdX = dLdX.port_to_GPU();
 
+    // block size
+    size_t block_size = 512;
+    // number of threads needed
+    size_t N = _weights.get_cols();
+    // number of threads per block
+    dim3 threadsPerBlock(block_size);
+    // number of blocks
+    dim3 numBlocks((N+block_size - 1)/block_size);
+
     // do matmul on GPU
-    vecMat_Kernel<<<1, _weights.get_cols()>>>(d_dLdY, d_weights, d_dLdX);
+    vecMat_Kernel<<<numBlocks, threadsPerBlock>>>(d_dLdY, d_weights, d_dLdX);
 
     // retrieve data from device and put it into return variable
     cudaMemcpy(dLdX.get_data(), d_dLdX, dLdX.get_len()*sizeof(double), cudaMemcpyDeviceToHost);
@@ -175,11 +193,30 @@ void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
 
     //! compute gradients GPU Version
     double* d_local_input = _local_input.port_to_GPU();
-    dim3 numBlocks(1,1);
-    dim3 threadsPerBlock(_dLdW.get_cols(), _dLdW.get_rows());
+
+    // num threads needed
+    size_t N_x = _dLdW.get_cols();
+    size_t N_y = _dLdW.get_rows();
+
+    // threads per 2D block
+    threadsPerBlock = (block_size, block_size);
+
+    // number of blocks needed
+    numBlocks = ((N_x + block_size - 1)/block_size, (N_y + block_size - 1)/block_size);
+
+    // call kernel
     vecVecplusequals_Kernel<<<numBlocks, threadsPerBlock>>>(d_dLdW, d_dLdY, d_local_input);
 
-    plus_equals_Kernel<<<1, dLdY.get_len()>>>(dLdY.get_len(), d_dLdB_data, d_dLdY, 1);
+    // num threads needed
+    N = dLdY.get_len();
+
+    // threads per block
+    threadsPerBlock = (block_size);
+
+    // number of blocks needed
+    numBlocks = ((N+block_size-1)/block_size);
+
+    plus_equals_Kernel<<<numBlocks, threadsPerBlock>>>(dLdY.get_len(), d_dLdB_data, d_dLdY, 1);
 
     // free device memory
     cudaFree(d_dLdY);
@@ -214,14 +251,32 @@ void Linear::Update_Params(Optimizer* optimizer, size_t normalizer)
     // for profiling, can be removed
     cudaProfilerStart();
 
+    // block size
+    size_t block_size = 512;
+    // number of threads needed
+    size_t N = _dLdB.get_len();
+    // number of threads per block
+    dim3 threadsPerBlock(block_size);
+    // number of blocks
+    dim3 numBlocks((N+block_size - 1)/block_size);
+
     // update the biases and reset dLdB to zeros. MUST UPDATE BIASES FIRST or else member variable k of momentum optmizer
     // is prematurely updated
     (*optimizer).Forward(d_biases_data, d_dLdB_data, normalizer, _dLdB.get_len());
-    fill_Kernel<<<1, _dLdB.get_len()>>>(_dLdB.get_len(), d_dLdB_data, 0);
+    fill_Kernel<<<numBlocks, threadsPerBlock>>>(_dLdB.get_len(), d_dLdB_data, 0);
+
+    // num threads needed
+    N = _dLdW.get_cols() * _dLdW.get_rows();
+
+    // threads per 2D block
+    threadsPerBlock = (block_size);
+
+    // number of blocks needed
+    numBlocks = ((N + block_size - 1)/block_size);
 
     // update the weights and reset dLdW to zeros
-    (*optimizer).Forward(d_weight_data, d_dLdW_data, normalizer, _dLdW.get_cols()*_dLdW.get_rows());
-    fill_Kernel<<<1, _dLdW.get_cols()*_dLdW.get_rows()>>>(_dLdW.get_cols()*_dLdW.get_rows(), d_dLdW_data, 0);
+    (*optimizer).Forward(d_weight_data, d_dLdW_data, normalizer, N);
+    fill_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_dLdW_data, 0);
 
     // for profiling, can be removed
     cudaProfilerStop();
