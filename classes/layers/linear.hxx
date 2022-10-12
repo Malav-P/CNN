@@ -25,6 +25,15 @@ class Linear {
             // free device memory
             cudaFree(d_weights);
             cudaFree(d_weight_data);
+
+            cudaFree(d_biases);
+            cudaFree(d_biases_data);
+
+            cudaFree(d_dLdW);
+            cudaFree(d_dLdW_data);
+
+            cudaFree(d_dLdB);
+            cudaFree(d_dLdB_data);
         }
 
         //! -----------------------------------------------------------------------------------------------------------
@@ -32,7 +41,7 @@ class Linear {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(const Vector<double>& input, Vector<double>& output);
+        void Forward(Vector<double>& input, Vector<double>& output);
 
         // send vector backwards through layer, computing gradients and input error dLdX
         void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
@@ -46,10 +55,29 @@ class Linear {
         //! OTHER ----------------------------------------------------------------------------------------------------
 
         // get the weight matrix
-        Mat<double> const& get_weights() const {return _weights;}
+        Mat<double> const& get_weights() const {
+            // retrieve data from device and put it into return variable
+            cudaMemcpy(_weights._data, d_weight_data, _weights.get_cols()*_weights.get_rows()*sizeof(double), cudaMemcpyDeviceToHost);
+            return _weights;
+        }
+
+        // get gradient matrix
+        Mat<double> const& get_dLdW() const {
+            // retrieve data from device and put it into return variable
+            cudaMemcpy(_dLdW._data, d_dLdW_data, _weights.get_cols()*_weights.get_rows()*sizeof(double), cudaMemcpyDeviceToHost);
+            return _dLdW;}
 
         // get the biases
-        Vector<double> const& get_biases() const {return _biases;}
+        Vector<double> const& get_biases() const {
+            // retrieve data from device and put it into return variable
+            cudaMemcpy(_biases.get_data(), d_biases, _biases.get_len()*sizeof(double), cudaMemcpyDeviceToHost);
+            return _biases;}
+
+        // get the dLdB vector
+        Vector<double> const& get_dLdB() const {
+        // retrieve data from device and put it into return variable
+        cudaMemcpy(_dLdB.get_data(), d_dLdB_data, _biases.get_len()*sizeof(double), cudaMemcpyDeviceToHost);
+        return _dLdB;}
 
         // get local output
         Vector<double> const& get_local_output() const {return _local_output;}
@@ -88,11 +116,29 @@ class Linear {
         // bias vector
         Vector<double> _biases {};
 
+        // bias vector on the device
+        Vector<double>* d_biases {nullptr};
+
+        // bias vector data on device
+        double* d_biases_data {nullptr};
+
         // locally stored gradients dL/dW
         Mat<double> _dLdW {};
 
+        // gradients matrix on device
+        Mat<double>* d_dLdW {nullptr};
+
+        // gradient matrix data on device
+        double* d_dLdW_data {nullptr};
+
         // locally stored gradients dL/dB
         Vector<double> _dLdB {};
+
+        // bias gradient on the device
+        Vector<double>* d_dLdB {nullptr};
+
+        // bias gradient data on device
+        double* d_dLdB_data {nullptr};
 
 };
 

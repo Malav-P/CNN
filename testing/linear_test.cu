@@ -3,6 +3,7 @@
 //
 
 #include "../classes/layers/layer_types.hxx"
+#include "../classes/optimizers/optimizers.hxx"
 
 int main()
 {
@@ -32,17 +33,29 @@ int main()
     std::cout << "\n\n";
 
 
-    linear.get_weights().print();
-
-    double out_arr[4] = {4, 2, 2, 4};
+    double out_arr[4] = {2, 1, 1, 2};
 
     Vector<double> out(4, out_arr);
     Vector<double> dLdX(linear.in_shape().width*linear.in_shape().height);
 
 
+    linear.get_dLdB().print();
+
     linear.Backward(out, dLdX);
 
+
+    linear.get_dLdB().print();
+
     dLdX.print();
+//
+//    linear.get_weights().print();
+
+    SGD optimizer;
+    linear.Update_Params(&optimizer, 1);
+
+    linear.get_dLdB().print();
+
+//    linear.get_weights().print();
 
 }
 

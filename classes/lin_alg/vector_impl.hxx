@@ -350,5 +350,17 @@ Vector<T> Vector<T>::merge(const Vector<T> &other)
     return obj;
 }
 
+template<typename T>
+T *Vector<T>::port_to_GPU()
+{
+
+    //! THIS FUNCTION RETURNS MALLOCED MEMORY, EVERY TIME IT IS CALLED, CUDAFREE MUST BE CALLED SOMEHWERE ELSE
+    T* d_ptr;
+    cudaMalloc(&d_ptr, _length*sizeof(T));
+    cudaMemcpy( d_ptr, _data, _length*sizeof(T), cudaMemcpyHostToDevice);
+
+    return d_ptr;
+}
+
 
 #endif //ANN_VECTOR_CPP

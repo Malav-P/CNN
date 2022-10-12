@@ -94,6 +94,9 @@ class Vector {
         // get the data (read and write)
         __host__ __device__ T*  & get_data() {return _data;}
 
+        // port held data to GPU
+        __host__ T* port_to_GPU();
+
         // print the vector elements
         void print() const;
 
