@@ -14,7 +14,7 @@ void vecMat_Kernel( double* d_in, Mat<double>* d_matrix, double* d_out)
     size_t N_ROWS = d_matrix->get_rows();
     size_t N_COLS = d_matrix->get_cols();
 
-    int j = threadIdx.x;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (j < N_COLS)
     {
@@ -61,7 +61,7 @@ __global__
 void plus_equals_Kernel(size_t N, double* d_L, double* d_R, double c)
 {
 
-    int i = threadIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < N)
     {
@@ -73,7 +73,7 @@ __global__
 void fill_Kernel(size_t N, double* d_data, double fill)
 {
 
-    int i = threadIdx.x;
+    int i = blockIdx.x * blockdim.x + threadIdx.x;
 
     if (i < N)
     {
