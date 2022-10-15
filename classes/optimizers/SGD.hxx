@@ -26,8 +26,18 @@ class SGD {
     template<typename T>
     void Forward(T* d_weights, T* d_gradient, size_t normalizer, size_t N)
     {
+
+        // block size
+        size_t block_size = 512;
+        // number of threads needed is N
+
+        // number of threads per block
+        dim3 threadsPerBlock(block_size);
+        // number of blocks
+        dim3 numBlocks((N+block_size - 1)/block_size);
+
         double multiplier = -alpha/normalizer;
-        plus_equals_Kernel<<<1, N>>>(N, d_weights, d_gradient, multiplier);
+        plus_equals_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_weights, d_gradient, multiplier);
     }
 
     // reset the optimizer for another pass through the network

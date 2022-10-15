@@ -73,7 +73,7 @@ __global__
 void fill_Kernel(size_t N, double* d_data, double fill)
 {
 
-    int i = blockIdx.x * blockdim.x + threadIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < N)
     {

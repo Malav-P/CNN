@@ -199,13 +199,13 @@ void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     size_t N_y = _dLdW.get_rows();
 
     // threads per 2D block
-    threadsPerBlock = (block_size, block_size);
+    dim3 threadsPerBlock1(32, 32);
 
     // number of blocks needed
-    numBlocks = ((N_x + block_size - 1)/block_size, (N_y + block_size - 1)/block_size);
+    dim3 numBlocks1((N_x + 32 - 1)/32, (N_y + 32 - 1)/32);
 
     // call kernel
-    vecVecplusequals_Kernel<<<numBlocks, threadsPerBlock>>>(d_dLdW, d_dLdY, d_local_input);
+    vecVecplusequals_Kernel<<<numBlocks1, threadsPerBlock1>>>(d_dLdW, d_dLdY, d_local_input);
 
     // num threads needed
     N = dLdY.get_len();
@@ -269,14 +269,14 @@ void Linear::Update_Params(Optimizer* optimizer, size_t normalizer)
     N = _dLdW.get_cols() * _dLdW.get_rows();
 
     // threads per 2D block
-    threadsPerBlock = (block_size);
+    dim3 threadsPerBlock1(block_size);
 
     // number of blocks needed
-    numBlocks = ((N + block_size - 1)/block_size);
+    dim3 numBlocks1((N + block_size - 1)/block_size);
 
     // update the weights and reset dLdW to zeros
     (*optimizer).Forward(d_weight_data, d_dLdW_data, normalizer, N);
-    fill_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_dLdW_data, 0);
+    fill_Kernel<<<numBlocks1, threadsPerBlock1>>>(N, d_dLdW_data, 0);
 
     // for profiling, can be removed
     cudaProfilerStop();

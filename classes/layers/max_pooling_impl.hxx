@@ -171,7 +171,7 @@ void Backward_Child_Kernel(double *d_in, double *d_out, MaxPool* d_pool_obj, siz
 {
 
 
-    int index = threadIdx.x;
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
     size_t* winners = d_pool_obj->_winners;
 
     if (index < N)
@@ -194,10 +194,19 @@ void Backward_Parent_Kernel(double *d_dLdY, double *d_dLdX, MaxPool* d_pool, siz
     double* in = d_dLdY + idx *_out.height * _out.width;
     double* out = d_dLdX + idx * _in.height * _in.width;
 
+
+    // block size
+    size_t block_size = 512;
+    // number of threads needed
     size_t N = _out.width*_out.height;
+    // number of threads per block
+    dim3 threadsPerBlock(block_size);
+    // number of blocks
+    dim3 numBlocks((N+block_size - 1)/block_size);
+
     if (idx < inmaps)
     {
-        Backward_Child_Kernel<<<1, N >>>(in, out, &(d_pool[idx]), N);
+        Backward_Child_Kernel<<<numBlocks, threadsPerBlock >>>(in, out, &(d_pool[idx]), N);
     }
 
 
@@ -219,7 +228,7 @@ void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     cudaMalloc(&d_dLdY, _out.width*_out.height*_out.depth*sizeof(double));
     cudaMemcpy( d_dLdY, dLdY.get_data(), _out.width*_out.height*_out.depth*sizeof(double), cudaMemcpyHostToDevice);
 
-    Backward_Parent_Kernel<<<_in_maps, 1 >>>(d_dLdY, d_dLdX, d_poolvec, _in_maps);
+    Backward_Parent_Kernel<<<1, _in_maps >>>(d_dLdY, d_dLdX, d_poolvec, _in_maps);
 
     // retrieve data from device and put it into return variable
     cudaMemcpy(dLdX.get_data(), d_dLdX, _in.height*_in.width*_in.depth*sizeof(double), cudaMemcpyDeviceToHost);
