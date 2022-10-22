@@ -28,6 +28,21 @@ class Convolution {
         // release allocated memory for Convolution object
         ~Convolution()
         {
+            for(size_t i = 0 ; i < _out.depth ; i++)
+            {
+                //free device memory for device data arrays
+                cudaFree(d_filters_data[i]);
+                cudaFree(d_dLdFs_data[i]);
+            }
+
+            // free host data arrays
+            delete[] d_dLdFs_data;
+            delete[] d_filters_data;
+
+            // free device struct arrays
+            cudaFree(d_filters);
+            cudaFree(d_dLdFs);
+
             delete[] _filters;
             delete[] _dLdFs;
             delete[] _local_input;
@@ -97,12 +112,23 @@ class Convolution {
         // stores the filter
         Cuboid<double>* _filters {nullptr};
 
+        // device version of Cuboid<double> Objects
+        Cuboid<double>* d_filters {nullptr};
+
+        // device version of _data attribute of Cuboid<double> class
+        double ** d_filters_data {nullptr};
+
         // locally stored filter gradient _dLdF
         Cuboid<double>* _dLdFs {nullptr};
 
+        // device version of Cuboid<double> Objects
+        Cuboid<double>* d_dLdFs {nullptr};
+
+        // device version of _data attribute of Cuboid<double> class
+        double** d_dLdFs_data {nullptr};
+
         // locally stored input feature maps
         Mat<double>* _local_input {nullptr};
-
 
 };
 

@@ -20,6 +20,8 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
   _padtop(padtop),
   _padbottom(padbottom),
   _filters(new Cuboid<double>[out_maps]),
+  d_filters_data(new double*[out_maps]),
+  d_dLdFs_data(new double*[out_maps]),
   _dLdFs(new Cuboid<double>[out_maps]),
   _local_input(new Mat<double>[in_maps])
 {
@@ -58,6 +60,71 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                 }}}
     }
 
+    // copy over data from filters from host to device
+
+    // Allocate device struct array
+    cudaMalloc( (void**)&d_filters, out_maps*sizeof(Cuboid<double>));
+
+    // copy over data from pool_vector to d_poolvec
+    for (size_t i = 0; i< out_maps; i++)
+    {
+        // host struct
+        Cuboid<double>* elem = &(_filters[i]);
+
+        // device struct
+        Cuboid<double>* d_elem = &(d_filters[i]);
+
+        // copy struct from host to device
+        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
+
+        // device array
+
+
+        // length of device array
+        int d_data_len = filter_height* filter_width* in_maps;
+
+        // Allocate device pointer
+        cudaMalloc((void**)&(d_filters_data[i]), d_data_len*sizeof(double));
+
+        // copy pointer content from host to device
+        cudaMemcpy((d_filters_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
+
+
+        cudaMemcpy(&(d_elem->_data), &(d_filters_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
+    }
+
+    //! --------------------------------------------------------
+    // Allocate device struct array
+    cudaMalloc( (void**)&d_dLdFs, out_maps*sizeof(Cuboid<double>));
+
+    // copy over data from pool_vector to d_poolvec
+    for (size_t i = 0; i< out_maps; i++)
+    {
+        // host struct
+        Cuboid<double>* elem = &(_dLdFs[i]);
+
+        // device struct
+        Cuboid<double>* d_elem = &(d_dLdFs[i]);
+
+        // copy struct from host to device
+        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
+
+        // device array
+
+
+        // length of device array
+        int d_data_len = filter_height* filter_width* in_maps;
+
+        // Allocate device pointer
+        cudaMalloc((void**)&(d_dLdFs_data[i]), d_data_len*sizeof(double));
+
+        // copy pointer content from host to device
+        cudaMemcpy((d_dLdFs_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
+
+
+        cudaMemcpy(&(d_elem->_data), &(d_dLdFs_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
+    }
+
 }
 
 Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
@@ -65,6 +132,8 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                          :_h_str(stride_h),
                           _v_str(stride_v),
                           _filters(new Cuboid<double>[out_maps]),
+                          d_filters_data(new double*[out_maps]),
+                          d_dLdFs_data(new double*[out_maps]),
                           _dLdFs(new Cuboid<double>[out_maps]),
                           _local_input(new Mat<double>[in_maps])
 {
@@ -134,6 +203,69 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++) { for (size_t k = 0; k< in_maps; k++){
              _filters[m](i,j, k) = distribution(generator);
         }}}
+    }
+
+    // Allocate device struct array
+    cudaMalloc( (void**)&d_filters, out_maps*sizeof(Cuboid<double>));
+
+    // copy over data from pool_vector to d_poolvec
+    for (size_t i = 0; i< out_maps; i++)
+    {
+        // host struct
+        Cuboid<double>* elem = &(_filters[i]);
+
+        // device struct
+        Cuboid<double>* d_elem = &(d_filters[i]);
+
+        // copy struct from host to device
+        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
+
+        // device array
+
+
+        // length of device array
+        int d_data_len = filter_height* filter_width* in_maps;
+
+        // Allocate device pointer
+        cudaMalloc((void**)&(d_filters_data[i]), d_data_len*sizeof(double));
+
+        // copy pointer content from host to device
+        cudaMemcpy((d_filters_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
+
+
+        cudaMemcpy(&(d_elem->_data), &(d_filters_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
+    }
+
+    //! --------------------------------------------------------
+    // Allocate device struct array
+    cudaMalloc( (void**)&d_dLdFs, out_maps*sizeof(Cuboid<double>));
+
+    // copy over data from pool_vector to d_poolvec
+    for (size_t i = 0; i< out_maps; i++)
+    {
+        // host struct
+        Cuboid<double>* elem = &(_dLdFs[i]);
+
+        // device struct
+        Cuboid<double>* d_elem = &(d_dLdFs[i]);
+
+        // copy struct from host to device
+        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
+
+        // device array
+
+
+        // length of device array
+        int d_data_len = filter_height* filter_width* in_maps;
+
+        // Allocate device pointer
+        cudaMalloc((void**)&(d_dLdFs_data[i]), d_data_len*sizeof(double));
+
+        // copy pointer content from host to device
+        cudaMemcpy((d_dLdFs_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
+
+
+        cudaMemcpy(&(d_elem->_data), &(d_dLdFs_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
     }
 
 }

@@ -116,6 +116,7 @@ void Parent_Kernel(double *d_in, double *d_out, MaxPool* d_pool, size_t inmaps)
     double* in = d_in + idx *_in.height * _in.width;
     double* out = d_out + idx * _out.height * _out.width;
 
+    //TODO : POSSIBLE CUDA INVALID LAUNCH CONFIGURATION FOR LARGER SIZES OF ARRAYS, FIX THIS!
     dim3 numBlocks(1,1);
     dim3 threadsPerBlock(_out.width, _out.height);
 
@@ -136,15 +137,10 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 
 
     // copy output to device
-    double* d_output;
-    cudaMalloc(&d_output, _out.height*_out.width*_out.depth*sizeof(double));
-    cudaMemcpy( d_output, output.get_data(), _out.height*_out.width*_out.depth*sizeof(double), cudaMemcpyHostToDevice);
+    double* d_output = output.port_to_GPU();
 
     // copy input to device
-    double* d_input;
-    cudaMalloc(&d_input, _in.width*_in.height*_in.depth*sizeof(double));
-    cudaMemcpy( d_input, input.get_data(), _in.width*_in.height*_in.depth*sizeof(double), cudaMemcpyHostToDevice);
-
+    double* d_input = input.port_to_GPU();
 
 
     // launch pool_vector.size number of kernels, each with a single thread
@@ -219,14 +215,10 @@ void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     cudaProfilerStart();
 
     // copy output to device
-    double* d_dLdX;
-    cudaMalloc(&d_dLdX, _in.height*_in.width*_in.depth*sizeof(double));
-    cudaMemcpy( d_dLdX, dLdX.get_data(), _in.height*_in.width*_in.depth*sizeof(double), cudaMemcpyHostToDevice);
+    double* d_dLdX = dLdX.port_to_GPU();
 
     // copy input to device
-    double* d_dLdY;
-    cudaMalloc(&d_dLdY, _out.width*_out.height*_out.depth*sizeof(double));
-    cudaMemcpy( d_dLdY, dLdY.get_data(), _out.width*_out.height*_out.depth*sizeof(double), cudaMemcpyHostToDevice);
+    double* d_dLdY = dLdY.port_to_GPU();
 
     Backward_Parent_Kernel<<<1, _in_maps >>>(d_dLdY, d_dLdX, d_poolvec, _in_maps);
 
