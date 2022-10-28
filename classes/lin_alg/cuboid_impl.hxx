@@ -323,6 +323,30 @@ void Cuboid<T>::rotate_once()
     _rot %= 4;
 }
 
+//! port to GPU -------------------------------------------------------------------------
+template<typename T>
+void Cuboid<T>::port_to_GPU(Cuboid<T>*& d_cuboid, T*& d_arr)
+{
+
+    //! THIS FUNCTION RETURNS MALLOCED MEMORY, EVERY TIME IT IS CALLED, CUDAFREE MUST BE CALLED SOMEHWERE ELSE twice
+
+    // allocate pointer memory on device
+    cudaMalloc(&d_arr, _rows*_cols*_depth*sizeof(T));
+
+    // copy pointer memory from host to device
+    cudaMemcpy( d_arr, _data, _rows*_cols*_depth*sizeof(T), cudaMemcpyHostToDevice);
+
+    // Allocate device struct memory
+    cudaMalloc( (void**)&d_cuboid, sizeof(Cuboid<T>));
+
+    // copy struct from host to device
+    cudaMemcpy(d_cuboid, this, sizeof(Cuboid<T>), cudaMemcpyHostToDevice);
+
+    cudaMemcpy(&(d_cuboid->_data), &(d_arr), sizeof(T*), cudaMemcpyHostToDevice);
+
+
+}
+
 //! print the cuboid------------------------------------------------------------------------------------
 template<typename T>
 void Cuboid<T>::print() const

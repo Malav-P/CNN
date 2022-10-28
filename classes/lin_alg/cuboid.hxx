@@ -95,6 +95,18 @@ class Cuboid {
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
 
+        // get the data (read only)
+        __host__ __device__ T* const& get_data() const {return _data;}
+
+        // get the data (read and write)
+        __host__ __device__ T*  & get_data() {return _data;}
+
+        // port data to GPU
+        __host__ T* port_to_GPU();
+
+        // port data to GPU
+        __host__ void port_to_GPU(Cuboid<T>*& d_cuboid, T*& d_arr);
+
         // print the cuboid
         void print() const;
 

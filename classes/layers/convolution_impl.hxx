@@ -270,12 +270,20 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
 }
 
+__global__
+void Conv_Parent_Kernel(double* d_out, Cuboid<double>* d_in, Dims3 _out, size_t _v_str, size_t _h_str, Cuboid<double>* d_filters)
+{
+    size_t k = blockIdx.z * blockDim.z + threadIdx.z;
+    size_t i = blockIdx.y * blockDim.y + threadIdx.y;
+    size_t j = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (i < _out.height && j < _out.width && k < _out.depth)
+    {d_out[k*_out.height*_out.width + i*_out.width + j] = d_in->partial_dot(d_filters[k], {i * _v_str, j * _h_str, 0});}
+}
+
 void Convolution::Forward(Vector<double> &input, Vector<double> &output)
 {
     // note that input length matching with _in parameters is indirectly checked in the matrix*vector operator overload
-
-    // this routine can be optimized (we take a vector, turn it into matrix, pad it, then flatten back to vector)
-    // find a way to do the padding with the vector itself
 
     size_t rows = _in.height-_padbottom-_padtop;
     size_t cols = _in.width - _padleft - _padright;
@@ -286,39 +294,52 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
 
+    // cubify input
     Cuboid<double> input_cube = cubify(_local_input, _in.depth);
 
+    // device struct
+    Cuboid<double>* d_input_cube;
+    // device pointer
+    double* d_arr;
 
-    // initialize return variable
-    Mat<double> output_image(_out.height, _out.width);
+    // deep copy struct to GPU
+    input_cube.port_to_GPU(d_input_cube, d_arr);
 
-    for (size_t k = 0; k < _out.depth; k++)
-    {
-        // do convolution
-        for (size_t i = 0; i < output_image.get_rows(); i++) {
-            for (size_t j = 0; j < output_image.get_cols(); j++) {
-                output[k*_out.height*_out.width + i*_out.width + j] = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
-            }
-        }
-    }
+    double* d_output = output.port_to_GPU();
+
+
+
+    //!setup and call kernel
+
+    // block dimensions
+    size_t xsize = 16;
+    size_t ysize = 16;
+    size_t zsize = 4;
+    assert(xsize*ysize*zsize <= 1024);
+
+    // number of threads needed in each dimension
+    size_t N_x = _out.width;
+    size_t N_y = _out.height;
+    size_t N_z = _out.depth;
+
+    // number of threads per block
+    dim3 threadsPerBlock(xsize,ysize,zsize);
+    // number of blocks
+    dim3 numBlocks((N_x+xsize - 1)/xsize, (N_y+ysize - 1)/ysize, (N_z+zsize - 1)/zsize);
+
+    // call kernel
+    Conv_Parent_Kernel<<<numBlocks, threadsPerBlock>>>(d_output, d_input_cube, _out, _v_str, _h_str, d_filters);
+
+    // retrieve data from device and put it into return variable
+    cudaMemcpy(output.get_data(), d_output, output.get_len()*sizeof(double), cudaMemcpyDeviceToHost);
+
+
+    // free d_arr and d_output
+    cudaFree(d_arr);
+    cudaFree(d_output);
+    cudaFree(d_input_cube);
+
 }
-
-__global__
-void Conv_Parent_Kernel(double* d_out, Cuboid<double> &d_in, Convolution* C)
-{
-    int k = threadIdx.z;
-    int i = threadIdx.y;
-    int j = threadIdx.x;
-
-    Dims3 _out    = C->_out;
-    size_t _v_str = C->_v_str;
-    size_t _h_str = C->_h_str;
-    Cuboid<double>* _filters = C->_filters;
-
-
-    d_out[k*_out.height*_out.width + i*_out.width + j] = d_in.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
-}
-
 
 
 void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)

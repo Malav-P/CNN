@@ -38,6 +38,7 @@ Vector<T>::Vector(const Vector &other)
 
 //! move constructor ----------------------------------------------------
 template<typename T>
+__host__ __device__
 Vector<T>::Vector(Vector<T> &&other) noexcept
         : _length(other._length)
         , _data(other._data)
