@@ -19,10 +19,6 @@ Vector<T>::Vector(size_t n, T *arr)
     {
         // TODO : currently no way to ensure arr has n elements in it
         std::memcpy(_data, arr, sizeof(T) * n);
-//        for (size_t i = 0; i< n ; i++)
-//        {
-//            _data[i] = arr[i];
-//        }
     }
 }
 //! ---------------------------------------------------------------------------

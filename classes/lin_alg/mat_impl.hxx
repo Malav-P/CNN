@@ -159,12 +159,12 @@ Mat<T> Mat<T>::operator+(const Mat<T> &rhs)
 //! ------------------------------------------------------------------------------
 //! matrix index operator myObj(i,j) returns the i-jth element of matrix ------------------
 template<typename T>
-T& Mat<T>::operator()(size_t i, size_t j) { return _data[i * _cols + j]; }
+__host__ __device__ T& Mat<T>::operator()(size_t i, size_t j) { return _data[i * _cols + j]; }
 //! ---------------------------------------------------------------------------------------
 
 //! same as above but for const objects ---------------------------------------------------
 template<typename T>
-const T& Mat<T>::operator()(size_t i, size_t j) const { return _data[i * _cols + j];}
+__host__ __device__ const T& Mat<T>::operator()(size_t i, size_t j) const { return _data[i * _cols + j];}
 //! ---------------------------------------------------------------------------------------
 
 //! multiply two matrices together, overloading the multiplication operator ---------------
@@ -255,7 +255,7 @@ T Mat<T>::dot(const Mat<T>& other)
 
 //! compute dot product between overlapping parts of matrices ---------------------------------
 template<typename T>
-T Mat<T>::partial_dot(const Mat<T>& other, Dims p)
+__host__ __device__ T Mat<T>::partial_dot(const Mat<T>& other, Dims p)
 {
     // starting indices must be within bounds of matrix
     assert(p.height < _rows && p.width < _cols);
@@ -479,6 +479,29 @@ void Mat<T>::print() const
     }
     std::cout << "\n";
 }
+
+template<typename T>
+void Mat<T>::port_to_GPU(Mat<T> *& d_mat, T*& d_mat_data)
+{
+
+    //! THIS FUNCTION RETURNS MALLOCED MEMORY, EVERY TIME IT IS CALLED, CUDAFREE MUST BE CALLED SOMEHWERE ELSE twice
+
+    // allocate pointer memory on device
+    cudaMalloc(&d_mat_data, _rows*_cols*sizeof(T));
+
+    // copy pointer memory from host to device
+    cudaMemcpy( d_mat_data, _data, _rows*_cols*sizeof(T), cudaMemcpyHostToDevice);
+
+    // Allocate device struct memory
+    cudaMalloc( (void**)&d_mat, sizeof(Mat<T>));
+
+    // copy struct from host to device
+    cudaMemcpy(d_mat, this, sizeof(Mat<T>), cudaMemcpyHostToDevice);
+
+    cudaMemcpy(&(d_mat->_data), &(d_mat_data), sizeof(T*), cudaMemcpyHostToDevice);
+
+}
+
 
 
 #endif //ANN_MAT_IMPL_HXX

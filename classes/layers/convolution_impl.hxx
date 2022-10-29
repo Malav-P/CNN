@@ -23,9 +23,9 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
   d_filters_data(new double*[out_maps]),
   d_dLdFs_data(new double*[out_maps]),
   _dLdFs(new Cuboid<double>[out_maps]),
-  _local_input(new Mat<double>[in_maps])
+  _local_input(new Mat<double>[in_maps]),
+  d_local_input_data(new double*[in_maps])
 {
-
 
 
     // calculate total number of vertical and horizontal strides
@@ -62,68 +62,24 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
     // copy over data from filters from host to device
 
-    // Allocate device struct array
-    cudaMalloc( (void**)&d_filters, out_maps*sizeof(Cuboid<double>));
-
-    // copy over data from pool_vector to d_poolvec
-    for (size_t i = 0; i< out_maps; i++)
-    {
-        // host struct
-        Cuboid<double>* elem = &(_filters[i]);
-
-        // device struct
-        Cuboid<double>* d_elem = &(d_filters[i]);
-
-        // copy struct from host to device
-        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
-
-        // device array
-
-
-        // length of device array
-        int d_data_len = filter_height* filter_width* in_maps;
-
-        // Allocate device pointer
-        cudaMalloc((void**)&(d_filters_data[i]), d_data_len*sizeof(double));
-
-        // copy pointer content from host to device
-        cudaMemcpy((d_filters_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
-
-
-        cudaMemcpy(&(d_elem->_data), &(d_filters_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
-    }
+    // this function uses cudamalloc, there must be calls to cudaFree elsewhere (ideally in destructor)
+    port_to_GPU(d_filters, _filters, d_filters_data, out_maps);
 
     //! --------------------------------------------------------
-    // Allocate device struct array
-    cudaMalloc( (void**)&d_dLdFs, out_maps*sizeof(Cuboid<double>));
+    // this function uses cudamalloc, there must be calls to cudaFree elsewhere (ideally in destructor)
+    port_to_GPU(d_dLdFs, _dLdFs, d_dLdFs_data, out_maps);
 
-    // copy over data from pool_vector to d_poolvec
-    for (size_t i = 0; i< out_maps; i++)
+    //!------------------
+
+    size_t rows = _in.height-_padbottom-_padtop;
+    size_t cols = _in.width - _padleft - _padright;
+
+    for (size_t i = 0; i < _filters[0].get_depth(); i++)
     {
-        // host struct
-        Cuboid<double>* elem = &(_dLdFs[i]);
-
-        // device struct
-        Cuboid<double>* d_elem = &(d_dLdFs[i]);
-
-        // copy struct from host to device
-        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
-
-        // device array
-
-
-        // length of device array
-        int d_data_len = filter_height* filter_width* in_maps;
-
-        // Allocate device pointer
-        cudaMalloc((void**)&(d_dLdFs_data[i]), d_data_len*sizeof(double));
-
-        // copy pointer content from host to device
-        cudaMemcpy((d_dLdFs_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
-
-
-        cudaMemcpy(&(d_elem->_data), &(d_dLdFs_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
+        _local_input[i] = Mat<double>(rows, cols);
+        _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
+    port_to_GPU(d_local_input, _local_input, d_local_input_data, in_maps);
 
 }
 
@@ -135,7 +91,8 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                           d_filters_data(new double*[out_maps]),
                           d_dLdFs_data(new double*[out_maps]),
                           _dLdFs(new Cuboid<double>[out_maps]),
-                          _local_input(new Mat<double>[in_maps])
+                          _local_input(new Mat<double>[in_maps]),
+                          d_local_input_data(new double*[in_maps])
 {
     if (!padding)
     {
@@ -205,68 +162,25 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         }}}
     }
 
-    // Allocate device struct array
-    cudaMalloc( (void**)&d_filters, out_maps*sizeof(Cuboid<double>));
-
-    // copy over data from pool_vector to d_poolvec
-    for (size_t i = 0; i< out_maps; i++)
-    {
-        // host struct
-        Cuboid<double>* elem = &(_filters[i]);
-
-        // device struct
-        Cuboid<double>* d_elem = &(d_filters[i]);
-
-        // copy struct from host to device
-        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
-
-        // device array
-
-
-        // length of device array
-        int d_data_len = filter_height* filter_width* in_maps;
-
-        // Allocate device pointer
-        cudaMalloc((void**)&(d_filters_data[i]), d_data_len*sizeof(double));
-
-        // copy pointer content from host to device
-        cudaMemcpy((d_filters_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
-
-
-        cudaMemcpy(&(d_elem->_data), &(d_filters_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
-    }
+    // this function uses cudamalloc, there must be calls to cudaFree elsewhere (ideally in destructor)
+    port_to_GPU(d_filters, _filters, d_filters_data, out_maps);
 
     //! --------------------------------------------------------
-    // Allocate device struct array
-    cudaMalloc( (void**)&d_dLdFs, out_maps*sizeof(Cuboid<double>));
 
-    // copy over data from pool_vector to d_poolvec
-    for (size_t i = 0; i< out_maps; i++)
+    // this function uses cudamalloc, there must be calls to cudaFree elsewhere (ideally in destructor)
+    port_to_GPU(d_dLdFs, _dLdFs, d_dLdFs_data, out_maps);
+
+    //!--------
+
+    size_t rows = _in.height-_padbottom-_padtop;
+    size_t cols = _in.width - _padleft - _padright;
+
+    for (size_t i = 0; i < _filters[0].get_depth(); i++)
     {
-        // host struct
-        Cuboid<double>* elem = &(_dLdFs[i]);
-
-        // device struct
-        Cuboid<double>* d_elem = &(d_dLdFs[i]);
-
-        // copy struct from host to device
-        cudaMemcpy(d_elem, elem, sizeof(Cuboid<double>), cudaMemcpyHostToDevice);
-
-        // device array
-
-
-        // length of device array
-        int d_data_len = filter_height* filter_width* in_maps;
-
-        // Allocate device pointer
-        cudaMalloc((void**)&(d_dLdFs_data[i]), d_data_len*sizeof(double));
-
-        // copy pointer content from host to device
-        cudaMemcpy((d_dLdFs_data[i]), elem->_data, d_data_len*sizeof(double), cudaMemcpyHostToDevice);
-
-
-        cudaMemcpy(&(d_elem->_data), &(d_dLdFs_data[i]), sizeof(double*), cudaMemcpyHostToDevice);
+        _local_input[i] = Mat<double>(rows, cols);
+        _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
+    port_to_GPU(d_local_input, _local_input, d_local_input_data, in_maps);
 
 }
 
@@ -283,6 +197,8 @@ void Conv_Parent_Kernel(double* d_out, Cuboid<double>* d_in, Dims3 _out, size_t 
 
 void Convolution::Forward(Vector<double> &input, Vector<double> &output)
 {
+
+    cudaProfilerStart();
     // note that input length matching with _in parameters is indirectly checked in the matrix*vector operator overload
 
     size_t rows = _in.height-_padbottom-_padtop;
@@ -293,6 +209,9 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
         _local_input[i] = Mat<double>(rows, cols, input.get_data() + i*rows*cols);
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
+
+    // TODO: there is an error in this function from cudaMemcpy
+    copy_to_GPU(d_local_input, _local_input, d_local_input_data, _filters[0].get_depth());
 
     // cubify input
     Cuboid<double> input_cube = cubify(_local_input, _in.depth);
@@ -306,8 +225,6 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
     input_cube.port_to_GPU(d_input_cube, d_arr);
 
     double* d_output = output.port_to_GPU();
-
-
 
     //!setup and call kernel
 
@@ -339,11 +256,31 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
     cudaFree(d_output);
     cudaFree(d_input_cube);
 
+    cudaProfilerStop();
+
+}
+
+
+__global__
+void Kernel2(Cuboid<double>* A,  Mat<double>* B, Mat<double>* C, size_t idx)
+{
+    size_t N_COLS = A->get_cols();
+    size_t N_ROWS = A->get_rows();
+    size_t N_DEPTH = A->get_depth();
+
+    size_t k = blockIdx.z * blockDim.z + threadIdx.z;
+    size_t i = blockIdx.y * blockDim.y + threadIdx.y;
+    size_t j = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (i < N_ROWS && j < N_COLS && k < N_DEPTH)
+    {A[idx](i,j,k) = B[k].partial_dot(*C, {i,j});}
+
 }
 
 
 void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 {
+    cudaProfilerStart();
 
     size_t m = _out.height;
     size_t n = _out.width;
@@ -357,21 +294,30 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
     size_t N_filters = _out.depth;
     size_t N_in_maps = _filters[0].get_depth();
 
+    //!---- for kernel calls
+    // block dimensions
+    size_t xsize = 16;
+    size_t ysize = 16;
+    size_t zsize = 4;
+    assert(xsize*ysize*zsize <= 1024);
+    // number of threads per block
+    dim3 threadsPerBlock(xsize,ysize,zsize);
+
 
     for (size_t idx = 0; idx < N_filters ; idx++)
     {
-        // reshape dLdY into a matrix
-        Mat<double> dLdY_matrix(m, n, dLdYs.get_data() + idx*m*n);
+
+        double* dLdY = dLdYs.get_data() + idx*m*n;
 
         // reformatted output
         Mat<double> reformatted_output(m + ((p-filter_height)%_v_str) + (m-1)*(_v_str - 1), n+ ((q - filter_width)%_h_str) + (n-1)*(_h_str -1));
 
         // fill in reformatted output matrix with the correct values
-        for (size_t i = 0; i < dLdY_matrix.get_rows(); i++)
+        for (size_t i = 0; i < m; i++)
         {
-            for (size_t j = 0; j < dLdY_matrix.get_cols(); j++)
+            for (size_t j = 0; j < n; j++)
             {
-                reformatted_output(i*(_v_str), j*(_h_str)) = dLdY_matrix(i,j);
+                reformatted_output(i*(_v_str), j*(_h_str)) = dLdY[i*n + j];
             }
         }
 
@@ -379,16 +325,26 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         size_t num_v_strides = std::floor((p - reformatted_output.get_rows())) + 1;
         size_t num_h_strides = std::floor((q - reformatted_output.get_cols())) + 1;
 
-        for (size_t k = 0; k < N_in_maps; k++)
-        {
-            for (size_t i = 0; i < num_v_strides; i++)
-            {
-                for (size_t j = 0; j < num_h_strides; j++)
-                {
-                    _dLdFs[idx](i, j, k) = _local_input[k].partial_dot(reformatted_output, {i, j});
-                }
-            }
-        }
+
+        // number of threads needed in each dimension
+        size_t N_x = num_h_strides;
+        size_t N_y = num_v_strides;
+        size_t N_z = N_in_maps;
+
+        // number of blocks
+        dim3 numBlocks((N_x+xsize - 1)/xsize, (N_y+ysize - 1)/ysize, (N_z+zsize - 1)/zsize);
+
+        Mat<double>* d_reformatted_output;
+        double* d_reformatted_output_data;
+        reformatted_output.port_to_GPU(d_reformatted_output, d_reformatted_output_data);
+
+        Kernel2<<<numBlocks, threadsPerBlock>>>(d_dLdFs, d_local_input, d_reformatted_output, idx);
+
+        // retrieve data from device and put it into return variable
+        cudaMemcpy(_dLdFs[idx]._data, d_dLdFs_data[idx], filter_height*filter_width*N_in_maps*sizeof(double), cudaMemcpyDeviceToHost);
+
+        cudaFree(d_reformatted_output_data);
+        cudaFree(d_reformatted_output);
 
         // this concludes the calculation of _dLdFs
 
@@ -400,46 +356,37 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         // rotate filter by 180 degrees
         _filters[idx].set_rot(2);
 
+
         num_v_strides = std::floor((reformatted_output.get_rows() - filter_height)) + 1;
         num_h_strides = std::floor((reformatted_output.get_cols()- filter_width)) + 1;
 
         // number of strides in each direction should be equal to the dimensions of dLdX_matrix
-        assert(num_v_strides == _in.height);
-        assert(num_h_strides == _in.width);
+        assert(num_v_strides == _in.height && num_h_strides == _in.width);
 
-        auto filter_as_list = cube_to_matarray(_filters[idx]);
-
-        std::vector<Mat<double>> dLdX_matrices(N_in_maps);
+        size_t n_rows = num_v_strides - _padbottom - _padtop;
+        size_t n_cols = num_h_strides - _padleft - _padright;
 
         for (size_t k = 0; k< N_in_maps; k++)
         {
-            Mat<double> mat(num_v_strides, num_h_strides);
-            for (size_t i = 0; i < num_v_strides; i++)
+            Mat<double> filter_plane(filter_height, filter_width, _filters[idx]._data + k * filter_width * filter_height);
+            // crop the matrices and only look at cropped portion of data
+            for (size_t i = 0; i < n_rows ; i++)
             {
-                for (size_t j = 0; j < num_h_strides; j++)
+                for (size_t j = 0 ; j< n_cols ; j++)
                 {
-                    mat(i,j) = reformatted_output.partial_dot(filter_as_list[k], {i,j});
+                    dLdXs[k*n_rows*n_cols + (i)*n_cols + (j)] += reformatted_output.partial_dot(filter_plane, {i+_padtop,j + _padleft});
                 }
             }
-            // crop the matrices (depad the matrix)
-            mat.crop(_padleft, _padright, _padtop, _padbottom);
-            for (size_t i = 0; i < mat.get_rows() ; i++)
-            {
-                for (size_t j = 0 ; j< mat.get_cols() ; j++)
-                {
-                    // unsure about this +=, look into it more. May need to instead average each dLdX[i] at the end of
-                    // the global loop
-                    dLdXs[k*mat.get_rows()*mat.get_cols() + i*mat.get_cols() + j] += mat(i,j);
-                }
-            }
-
         }
 
         // return filter to original, non-rotated state
         _filters[idx].set_rot(0);
+
     }
     // we are averaging the loss gradient over the total number of filters
         dLdXs *= 1.0/N_filters;
+
+    cudaProfilerStop();
 }
 
 template<typename Optimizer>

@@ -84,13 +84,13 @@ class Cuboid {
         Vector<T> flatten();
 
         // get number of rows of matrix (read only)
-        size_t const& get_rows() const {return _rows;}
+        __host__ __device__ size_t const& get_rows() const {return _rows;}
 
         // get number of cols of matrix (read only)
-        size_t const& get_cols() const {return _cols;}
+        __host__ __device__ size_t const& get_cols() const {return _cols;}
 
         // get depth of cuboid
-        size_t const& get_depth() const {return _depth;}
+        __host__ __device__ size_t const& get_depth() const {return _depth;}
 
         // get rotation state
         size_t const& get_rot()  const {return _rot;}

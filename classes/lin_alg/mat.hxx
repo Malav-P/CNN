@@ -52,7 +52,7 @@ class Mat {
         __host__ __device__ T& operator()(size_t i, size_t j);
 
         // const index operator
-        const T& operator()(size_t i, size_t j) const;
+        __host__ __device__ const T& operator()(size_t i, size_t j) const;
 
         // multiply operator (matrix)
         Mat<T> operator * (const Mat<T>& other);
@@ -71,7 +71,7 @@ class Mat {
         T dot(const Mat<T>& other);
 
         // compute partial inner product with given Dims of starting indices
-        T partial_dot(const Mat<T>& other, Dims p);
+        __host__ __device__ T partial_dot(const Mat<T>& other, Dims p);
 
         // keep values in certain indices, and set all others to zero. indices must be sorted in increasing row, increasing column order
         void keep(Dims* indices);
@@ -103,6 +103,8 @@ class Mat {
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
 
+        // port data to GPU
+        void port_to_GPU(Mat<T>*& d_mat, T*& d_mat_data);
 
         // print the matrix
         void print() const;

@@ -35,6 +35,12 @@ class Convolution {
                 cudaFree(d_dLdFs_data[i]);
             }
 
+            for(size_t i = 0 ; i < _in.depth ; i++)
+            {
+                //free device memory for device data arrays
+                cudaFree(d_local_input_data[i]);
+            }
+
             // free host data arrays
             delete[] d_dLdFs_data;
             delete[] d_filters_data;
@@ -42,10 +48,12 @@ class Convolution {
             // free device struct arrays
             cudaFree(d_filters);
             cudaFree(d_dLdFs);
+            cudaFree(d_local_input);
 
             delete[] _filters;
             delete[] _dLdFs;
             delete[] _local_input;
+            delete[] d_local_input_data;
         }
 
         //! -----------------------------------------------------------------------------------------------------------
@@ -129,6 +137,12 @@ class Convolution {
 
         // locally stored input feature maps
         Mat<double>* _local_input {nullptr};
+
+        // device version of Mat<double> Objects
+        Mat<double>* d_local_input {nullptr};
+
+        // device version of _data attribute of Mat<double> class
+        double** d_local_input_data {nullptr};
 
 };
 

@@ -369,4 +369,5 @@ void Cuboid<T>::print() const
 
 
 
+
 #endif //CNN_CUBOID_IMPL_HXX

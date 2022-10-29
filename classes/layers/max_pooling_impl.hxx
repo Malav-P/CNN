@@ -56,7 +56,6 @@ MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t
         // copy pointer content from host to device
         cudaMemcpy((d_winners[i]), elem->_winners, d_winners_len*sizeof(size_t), cudaMemcpyHostToDevice);
 
-
         cudaMemcpy(&(d_elem->_winners), &(d_winners[i]), sizeof(size_t*), cudaMemcpyHostToDevice);
     }
 
