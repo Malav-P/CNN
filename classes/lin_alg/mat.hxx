@@ -22,7 +22,7 @@ class Mat {
         explicit Mat(size_t side_len, T* arr = nullptr);
 
         // constructor
-        Mat(size_t num_r, size_t num_c, T* arr = nullptr);
+        __host__ __device__ Mat(size_t num_r, size_t num_c, T* arr = nullptr);
 
         // copy constructor
         Mat(const Mat<T>& other);
@@ -31,16 +31,16 @@ class Mat {
         Mat(Mat<T>&& other) noexcept;
 
         // destructor
-        ~Mat() { delete[] _data; }
+        __host__ __device__ ~Mat() { delete[] _data; }
 
         //! --------------------------------------------------------------------------------------------------------
 
         //! ASSIGNMENT, BINARY, UNARY OPERATORS -------------------------------------------------------------------
         // copy assignment operator
-        Mat<T>& operator=(const Mat<T>& rhs);
+        __host__ __device__ Mat<T>& operator=(const Mat<T>& rhs);
 
         // move assignment operator
-        Mat<T>& operator=(Mat<T>&& other) noexcept ;
+        __host__ __device__ Mat<T>& operator=(Mat<T>&& other) noexcept ;
 
         // += operator
         Mat<T>& operator+=(const Mat<T>& other);
@@ -80,7 +80,7 @@ class Mat {
         void fill(T t);
 
         // set the rotation state of the matrix and restructure _data
-        void set_rot(size_t n = 0);
+        __host__ __device__ void set_rot(size_t n = 0);
 
         // add padding to matrix
         void padding(size_t padleft, size_t padright, size_t padtop, size_t padbottom);
@@ -124,7 +124,7 @@ class Mat {
         size_t _rot {0};
 
         // helper for set_rot, rotate matrix CW by 90 degrees
-        void rotate_once();
+        __host__ __device__ void rotate_once();
 
         friend class Vector<T>;
     public:

@@ -63,16 +63,16 @@ int main()
     dLdYs[1] = dLdY2;
 
     Vector<double> dLdX(conv.in_shape().width*conv.in_shape().height*conv.in_shape().depth);
-//
-//    dLdY1 = dLdY1.merge(dLdY2);
-//    conv.Backward(dLdY1, dLdX);
-//
-//    // choose an optimizer
-//    SGD optimizer(0.1);
-//
-//    // update parameters for optimizer
-//    conv.Update_Params(&optimizer,1);
-//
-//    // print updated filters
-//    conv.print_filters();
+
+    dLdY1 = dLdY1.merge(dLdY2);
+    conv.Backward(dLdY1, dLdX);
+
+    // choose an optimizer
+    SGD optimizer(0.1);
+
+    // update parameters for optimizer
+    conv.Update_Params(&optimizer,1);
+
+    // print updated filters
+    conv.print_filters();
 }

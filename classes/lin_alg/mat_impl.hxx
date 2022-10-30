@@ -26,7 +26,7 @@ Mat<T>::Mat(size_t side_len, T* arr)
 
 //! constructor --------------------------------------------------------------------------
 template<typename T>
-Mat<T>::Mat(size_t num_r, size_t num_c, T* arr)
+__host__ __device__ Mat<T>::Mat(size_t num_r, size_t num_c, T* arr)
 : _rows(num_r)
 , _cols(num_c)
 , _rot(0)
@@ -284,6 +284,7 @@ void Mat<T>::fill(T t) { for (size_t i=0; i < _cols * _rows; i++) { _data[i] = t
 
 //! set rotation state of matrix ------------------------------------------------------------
 template<typename T>
+__host__ __device__
 void Mat<T>::set_rot(size_t n)
 {
     // rotation state can be either 0, 1, 2, or 3
@@ -437,14 +438,18 @@ void Mat<T>::keep(Dims *indices)
 
 //! rotate matrix once (helper for set_rotate) -------------------------------------------------
 template<typename T>
+__host__ __device__
 void Mat<T>::rotate_once()
 {
     // copy lin_alg to local variable
-    T tmp[_rows * _cols];
+    T* tmp  = new T[_rows * _cols];
+
     for (size_t k = 0; k < _rows * _cols; k++) { tmp[k] = _data[k];}
 
     // swap rows and cols
-    std::swap(_rows, _cols);
+    size_t temp = _rows;
+    _rows = _cols;
+    _cols = temp;
 
     // do the rotation operation
     for (size_t new_i = 0; new_i < _rows; new_i++)
@@ -460,6 +465,8 @@ void Mat<T>::rotate_once()
 
     // rotation state can be one of 0, 1, 2, or 3
     _rot %= 4;
+
+    delete[] tmp;
 }
 
 //! print the matrix------------------------------------------------------------------------------------

@@ -210,7 +210,6 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
 
-    // TODO: there is an error in this function from cudaMemcpy
     copy_to_GPU(d_local_input, _local_input, d_local_input_data, _filters[0].get_depth());
 
     // cubify input
@@ -278,6 +277,57 @@ void Kernel2(Cuboid<double>* A,  Mat<double>* B, Mat<double>* C, size_t idx)
 }
 
 
+__global__
+void Kernel3Child(size_t n_rows, size_t n_cols, size_t k, double* d_out, Mat<double>* filter_plane, size_t _padtop, size_t _padleft, Mat<double>* d_reformatted_output)
+{
+    size_t i = blockIdx.y * blockDim.y + threadIdx.y;
+    size_t j = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (i < n_rows && j < n_cols)
+    {
+        d_out[k*n_rows*n_cols + (i)*n_cols + (j)] += d_reformatted_output->partial_dot(*filter_plane, {i+_padtop,j + _padleft});
+    }
+}
+
+__global__
+void Kernel3(size_t N_in_maps, size_t idx, size_t n_cols, size_t n_rows, Cuboid<double>* d_filters, double* d_out, size_t _padtop, size_t _padleft, Mat<double>* d_reformatted_output)
+{
+
+    size_t k = blockIdx.x * blockDim.x + threadIdx.x;
+
+    size_t filter_height = d_filters[idx].get_rows();
+    size_t filter_width = d_filters[idx].get_cols();
+
+    if (k < N_in_maps)
+    {
+        auto filter_plane = new Mat<double>(filter_height, filter_width, d_filters[idx]._data + k * filter_width * filter_height);
+
+        //rotate filter by 180 degrees
+        filter_plane->set_rot(2);
+
+        // number of threads needed
+        size_t N_x = n_cols;
+        size_t N_y = n_rows;
+
+        // block dimensions (PRODUCT MUST BE 1024 or LESS)
+        size_t xsize = 32;
+        size_t ysize = 32;
+
+        // number of threads per block
+        dim3 threadsPerBlock(xsize,ysize);
+
+        // number of blocks
+        dim3 numBlocks((N_x+xsize - 1)/xsize, (N_y+ysize - 1)/ysize);
+
+        Kernel3Child<<<numBlocks, threadsPerBlock>>>(n_rows, n_cols, k, d_out, filter_plane, _padtop, _padleft, d_reformatted_output);
+
+        cudaDeviceSynchronize();
+
+        delete filter_plane;
+    }
+}
+
+
 void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 {
     cudaProfilerStart();
@@ -303,6 +353,7 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
     // number of threads per block
     dim3 threadsPerBlock(xsize,ysize,zsize);
 
+    double* d_out = dLdXs.port_to_GPU();
 
     for (size_t idx = 0; idx < N_filters ; idx++)
     {
@@ -353,9 +404,6 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         // add padding to reformatted matrix
         reformatted_output.padding(filter_width-1, filter_width-1, filter_height-1, filter_height-1);
 
-        // rotate filter by 180 degrees
-        _filters[idx].set_rot(2);
-
 
         num_v_strides = std::floor((reformatted_output.get_rows() - filter_height)) + 1;
         num_h_strides = std::floor((reformatted_output.get_cols()- filter_width)) + 1;
@@ -366,26 +414,37 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         size_t n_rows = num_v_strides - _padbottom - _padtop;
         size_t n_cols = num_h_strides - _padleft - _padright;
 
-        for (size_t k = 0; k< N_in_maps; k++)
-        {
-            Mat<double> filter_plane(filter_height, filter_width, _filters[idx]._data + k * filter_width * filter_height);
-            // crop the matrices and only look at cropped portion of data
-            for (size_t i = 0; i < n_rows ; i++)
-            {
-                for (size_t j = 0 ; j< n_cols ; j++)
-                {
-                    dLdXs[k*n_rows*n_cols + (i)*n_cols + (j)] += reformatted_output.partial_dot(filter_plane, {i+_padtop,j + _padleft});
-                }
-            }
-        }
+        reformatted_output.port_to_GPU(d_reformatted_output, d_reformatted_output_data);
 
-        // return filter to original, non-rotated state
-        _filters[idx].set_rot(0);
+        Kernel3<<<1, N_in_maps>>>(N_in_maps, idx, n_cols, n_rows, d_filters, d_out, _padtop, _padleft, d_reformatted_output);
+
+        cudaFree(d_reformatted_output_data);
+        cudaFree(d_reformatted_output);
+
+//        for (size_t k = 0; k< N_in_maps; k++)
+//        {
+//            Mat<double> filter_plane(filter_height, filter_width, _filters[idx]._data + k * filter_width * filter_height);
+//            //rotate filter by 180 degrees
+//            filter_plane.set_rot(2);
+//            // crop the matrices and only look at cropped portion of data
+//            for (size_t i = 0; i < n_rows ; i++)
+//            {
+//                for (size_t j = 0 ; j< n_cols ; j++)
+//                {
+//                    dLdXs[k*n_rows*n_cols + (i)*n_cols + (j)] += reformatted_output.partial_dot(filter_plane, {i+_padtop,j + _padleft});
+//                }
+//            }
+//        }
 
     }
+
+    // retrieve data from device and put it into return variable
+    cudaMemcpy(dLdXs.get_data(), d_out, dLdXs.get_len()*sizeof(double), cudaMemcpyDeviceToHost);
+
     // we are averaging the loss gradient over the total number of filters
         dLdXs *= 1.0/N_filters;
 
+    cudaFree(d_out);
     cudaProfilerStop();
 }
 
