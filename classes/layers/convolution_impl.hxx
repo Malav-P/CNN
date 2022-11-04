@@ -212,7 +212,7 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
             {
                 for (size_t j = 0; j < num_h_strides; j++)
                 {
-                    _dLdFs[idx](i, j, k) = _local_input[k].partial_dot(reformatted_output, {i, j});
+                    _dLdFs[idx](i, j, k) += _local_input[k].partial_dot(reformatted_output, {i, j});
                 }
             }
         }
