@@ -156,17 +156,11 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
 
     Cuboid<double> input_cube = cubify(_local_input);
 
-//    Vector<double> OUTPUT;
-
-    // initialize return variable
-    Mat<double> output_image(_out.height, _out.width);
-
     for (size_t k = 0; k < _filters.size(); k++) {
 
         // do convolution
-        for (size_t i = 0; i < output_image.get_rows(); i++) {
-            for (size_t j = 0; j < output_image.get_cols(); j++) {
-//                output_image(i, j) = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
+        for (size_t i = 0; i < _out.height; i++) {
+            for (size_t j = 0; j < _out.width; j++) {
                 output[k*_out.height*_out.width + i*_out.width + j] = input_cube.partial_dot(_filters[k], {i * _v_str, j * _h_str, 0});
             }
         }
@@ -194,17 +188,17 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
     for (size_t idx = 0; idx < N_filters ; idx++)
     {
         // reshape dLdY into a matrix
-        Mat<double> dLdY_matrix(m, n, dLdYs.get_data() + idx*m*n);
+        double* dLdY = dLdYs.get_data() + idx*m*n;
 
         // reformatted output
         Mat<double> reformatted_output(m + ((p-filter_height)%_v_str) + (m-1)*(_v_str - 1), n+ ((q - filter_width)%_h_str) + (n-1)*(_h_str -1));
 
         // fill in reformatted output matrix with the correct values
-        for (size_t i = 0; i < dLdY_matrix.get_rows(); i++)
+        for (size_t i = 0; i < m; i++)
         {
-            for (size_t j = 0; j < dLdY_matrix.get_cols(); j++)
+            for (size_t j = 0; j < n; j++)
             {
-                reformatted_output(i*(_v_str), j*(_h_str)) = dLdY_matrix(i,j);
+                reformatted_output(i*(_v_str), j*(_h_str)) = dLdY[i*n + j];
             }
         }
 
