@@ -437,8 +437,7 @@ void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 
     for (size_t i = 0; i < _out.depth; i++)
     {
-        // update the biases and reset dLdB to zeros. MUST UPDATE BIASES FIRST or else member variable k of momentum optmizer
-        // is prematurely updated
+
         (*optimizer).Forward(d_filters_data[i], d_dLdFs_data[i], normalizer, N);
         fill_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_dLdFs_data[i], 0);
     }

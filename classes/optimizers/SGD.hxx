@@ -28,7 +28,7 @@ class SGD {
     {
 
         // block size
-        size_t block_size = 512;
+        size_t block_size = 1024;
         // number of threads needed is N
 
         // number of threads per block
