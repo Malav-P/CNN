@@ -80,7 +80,7 @@ class Convolution {
 
         //! OTHER ----------------------------------------------------------------------------------------------------
 
-        // access the kernel (FOR TESTING PURPOSES)
+        // TODO: copy d_filters from device to _filters on host before returning!
         Cuboid<double>* const& get_filters()  const {return _filters;}
 
         // access the local input

@@ -72,13 +72,9 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
     //!------------------
 
-    size_t rows = _in.height-_padbottom-_padtop;
-    size_t cols = _in.width - _padleft - _padright;
-
     for (size_t i = 0; i < _filters[0].get_depth(); i++)
     {
-        _local_input[i] = Mat<double>(rows, cols);
-        _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
+        _local_input[i] = Mat<double>(_in.height, _in.width);
     }
     port_to_GPU(d_local_input, _local_input, d_local_input_data, in_maps);
 
@@ -173,13 +169,9 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
     //!--------
 
-    size_t rows = _in.height-_padbottom-_padtop;
-    size_t cols = _in.width - _padleft - _padright;
-
     for (size_t i = 0; i < _filters[0].get_depth(); i++)
     {
-        _local_input[i] = Mat<double>(rows, cols);
-        _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
+        _local_input[i] = Mat<double>(_in.height, _in.width);
     }
     port_to_GPU(d_local_input, _local_input, d_local_input_data, in_maps);
 
@@ -211,7 +203,7 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
         _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
     }
 
-    copy_to_GPU(d_local_input, _local_input, d_local_input_data, _filters[0].get_depth());
+    copy_to_GPU(d_local_input, _local_input, d_local_input_data, _in.depth);
 
     // cubify input
     Cuboid<double> input_cube = cubify(_local_input, _in.depth);
@@ -392,9 +384,6 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 
         Kernel2<<<numBlocks, threadsPerBlock>>>(d_dLdFs, d_local_input, d_reformatted_output, idx);
 
-        // retrieve data from device and put it into return variable
-        cudaMemcpy(_dLdFs[idx]._data, d_dLdFs_data[idx], filter_height*filter_width*N_in_maps*sizeof(double), cudaMemcpyDeviceToHost);
-
         cudaFree(d_reformatted_output_data);
         cudaFree(d_reformatted_output);
 
@@ -422,21 +411,6 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         cudaFree(d_reformatted_output_data);
         cudaFree(d_reformatted_output);
 
-//        for (size_t k = 0; k< N_in_maps; k++)
-//        {
-//            Mat<double> filter_plane(filter_height, filter_width, _filters[idx]._data + k * filter_width * filter_height);
-//            //rotate filter by 180 degrees
-//            filter_plane.set_rot(2);
-//            // crop the matrices and only look at cropped portion of data
-//            for (size_t i = 0; i < n_rows ; i++)
-//            {
-//                for (size_t j = 0 ; j< n_cols ; j++)
-//                {
-//                    dLdXs[k*n_rows*n_cols + (i)*n_cols + (j)] += reformatted_output.partial_dot(filter_plane, {i+_padtop,j + _padleft});
-//                }
-//            }
-//        }
-
     }
 
     // retrieve data from device and put it into return variable
@@ -452,29 +426,21 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
 template<typename Optimizer>
 void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 {
+    // block size
+    size_t block_size = 1024;
+    // number of threads needed
+    size_t N = _dLdFs->get_depth() * _dLdFs->get_cols() * _dLdFs->get_rows();
+    // number of threads per block
+    dim3 threadsPerBlock(block_size);
+    // number of blocks
+    dim3 numBlocks((N+block_size - 1)/block_size);
+
     for (size_t i = 0; i < _out.depth; i++)
     {
-
-        // block size
-        size_t block_size = 1024;
-        // number of threads needed
-        size_t N = _dLdFs->get_depth() * _dLdFs->get_cols() * _dLdFs->get_rows();
-        // number of threads per block
-        dim3 threadsPerBlock(block_size);
-        // number of blocks
-        dim3 numBlocks((N+block_size - 1)/block_size);
-
         // update the biases and reset dLdB to zeros. MUST UPDATE BIASES FIRST or else member variable k of momentum optmizer
         // is prematurely updated
         (*optimizer).Forward(d_filters_data[i], d_dLdFs_data[i], normalizer, N);
         fill_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_dLdFs_data[i], 0);
-
-        //! ---- CPU version
-//        // update the weights according to the optimizer
-//        (*optimizer).Forward(_filters[i], _dLdFs[i], normalizer);
-//
-//        // fill the gradient with zeros
-//        _dLdFs[i].fill(0);
     }
 
 }
