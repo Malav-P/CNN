@@ -118,6 +118,7 @@ class Cuboid {
         // rotation state, 0 = no rotate; 1 = 90 degrees clockwise; 2 = 180 degrees clockwise; 3 = 270 degrees clockwise
         size_t _rot {0};
 
+    public:
         // pointer to _data
         T* _data {nullptr};
 

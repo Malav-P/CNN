@@ -230,9 +230,6 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         // add padding to reformatted matrix
         reformatted_output.padding(filter_width-1, filter_width-1, filter_height-1, filter_height-1);
 
-        // rotate filter by 180 degrees
-        _filters[idx].set_rot(2);
-
         num_v_strides = std::floor((reformatted_output.get_rows() - filter_height)) + 1;
         num_h_strides = std::floor((reformatted_output.get_cols()- filter_width)) + 1;
 
@@ -240,36 +237,24 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         assert(num_v_strides == _in.height);
         assert(num_h_strides == _in.width);
 
-        auto filter_as_list = cube_to_matarray(_filters[idx]);
-
-        std::vector<Mat<double>> dLdX_matrices(N_in_maps);
+        size_t n_rows = num_v_strides - _padtop - _padbottom;
+        size_t n_cols = num_h_strides - _padleft - _padright;
 
         for (size_t k = 0; k< N_in_maps; k++)
         {
-            Mat<double> mat(num_v_strides, num_h_strides);
-            for (size_t i = 0; i < num_v_strides; i++)
+            Mat<double> filter_plane(filter_height, filter_width, _filters[idx]._data + k * filter_width * filter_height);
+            //rotate filter by 180 degrees
+            filter_plane.set_rot(2);
+            // crop the matrices and only look at cropped portion of data
+            for (size_t i = 0; i < n_rows ; i++)
             {
-                for (size_t j = 0; j < num_h_strides; j++)
+                for (size_t j = 0 ; j< n_cols ; j++)
                 {
-                    mat(i,j) = reformatted_output.partial_dot(filter_as_list[k], {i,j});
+                    dLdXs[k*n_rows*n_cols + (i)*n_cols + (j)] += reformatted_output.partial_dot(filter_plane, {i+_padtop,j + _padleft});
                 }
             }
-            // crop the matrices (depad the matrix)
-            mat.crop(_padleft, _padright, _padtop, _padbottom);
-            for (size_t i = 0; i < mat.get_rows() ; i++)
-            {
-                for (size_t j = 0 ; j< mat.get_cols() ; j++)
-                {
-                    // unsure about this +=, look into it more. May need to instead average each dLdX[i] at the end of
-                    // the global loop
-                    dLdXs[k*mat.get_rows()*mat.get_cols() + i*mat.get_cols() + j] += mat(i,j);
-                }
-            }
-
         }
 
-        // return filter to original, non-rotated state
-        _filters[idx].set_rot(0);
     }
     // we are averaging the loss gradient over the total number of filters
         dLdXs *= 1.0/N_filters;
