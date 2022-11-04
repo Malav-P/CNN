@@ -7,6 +7,7 @@
 
 #include "convolution.hxx"
 #include "../lin_alg/miscellaneous_helpers.hxx"
+#include "../lin_alg/lin_alg_kernels.hxx"
 
 Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
                          size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft, size_t padright,
@@ -272,7 +273,7 @@ void Kernel2(Cuboid<double>* A,  Mat<double>* B, Mat<double>* C, size_t idx)
     size_t j = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < N_ROWS && j < N_COLS && k < N_DEPTH)
-    {A[idx](i,j,k) = B[k].partial_dot(*C, {i,j});}
+    {A[idx](i,j,k) += B[k].partial_dot(*C, {i,j});}
 
 }
 
@@ -453,11 +454,27 @@ void Convolution::Update_Params(Optimizer* optimizer, size_t normalizer)
 {
     for (size_t i = 0; i < _out.depth; i++)
     {
-        // update the weights according to the optimizer
-        (*optimizer).Forward(_filters[i], _dLdFs[i], normalizer);
 
-        // fill the gradient with zeros
-        _dLdFs[i].fill(0);
+        // block size
+        size_t block_size = 1024;
+        // number of threads needed
+        size_t N = _dLdFs->get_depth() * _dLdFs->get_cols() * _dLdFs->get_rows();
+        // number of threads per block
+        dim3 threadsPerBlock(block_size);
+        // number of blocks
+        dim3 numBlocks((N+block_size - 1)/block_size);
+
+        // update the biases and reset dLdB to zeros. MUST UPDATE BIASES FIRST or else member variable k of momentum optmizer
+        // is prematurely updated
+        (*optimizer).Forward(d_filters_data[i], d_dLdFs_data[i], normalizer, N);
+        fill_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_dLdFs_data[i], 0);
+
+        //! ---- CPU version
+//        // update the weights according to the optimizer
+//        (*optimizer).Forward(_filters[i], _dLdFs[i], normalizer);
+//
+//        // fill the gradient with zeros
+//        _dLdFs[i].fill(0);
     }
 
 }

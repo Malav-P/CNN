@@ -262,8 +262,8 @@ void Linear::Update_Params(Optimizer* optimizer, size_t normalizer)
 
     // update the biases and reset dLdB to zeros. MUST UPDATE BIASES FIRST or else member variable k of momentum optmizer
     // is prematurely updated
-    (*optimizer).Forward(d_biases_data, d_dLdB_data, normalizer, _dLdB.get_len());
-    fill_Kernel<<<numBlocks, threadsPerBlock>>>(_dLdB.get_len(), d_dLdB_data, 0);
+    (*optimizer).Forward(d_biases_data, d_dLdB_data, normalizer, N);
+    fill_Kernel<<<numBlocks, threadsPerBlock>>>(N, d_dLdB_data, 0);
 
     // num threads needed
     N = _dLdW.get_cols() * _dLdW.get_rows();
