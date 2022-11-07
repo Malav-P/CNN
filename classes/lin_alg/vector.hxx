@@ -73,6 +73,9 @@ class Vector {
         // compute dot product between two Vectors
         T dot(const Vector<T>& other);
 
+        // write into the vector at a specified start point
+        void write(const Vector<T>& other, T* start);
+
         // fill vector with a value
         void fill(T fill);
 

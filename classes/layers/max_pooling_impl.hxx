@@ -28,10 +28,10 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 {
 
     Vector<double> OUTPUT;
+    // allocate memory for output vector
+    Vector<double> out(_out.width*_out.height);
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
-        // allocate memory for output vector
-        Vector<double> out(_out.width*_out.height);
 
         Vector<double> in(_in.height * _in.width, input.get_data() + i *_in.height * _in.width);
         pool_vector[i].Forward(in, out);
@@ -45,10 +45,9 @@ void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
 {
     Vector<double> OUTPUT;
+    Vector<double> out(_in.height*_in.width);
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
-
-        Vector<double> out(_in.height*_in.width);
         Vector<double> in(_out.height * _out.width, dLdY.get_data() + i *_out.height * _out.width);
         pool_vector[i].Backward(in, out);
 

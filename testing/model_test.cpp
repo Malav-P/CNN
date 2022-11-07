@@ -94,7 +94,6 @@ int main(int argc, char* argv[])
     DataSet container = read_mnist(N_TRAIN);
     DataSet test_set = read_mnist(N_TEST, 1);
 
-    //Momentum optimizer(model, 0.1, 0.9);
     SGD optimizer;
 
     model.Train(&optimizer, container, 50, N_EPOCHS);

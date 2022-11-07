@@ -17,7 +17,6 @@ Mat<T>::Mat(size_t side_len, T* arr)
 {
     if(arr != nullptr)
     {
-        // TODO : currently no way to ensure arr has side_len*side_len elements in it
         std::memcpy(_data, arr, sizeof(T) * _rows * _cols);
     }
 }
@@ -128,7 +127,7 @@ Mat<T> &Mat<T>::operator+=(const Mat<T> &other)
 
     // do += operation
     for (size_t i = 0; i < _rows ; i++){ for (size_t j = 0; j < _cols ; j++){
-            (*this)(i,j) += other(i,j);
+            _data[i*_cols + j] += other(i,j);
         }}
 
     // return the current object
@@ -201,7 +200,7 @@ Mat<T> Mat<T>::operator*(const double c)
 
     // do * operation
     for (size_t i = 0; i < _rows ; i++){ for (size_t j = 0; j < _cols ; j++){
-            obj(i,j)  = c * (*this)(i,j);
+            obj(i,j)  = c * _data[i*_cols + j];
         }}
 
     // return the current object
@@ -224,7 +223,7 @@ Vector<T> Mat<T>::operator * (const Vector<T>& other)
         obj[i] = 0;
         for (size_t j = 0; j < _cols; j++)
         {
-            obj[i] += other[j] * (*this)(i, j);
+            obj[i] += other[j] * _data[i*_cols + j];
         }
     }
 
