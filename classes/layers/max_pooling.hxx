@@ -10,14 +10,12 @@ class MaxPooling {
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        // create a MaxPool object
-        MaxPooling() = default;
+        // default constructor shouldn't exist
+        MaxPooling() = delete;
 
         // create MaxPool object from given parameters
         MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
-        // release allocated memory for MaxPool object
-        ~MaxPooling() = default;
 
         //!------------------------------------------------------------------------------------------------------------
 

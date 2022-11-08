@@ -11,14 +11,12 @@ class MaxPool {
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        // create a MaxPool object
-        MaxPool() = default;
+        // default constructor shouldn't exist
+        MaxPool() = delete;
 
         // create MaxPool object from given parameters
         MaxPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
-        // release allocated memory for MaxPool object
-        ~MaxPool() = default;
 
         //!------------------------------------------------------------------------------------------------------------
 

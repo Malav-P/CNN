@@ -10,8 +10,8 @@ class Softmax {
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        // default constructor
-        Softmax() = default;
+        // default constructor shouldnt exist
+        Softmax() = delete;
 
         // constructor
         explicit Softmax(size_t len, double beta = -1)

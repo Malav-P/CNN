@@ -7,6 +7,10 @@
 
 class Tanh {
     public:
+
+        // default constrcutor shouldnt exist
+        Tanh() = delete;
+
         // default constructor
         Tanh(size_t input_width, size_t input_height);
 

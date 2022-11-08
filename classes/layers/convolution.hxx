@@ -13,8 +13,8 @@ class Convolution : public Layer {
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        //create a Convolution object
-        Convolution() = default;
+        // create a Convolution object, default constructor should not exist
+        Convolution() = delete;
 
         // create Convolution object from given parameters
         Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,

@@ -9,6 +9,9 @@
 class Sigmoid {
     public:
 
+        // default constructor shouldnt exist
+        Sigmoid() = delete;
+
         // default constructor
         Sigmoid(size_t input_width, size_t input_height);
 

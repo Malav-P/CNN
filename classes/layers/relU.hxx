@@ -8,6 +8,9 @@
 class RelU {
     public:
 
+        // default constructor shouldnt exist;
+        RelU() = delete;
+
         // default constructor
         RelU(size_t input_width, size_t input_height, size_t input_depth);
 

@@ -10,7 +10,8 @@
 class Layer {
 public:
 
-    Layer() = default;
+    // default constructor should not exist
+    Layer() = delete;
 
     Layer(size_t in_width, size_t in_height, size_t in_depth, size_t out_width, size_t out_height, size_t out_depth)
     : _in(in_width, in_height, in_depth),
