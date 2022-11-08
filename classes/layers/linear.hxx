@@ -36,6 +36,12 @@ class Linear {
         template<typename Optimizer>
         void Update_Params(Optimizer* optimizer, size_t normalizer);
 
+        // return out shape of layer
+        Dims3 const& out_shape() const {return _out;}
+
+        // return in shape of layer
+        Dims3 const& in_shape() const {return _in;}
+
         //! ----------------------------------------------------------------------------------------------------------
 
         //! OTHER ----------------------------------------------------------------------------------------------------
@@ -49,11 +55,6 @@ class Linear {
         // get local output
         Vector<double> const& get_local_output() const {return _local_output;}
 
-        // return out shape of layer
-        Dims3 const& out_shape() const {return _out;}
-
-        // return in shape of layer
-        Dims3 const& in_shape() const {return _in;}
 
         //! ---------------------------------------------------------------------------------------------------------
     private:

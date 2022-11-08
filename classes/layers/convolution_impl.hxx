@@ -12,7 +12,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                          size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft, size_t padright,
                          size_t padtop,
                          size_t padbottom)
-: _in(in_width + padleft + padright, in_height + padtop + padbottom, in_maps),
+: Layer(in_width, in_height, in_maps, 0,0,0),
   _h_str(stride_h),
   _v_str(stride_v),
   _padleft(padleft),
@@ -27,8 +27,8 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
 
     // calculate total number of vertical and horizontal strides
-    size_t num_v_strides = std::floor((_in.height - filter_height) / _v_str) + 1;
-    size_t num_h_strides = std::floor((_in.width - filter_width) / _h_str) + 1;
+    size_t num_v_strides = std::floor((_in.height + _padtop + _padbottom - filter_height) / _v_str) + 1;
+    size_t num_h_strides = std::floor((_in.width + _padleft + _padright - filter_width) / _h_str) + 1;
 
     // specify output shape
     _out = {num_h_strides, num_v_strides, out_maps};
@@ -39,9 +39,12 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
     myclock::duration d = myclock::now() - beginning;
     unsigned seed2 = d.count();
 
+    size_t m = _in.height + _padtop + _padbottom;
+    size_t n = _in.width + _padleft + _padright;
+
     // seed the random number generator
     std::default_random_engine generator(seed2);
-    std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
+    std::uniform_real_distribution<double> distribution(-sqrt(6.0/(m*n + _out.height*_out.width)), sqrt(6.0/(m*n + _out.height*_out.width)));
 
     // allocate memory for an initialize filters
     for (size_t i = 0; i< _filters.size(); i++)
@@ -66,7 +69,8 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
                           _v_str(stride_v),
                           _filters(out_maps),
                           _dLdFs(out_maps),
-                          _local_input(in_maps)
+                          _local_input(in_maps),
+                          Layer(in_width, in_height, in_maps, 0,0,0)
 {
     if (!padding)
     {
@@ -74,7 +78,6 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         _padright = 0;
         _padtop = 0;
         _padbottom = 0;
-        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom, in_maps};
 
     }
     else
@@ -96,17 +99,15 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
         // number of padded columns to right of matrix
         _padright = std::ceil(hor_pad/2.0);
-
-        // rest of member variables
-        _in = {in_width + _padleft + _padright, in_height + _padtop + _padbottom, in_maps};
     }
 
 
-
+    size_t m = _in.height + _padtop + _padbottom;
+    size_t n = _in.width + _padleft + _padright;
 
     // calculate total number of vertical and horizontal strides
-    size_t num_v_strides = std::floor((_in.height - filter_height) / _v_str) + 1;
-    size_t num_h_strides = std::floor((_in.width - filter_width) / _h_str) + 1;
+    size_t num_v_strides = std::floor((m - filter_height) / _v_str) + 1;
+    size_t num_h_strides = std::floor((n - filter_width) / _h_str) + 1;
 
     // specify output shape
     _out = {num_h_strides, num_v_strides, out_maps};
@@ -119,7 +120,7 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
 
     // seed the random number generator
     std::default_random_engine generator(seed2);
-    std::uniform_real_distribution<double> distribution(-sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)), sqrt(6.0/(_in.height*_in.width + _out.height*_out.width)));
+    std::uniform_real_distribution<double> distribution(-sqrt(6.0/(m*n + _out.height*_out.width)), sqrt(6.0/(m*n + _out.height*_out.width)));
 
     // initialize filters
     for (size_t i = 0; i< _filters.size(); i++)
@@ -145,8 +146,8 @@ void Convolution::Forward(Vector<double> &input, Vector<double> &output)
     // this routine can be optimized (we take a vector, turn it into matrix, pad it, then flatten back to vector)
     // find a way to do the padding with the vector itself
 
-    size_t rows = _in.height-_padbottom-_padtop;
-    size_t cols = _in.width - _padleft - _padright;
+    size_t rows = _in.height;
+    size_t cols = _in.width;
 
     for (size_t i = 0; i < _filters[0].get_depth(); i++)
     {
@@ -175,8 +176,8 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
     size_t m = _out.height;
     size_t n = _out.width;
 
-    size_t p = _in.height;
-    size_t q = _in.width;
+    size_t p = _in.height + _padtop + _padbottom;
+    size_t q = _in.width + _padleft + _padright;
 
     size_t filter_height = _filters[0].get_rows();
     size_t filter_width = _filters[0].get_cols();
@@ -228,8 +229,8 @@ void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs)
         num_h_strides = std::floor((reformatted_output.get_cols()- filter_width)) + 1;
 
         // number of strides in each direction should be equal to the dimensions of dLdX_matrix
-        assert(num_v_strides == _in.height);
-        assert(num_h_strides == _in.width);
+        assert(num_v_strides == p);
+        assert(num_h_strides == q);
 
         size_t n_rows = num_v_strides - _padtop - _padbottom;
         size_t n_cols = num_h_strides - _padleft - _padright;
