@@ -8,7 +8,7 @@
 class Tanh {
     public:
 
-        // default constrcutor shouldnt exist
+        // default constructor shouldnt exist
         Tanh() = delete;
 
         // default constructor
