@@ -8,7 +8,7 @@
 
 //! a linear class which applies a transformation of the form
 //! Y = Wx + b. W is a weight matrix and b is a bias.
-class Linear {
+class Linear : public Layer {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
@@ -25,20 +25,14 @@ class Linear {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(const Vector<double>& input, Vector<double>& output);
+        void Forward(Vector<double>& input, Vector<double>& output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
+        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
         void Update_Params(Optimizer* optimizer, size_t normalizer);
-
-        // return out shape of layer
-        Dims3 const& out_shape() const {return _out;}
-
-        // return in shape of layer
-        Dims3 const& in_shape() const {return _in;}
 
         //! ----------------------------------------------------------------------------------------------------------
 
@@ -57,12 +51,6 @@ class Linear {
         //! ---------------------------------------------------------------------------------------------------------
     private:
         // NOTE: empty braces call default constructor for that class ( at least i hope it does)
-
-        // input shape
-        Dims3 _in {0, 0,1};
-
-        // output shape
-        Dims3 _out {0,0,1};
 
         // locally stored input
         Vector<double> _local_input {};

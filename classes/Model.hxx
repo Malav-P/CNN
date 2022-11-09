@@ -25,7 +25,6 @@ class Model {
         void Add(Args... args) {network.push_back(new LayerType(args...));}
 
         // train the network on the _data
-
         template<typename Optimizer>
         void Train(Optimizer* opt, DataSet& training_set, size_t batch_size, size_t epochs /* args to be filled */ );
 

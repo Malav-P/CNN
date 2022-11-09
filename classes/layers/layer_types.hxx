@@ -10,8 +10,8 @@
 // convolutional layer
 class Convolution;
 
-// applies max pooling operation to incoming _data
-class MaxPool;
+// MaxPooling Layer
+class MaxPooling;
 
 // applies mean pooling operation to incoming _data
 class MeanPool;
@@ -31,9 +31,6 @@ class Sigmoid;
 // Tanh layer
 class Tanh;
 
-// MaxPooling Layer
-class MaxPooling;
-
 
 using LayerTypes = boost::variant<
         Convolution*,
@@ -50,13 +47,12 @@ using LayerTypes = boost::variant<
 #include "../lin_alg/data_types.hxx"
 
 #include "convolution.hxx"
+#include "max_pooling.hxx"
 #include "linear.hxx"
-#include "max_pool.hxx"
 #include "mean_pool.hxx"
 #include "softmax.hxx"
 #include "relU.hxx"
 #include "sigmoid.hxx"
 #include "tanh.hxx"
-#include "max_pooling.hxx"
 
 #endif //ANN_LAYER_TYPES_HXX

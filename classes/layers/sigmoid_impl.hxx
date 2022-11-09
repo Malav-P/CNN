@@ -7,12 +7,11 @@
 
 #include "sigmoid.hxx"
 
-Sigmoid::Sigmoid(size_t input_width, size_t input_height):
-        _in(input_width, input_height,1),
-        _out(input_width, input_height,1)
+Sigmoid::Sigmoid(size_t input_width, size_t input_height, size_t input_depth)
+: Layer(input_width, input_height, input_depth, input_width, input_height, input_depth)
 {}
 
-void Sigmoid::Forward(const Vector<double> &input, Vector<double> &output)
+void Sigmoid::Forward(Vector<double> &input, Vector<double> &output)
 {
     assert(input.get_len() == output.get_len());
 
