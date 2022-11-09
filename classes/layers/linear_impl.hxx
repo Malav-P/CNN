@@ -9,8 +9,7 @@
 
 
 Linear::Linear(size_t in_size, size_t out_size)
-: _in(1, in_size,1)
-, _out(1, out_size,1)
+: Layer(1, in_size, 1, 1, out_size, 1)
 , _local_input(in_size)
 , _local_output(out_size)
 , _weights(out_size, in_size)
@@ -36,7 +35,7 @@ Linear::Linear(size_t in_size, size_t out_size)
 }
 
 
-void Linear::Forward(const Vector<double> &input, Vector<double> &output)
+void Linear::Forward(Vector<double> &input, Vector<double> &output)
 {
     //! TODO: ensure that matrix multiplication is compatible with sizes, _weights*input assertion is already done in the operator overload
     assert(output.get_len() == _weights.get_rows());

@@ -45,7 +45,6 @@ class Cuboid {
         // += operator
         Cuboid<T>& operator+=(const Cuboid<T>& other);
 
-
         // + operator
         Cuboid<T> operator+(const Cuboid<T>& rhs);
 
@@ -57,8 +56,6 @@ class Cuboid {
 
         // multiply operator (scalar)
         Cuboid<T> operator * (double c);
-
-
 
 
         //! -------------------------------------------------------------------------------------------------------
@@ -99,7 +96,6 @@ class Cuboid {
         void print() const;
 
         //! --------------------------------------------------------------------------------------------------------
-
 
     private:
 

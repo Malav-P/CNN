@@ -8,29 +8,27 @@
 
 //! a linear class which applies a transformation of the form
 //! Y = Wx + b. W is a weight matrix and b is a bias.
-class Linear {
+class Linear : public Layer {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        // default constructor
-        Linear() = default;
+        // default constructor should not exist
+        Linear() = delete;
 
         // construct Linear Layer with specified input and output sizes
         Linear(size_t in_size, size_t out_size);
 
-        // destructor
-        ~Linear() = default;
 
         //! -----------------------------------------------------------------------------------------------------------
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(const Vector<double>& input, Vector<double>& output);
+        void Forward(Vector<double>& input, Vector<double>& output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
+        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
@@ -49,21 +47,10 @@ class Linear {
         // get local output
         Vector<double> const& get_local_output() const {return _local_output;}
 
-        // return out shape of layer
-        Dims3 const& out_shape() const {return _out;}
-
-        // return in shape of layer
-        Dims3 const& in_shape() const {return _in;}
 
         //! ---------------------------------------------------------------------------------------------------------
     private:
         // NOTE: empty braces call default constructor for that class ( at least i hope it does)
-
-        // input shape
-        Dims3 _in {0, 0,1};
-
-        // output shape
-        Dims3 _out {0,0,1};
 
         // locally stored input
         Vector<double> _local_input {};

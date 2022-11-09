@@ -5,17 +5,18 @@
 #ifndef ANN_SOFTMAX_HXX
 #define ANN_SOFTMAX_HXX
 
-class Softmax {
+class Softmax: public Layer {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        // default constructor
-        Softmax() = default;
+        // default constructor shouldnt exist
+        Softmax() = delete;
 
         // constructor
         explicit Softmax(size_t len, double beta = -1)
-        : _size(len),
+        :
+          Layer(1, len, 1, 1, len, 1),
           _beta(beta),
           _normalization(-1),
           _normalized(false),
@@ -25,14 +26,14 @@ class Softmax {
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
         // send vector through softmax layer
-        void Forward(Vector<double>& input, Vector<double>& output, bool training = true)
+        void Forward(Vector<double>& input, Vector<double>& output) override
         {
             // check to make sure input and output is of same length as softmax length
-            assert(input.get_len() == _size && output.get_len() == _size);
+            assert(input.get_len() == _in.height && output.get_len() == _in.height);
 
             // calculate normalization factor
             _normalization = 0;
-            for (size_t i = 0; i<_size ; i++)
+            for (size_t i = 0; i<_in.height ; i++)
             {
                 _normalization += exp(-_beta * input[i]);
             }
@@ -41,23 +42,22 @@ class Softmax {
             _normalized = true;
 
             // fill in output vector
-            for (size_t i = 0; i<_size ; i++)
+            for (size_t i = 0; i<_in.height ; i++)
             {
                 output[i] = (1/_normalization) * exp(-_beta * input[i]);
             }
 
-            if (training)
-            {
-                // fill in derivative matrix
-                for (size_t i = 0; i < _size; i++) { for (size_t j = 0; j < _size; j++)
-                    {
-                        _jacobian(i,j) = (-_beta * (exp(-_beta * input[j])/_normalization))*(((i == j) ? 1 : 0 ) - (exp(-_beta * input[i]) / _normalization));
-                    }}
-            }
+
+            // fill in derivative matrix
+            for (size_t i = 0; i < _in.height; i++) { for (size_t j = 0; j < _in.height; j++)
+                {
+                    _jacobian(i,j) = (-_beta * (exp(-_beta * input[j])/_normalization))*(((i == j) ? 1 : 0 ) - (exp(-_beta * input[i]) / _normalization));
+                }}
+
         }
 
         // send vector backward through the layer
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX)
+        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override
         {
             // check to ensure a forward pass has occurred
             assert(_normalized);
@@ -67,12 +67,6 @@ class Softmax {
             _normalized = false;
         }
 
-        // get input shape
-        Dims3 in_shape() const {return {1, _size,1};}
-
-        // get output shape
-        Dims3 out_shape() const {return in_shape();}
-
         // update parameters for the layer
         template<typename Optimizer>
         void Update_Params(Optimizer* optimizer, size_t normalizer) {/* nothing to do */}
@@ -80,9 +74,6 @@ class Softmax {
         //! ----------------------------------------------------------------------------------------------------------
 
     private:
-
-        // size of softmax layer
-        size_t _size {0};
 
         // temperature parameter
         double _beta {-1};

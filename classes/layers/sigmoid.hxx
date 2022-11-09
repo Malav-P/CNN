@@ -6,43 +6,31 @@
 #define CNN_SIGMOID_HXX
 
 
-class Sigmoid {
+class Sigmoid: public Layer {
     public:
 
+        // default constructor shouldnt exist
+        Sigmoid() = delete;
+
         // default constructor
-        Sigmoid(size_t input_width, size_t input_height);
+        Sigmoid(size_t input_width, size_t input_height, size_t input_depth);
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(const Vector<double>& input, Vector<double>& output);
+        void Forward(Vector<double>& input, Vector<double>& output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX);
+        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
         void Update_Params(Optimizer* optimizer, size_t normalizer){/* nothing to do, no parameters to be learned in this layer*/}
-
-        // return out shape of layer
-        Dims3 const& out_shape() const {return _out;}
-
-        // return in shape of layer
-        Dims3 const& in_shape() const {return _in;}
         //! ----------------------------------------------------------------------------------------------------------
 
     private:
-
-
         // local input to layer
         Vector<double> _local_input {};
-
-        // input shape of layer
-        Dims3 _in {0,0,1};
-
-        // output shape of layer
-
-        Dims3 _out{0,0,1};
 
         // apply function to input
         double func(double input);

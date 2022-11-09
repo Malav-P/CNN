@@ -11,14 +11,12 @@ public:
 
     //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-    // create a MeanPool object
+    // default constructor shouldnt exist
     MeanPool() = default;
 
     // create MaxPool object from given parameters
     MeanPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
 
-    // release allocated memory for MeanPool object
-    ~MeanPool() = default;
 
     //! --------------------------------------------------------------------------------------------------------------
 

@@ -6,14 +6,15 @@
 #define ANN_CONVOLUTION_HXX
 
 
+#include "layer.hxx"
 
-class Convolution {
+class Convolution : public Layer {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
 
-        //create a Convolution object
-        Convolution() = default;
+        // create a Convolution object, default constructor should not exist
+        Convolution() = delete;
 
         // create Convolution object from given parameters
         Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
@@ -25,8 +26,6 @@ class Convolution {
         Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
                     size_t filter_height, size_t stride_h, size_t stride_v, bool padding = false);
 
-        // release allocated memory for Convolution object
-        ~Convolution() = default;
 
         //! -----------------------------------------------------------------------------------------------------------
 
@@ -34,16 +33,10 @@ class Convolution {
         //! BOOST::APPLY_VISITOR FUNCTIONS ----------------------------------------------------------------------------
 
         // send feature through the convolutional layer
-        void Forward(Vector<double> &input, Vector<double> &output);
+        void Forward(Vector<double> &input, Vector<double> &output) override;
 
         // send feature backward through convolutional layer, keeping track of gradients
-        void Backward(Vector<double> &dLdYs, Vector<double> &dLdXs);
-
-        // get output shape of convolution
-        Dims3 const& out_shape() const {return _out;}
-
-        // get input shape of convolution (without padding!)
-        Dims3  in_shape() const  {return {_in.width - _padleft - _padright, _in.height - _padtop - _padbottom, _in.depth};}
+        void Backward(Vector<double> &dLdYs, Vector<double> &dLdXs) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
@@ -80,12 +73,6 @@ class Convolution {
 
         // vertical stride length
         size_t _v_str {1};
-
-        // input image shape
-        Dims3 _in {0, 0,0};
-
-        // output image shape
-        Dims3 _out {0, 0,0};
 
         // padding
         size_t _padleft {0};
