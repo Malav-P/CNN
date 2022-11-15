@@ -132,13 +132,14 @@ template<typename T>
 Vector<T> Vector<T>::operator*(Mat<T> &other)
 {
     // assert vector length equal number of rows of matrix
-    assert(_length == other._rows);
+    if (_length != other._rows)
+    {
+        std::cout<< "Error in Vector<T>::operator*(Mat<T> &other)\n";
+        exit(1);
+    }
 
     // initialize return variable
     Vector<T> obj(other._cols);
-
-    // helper variable
-    Vector<T> col(_length);
 
     // do multiplication operation
     for (size_t col = 0; col < other._cols; col++)
@@ -343,4 +344,18 @@ Vector<T> Vector<T>::merge(const Vector<T> &other)
     // return result
     return obj;
 }
+
+template<typename T>
+void Vector<T>::write(const Vector<T> &other, size_t start)
+{
+    T* start_ptr = _data + start;
+    std::memcpy(start_ptr, other._data, sizeof(T) * other._length);
+}
+
+template<typename T>
+void Vector<T>::reset_data(T *arr)
+{
+    std::memcpy(_data, arr, sizeof(T)*_length);
+}
+
 #endif //ANN_VECTOR_CPP

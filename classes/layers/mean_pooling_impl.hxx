@@ -5,7 +5,7 @@
 #ifndef ANN_MEAN_POOL_IMPL_HXX
 #define ANN_MEAN_POOL_IMPL_HXX
 
-#include "mean_pool.hxx"
+#include "mean_pooling.hxx"
 
 MeanPool::MeanPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride)
 : _in(in_width, in_height,1),
@@ -84,6 +84,57 @@ double MeanPool::avg_value(T *arr, size_t n)
 
     // return average
     return sum/n;
+}
+
+//!--------------------------
+
+MeanPooling::MeanPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height,
+                       size_t h_stride, size_t v_stride):
+        pool_vector(in_maps),
+        Layer(in_width, in_height, in_maps, 0,0,0),
+        _field(fld_width, fld_height),
+        _h_str(h_stride),
+        _v_str(v_stride)
+{
+    for (size_t i = 0; i < in_maps; i++)
+    {
+        pool_vector[i] = MeanPool(in_width, in_height, fld_width, fld_height, h_stride, v_stride);
+    }
+
+    _out = pool_vector[0].out_shape();
+    _out.depth = in_maps;
+}
+
+void MeanPooling::Forward(Vector<double> &input, Vector<double> &output)
+{
+
+    // allocate memory for output vector
+    Vector<double> out(_out.width*_out.height);
+    Vector<double> in(_in.height * _in.width);
+    for (size_t i = 0; i < pool_vector.size() ; i++)
+    {
+
+        in.reset_data(input.get_data() + i *_in.height * _in.width);
+        pool_vector[i].Forward(in, out);
+
+        output.write(out, i*out.get_len());
+    }
+
+}
+
+void MeanPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
+{
+
+    Vector<double> out(_in.height*_in.width);
+    Vector<double> in(_out.height*_out.width);
+    for (size_t i = 0; i < pool_vector.size() ; i++)
+    {
+        in.reset_data(dLdY.get_data() + i *_out.height * _out.width);
+        pool_vector[i].Backward(in, out);
+
+        dLdX.write(out, i*out.get_len());
+    }
+
 }
 
 #endif //ANN_MEAN_POOL_IMPL_HXX

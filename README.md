@@ -50,7 +50,7 @@ Below is example code of how to construct an instance of this class.
 ```
 ## `MeanPool`
 This class defines the mean pooling layer.
-The [`mean_pool.hxx`](./classes/layers/mean_pool.hxx) file contains the class definition for the mean pooling layer.
+The [`mean_pool.hxx`](./classes/layers/mean_pooling.hxx) file contains the class definition for the mean pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
     MeanPool mean_pool(   15   // input width

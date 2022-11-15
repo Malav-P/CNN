@@ -14,7 +14,7 @@ class Convolution;
 class MaxPooling;
 
 // applies mean pooling operation to incoming _data
-class MeanPool;
+class MeanPooling;
 
 // a standard y = W*x + b layer with _weights W, bias b
 class Linear;
@@ -35,7 +35,7 @@ class Tanh;
 using LayerTypes = boost::variant<
         Convolution*,
         MaxPooling*,
-        MeanPool*,
+        MeanPooling*,
         Linear*,
         Softmax*,
         RelU*,
@@ -49,7 +49,7 @@ using LayerTypes = boost::variant<
 #include "convolution.hxx"
 #include "max_pooling.hxx"
 #include "linear.hxx"
-#include "mean_pool.hxx"
+#include "mean_pooling.hxx"
 #include "softmax.hxx"
 #include "relU.hxx"
 #include "sigmoid.hxx"

@@ -63,5 +63,52 @@ private:
 
 };
 
-#include "mean_pool_impl.hxx"
+class MeanPooling: public Layer {
+public:
+
+    //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
+
+    // default constructor shouldn't exist
+    MeanPooling() = delete;
+
+    // create MaxPool object from given parameters
+    MeanPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride);
+
+    //!------------------------------------------------------------------------------------------------------------
+
+    //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
+
+    // send feature through the MaxPool layer
+    void Forward(Vector<double> &input, Vector<double> &output) override;
+
+    // send feature backward through the MaxPool layer
+    void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
+
+    // update parameters in this layer (during learning)
+    template<typename Optimizer>
+    void Update_Params(Optimizer* optimizer, size_t normalizer) {/* do nothing, no parameters to learn in this layer */}
+
+    //! ----------------------------------------------------------------------------------------------------------
+
+
+    //! OTHER ---------------------------------------------------------------------------------------------------
+    std::vector<MeanPool> const & get_pool_vector() const {return pool_vector;}
+    //! ---------------------------------------------------------------------------------------------------------
+private:
+
+    // field shape
+    Dims _field {0, 0};
+
+    // horizontal stride_length
+    size_t _h_str {0};
+
+    // vertical stride_length
+    size_t _v_str {0};
+
+    // vector of individual MeanPool Objects
+    std::vector<MeanPool> pool_vector;
+
+};
+
+#include "mean_pooling_impl.hxx"
 #endif //ANN_MEAN_POOL_HXX

@@ -109,33 +109,29 @@ MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t
 void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
 {
 
-    Vector<double> OUTPUT;
-    // allocate memory for output vector
     Vector<double> out(_out.width*_out.height);
+    Vector<double> in(_in.height * _in.width);
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
 
-        Vector<double> in(_in.height * _in.width, input.get_data() + i *_in.height * _in.width);
+        in.reset_data(input.get_data() + i *_in.height * _in.width);
         pool_vector[i].Forward(in, out);
-
-        OUTPUT = OUTPUT.merge(out);
+        output.write(out, i*out.get_len());
     }
 
-    output = OUTPUT;
 }
 
 void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
 {
-    Vector<double> OUTPUT;
     Vector<double> out(_in.height*_in.width);
+    Vector<double> in(_out.height * _out.width);
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
-        Vector<double> in(_out.height * _out.width, dLdY.get_data() + i *_out.height * _out.width);
+        in.reset_data(dLdY.get_data() + i *_out.height * _out.width);
         pool_vector[i].Backward(in, out);
 
-        OUTPUT = OUTPUT.merge(out);
+        dLdX.write(out, i*out.get_len());
     }
-    dLdX = OUTPUT;
 }
 
 #endif //CNN_MAX_POOLING_IMPL_HXX

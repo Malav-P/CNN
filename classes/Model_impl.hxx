@@ -228,7 +228,7 @@ Model<LossFunction>::~Model()
 
             case 2 : // meanpool layer
             {
-                MeanPool* ptr = boost::get<MeanPool*>(layer);
+                MeanPooling* ptr = boost::get<MeanPooling*>(layer);
 
                 delete ptr;
 

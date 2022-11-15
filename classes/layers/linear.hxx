@@ -44,9 +44,6 @@ class Linear : public Layer {
         // get the biases
         Vector<double> const& get_biases() const {return _biases;}
 
-        // get local output
-        Vector<double> const& get_local_output() const {return _local_output;}
-
 
         //! ---------------------------------------------------------------------------------------------------------
     private:
@@ -54,9 +51,6 @@ class Linear : public Layer {
 
         // locally stored input
         Vector<double> _local_input {};
-
-        // locally stored output Y = Wx + B
-        Vector<double> _local_output {};
 
         // weight matrix W
         Mat<double> _weights {};

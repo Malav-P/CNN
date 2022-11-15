@@ -74,7 +74,10 @@ class Vector {
         T dot(const Vector<T>& other);
 
         // write into the vector at a specified start point
-        void write(const Vector<T>& other, T* start);
+        void write(const Vector<T>& other, size_t start);
+
+        // reset data with another pointer
+        void reset_data(T* arr);
 
         // fill vector with a value
         void fill(T fill);

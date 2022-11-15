@@ -11,7 +11,6 @@
 Linear::Linear(size_t in_size, size_t out_size)
 : Layer(1, in_size, 1, 1, out_size, 1)
 , _local_input(in_size)
-, _local_output(out_size)
 , _weights(out_size, in_size)
 , _dLdW(out_size, in_size)
 , _biases(out_size)
@@ -44,10 +43,7 @@ void Linear::Forward(Vector<double> &input, Vector<double> &output)
     _local_input = input;
 
     // perform Y = Wx + B
-    _local_output = (_weights * input) + _biases;
-
-    // assign _local_output to output of layer
-    output = _local_output;
+    output = (_weights * input) + _biases;
 }
 
 void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
