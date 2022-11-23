@@ -126,9 +126,10 @@ Mat<T> &Mat<T>::operator+=(const Mat<T> &other)
     assert(_rows == other._rows && _cols == other._cols);
 
     // do += operation
-    for (size_t i = 0; i < _rows ; i++){ for (size_t j = 0; j < _cols ; j++){
-            _data[i*_cols + j] += other(i,j);
-        }}
+    for (size_t i = 0; i < _rows*_cols; i++)
+    {
+        _data[i] += other._data[i];
+    }
 
     // return the current object
     return (*this);
@@ -146,9 +147,10 @@ Mat<T> Mat<T>::operator+(const Mat<T> &rhs)
     Mat<T> obj(_rows ,_cols);
 
     // do + operation
-    for (size_t i = 0; i < _rows ; i++){ for (size_t j = 0; j < _cols ; j++){
-            obj(i,j)  = rhs(i,j) + (*this)(i,j);
-        }}
+    for (size_t i = 0; i < _rows*_cols ; i++)
+    {
+        obj._data[i] = rhs._data[i] + _data[i];
+    }
 
     // return the current object
     return obj;
@@ -199,9 +201,10 @@ Mat<T> Mat<T>::operator*(const double c)
     Mat<T> obj(_rows,_cols);
 
     // do * operation
-    for (size_t i = 0; i < _rows ; i++){ for (size_t j = 0; j < _cols ; j++){
-            obj(i,j)  = c * _data[i*_cols + j];
-        }}
+    for (size_t i = 0 ; i < _rows*_cols ; i++)
+    {
+        obj._data[i] = c * _data[i];
+    }
 
     // return the current object
     return obj;
@@ -212,7 +215,11 @@ template<typename T>
 Vector<T> Mat<T>::operator * (const Vector<T>& other)
 {
     // check to make sure matrix is compatible with vector
-    assert(_cols == other._length);
+    if (_cols != other._length)
+    {
+        std::cout << "error in Mat operator *, exiting\n";
+        exit(1);
+    }
 
     // initialize return variable
     Vector<T> obj(_rows);

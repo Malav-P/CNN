@@ -26,40 +26,44 @@ The [`convolution.hxx`](./classes/layers/convolution.hxx) file contains the clas
 Below is example code of how to construct an instance of this class.
 
 ```C++
-Convolution conv(   28,          // input image width
-                    28,          // input image height
-                    3,           // filter width
-                    3,           // filter height
-                    1,           // horizontal stride length
-                    1,           // vertical stride length
-                    false        // same (true) or valid (false) padding
-                );
+    model.Add<Convolution>(   1     // input feature maps
+                            , 24    // output feature maps
+                            , 28    // input width
+                            , 28    // input height
+                            , 5     // filter width
+                            , 5     // filter height
+                            , 1     // horizontal stride length
+                            , 1     // vertical stride length
+                            , true  // same (true) or valid (false) padding
+);
 ```
-## `MaxPool` 
+## `MaxPooling` 
 This class defines the max pooling layer.
-The [`max_pool.hxx`](./classes/layers/max_pool.hxx) file contains the class definition for a max pooling layer.
+The [`max_pooling.hxx`](./classes/layers/max_pooling.hxx) file contains the class definition for a max pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
-      MaxPool max_pool(   15   // input width
-                        , 15   // input height
-                        , 2    // window width
-                        , 2    // window height
-                        , 1    // horizontal stride length
-                        , 1    // vertical stride length
-                      );
+    model.Add<MaxPooling>(    model.get_outshape(1).depth   // number of input maps
+                            , model.get_outshape(1).width   // input width
+                            , model.get_outshape(1).height  // input height
+                            , 2  // filter width
+                            , 2  // filter height
+                            , 2  // horizontal stride length
+                            , 2  // vertical stride length
+);
 ```
-## `MeanPool`
+## `MeanPooling`
 This class defines the mean pooling layer.
-The [`mean_pool.hxx`](./classes/layers/mean_pooling.hxx) file contains the class definition for the mean pooling layer.
+The [`mean_pooling.hxx`](./classes/layers/mean_pooling.hxx) file contains the class definition for the mean pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
-    MeanPool mean_pool(   15   // input width
-                        , 15   // input height
-                        , 2    // window width
-                        , 2    // window height
-                        , 1    // horizontal stride length
-                        , 1    // vertical stride length
-                      );
+    model.Add<MeanPooling>(   model.get_outshape(1).depth    // number of input maps
+                            , model.get_outshape(1).width    // input width
+                            , model.get_outshape(1).height   // input height
+                            , 2  // filter width
+                            , 2  // filter height
+                            , 2  // horizontal stride length
+                            , 2  // vertical stride length
+);
 ```
 
 ## `Linear`
@@ -109,38 +113,58 @@ template class is a loss function. Currently the source code supports the follow
 See the example code below for constructing a model using the `CrossEntropy` class.
 
 ```C++
-    Model<CrossEntropy> model;
+Model<CrossEntropy> model;
 
-    
-    model.Add<Convolution>(   28      // input width
-                            , 28      // input height
-                            , 3       // filter width
-                            , 3       // filter height
-                            , 1       // horizontal stride length
-                            , 1       // vertical stride length
-                            , false   // same (true) or valid (false) padding
-    );
-    
-    model.Add<MaxPool>(       model.get_outshape(0).width   // input width
-                            , model.get_outshape(0).height  // input height
-                            , 2  // filter width
-                            , 2  // filter height
-                            , 1  // horizontal stride length
-                            , 1  // vertical stride length
-    );
-    
-    
-    model.Add<Linear>(model.get_outshape(1).width * model.get_outshape(1).height  // input size
-                            , 10   // output size
-    );
 
-    model.Add<RelU>(    0.1,                            // leaky RelU parameter
-                        model.get_outshape(2).width,    // input width
-                        model.get_outshape(2).height    // input height
-    );
-    
-    model.Add<Softmax>(model.get_outshape(3).width * model.get_outshape(3).height // input size
-    );
+model.Add<Convolution>(   1     // input feature maps
+                        , 24    // output feature maps
+                        , 28    // input width
+                        , 28    // input height
+                        , 5     // filter width
+                        , 5     // filter height
+                        , 1     // horizontal stride length
+                        , 1     // vertical stride length
+                        , true
+                        );
+
+model.Add<RelU>(    0.1,                            // leaky RelU parameter
+                    model.get_outshape(0).width,    // input width
+                    model.get_outshape(0).height,   // input height
+                    model.get_outshape(0).depth     // input depth
+                    );
+
+
+model.Add<MaxPooling>(  model.get_outshape(1).depth   // in maps
+                      , model.get_outshape(1).width   // input width
+                      , model.get_outshape(1).height  // input height
+                      , 2  // filter width
+                      , 2  // filter height
+                      , 2  // horizontal stride length
+                      , 2  // vertical stride length
+                      );
+
+
+model.Add<Linear>(   model.get_outshape(2).depth
+                    *model.get_outshape(2).width
+                    *model.get_outshape(2).height  // input size
+                    , 256   // output size
+                    );
+
+model.Add<RelU>(    0.1,                            // leaky RelU parameter
+                    model.get_outshape(3).width,    // input width
+                    model.get_outshape(3).height,   // input height
+                    model.get_outshape(3).depth     // input depth
+                    );
+
+model.Add<Linear>(   model.get_outshape(4).depth
+                    *model.get_outshape(4).width
+                    *model.get_outshape(4).height  // input size
+                    , 10   // output size
+                    );
+
+
+model.Add<Softmax>(model.get_outshape(5).width * model.get_outshape(5).height // input size
+);
 ```
 
 ## Training the Model
@@ -148,7 +172,7 @@ See the example code below for constructing a model using the `CrossEntropy` cla
 Training the model can be done by calling the `Train` member function of the `Model` class. It takes the following arguments :
 
 - An [Optimizer](./classes/optimizers/optimizers.hxx)
-  - The source code supports the [Stochastic Gradient Descent](./classes/optimizers/SGD.hxx) and [Momentum](./classes/optimizers/momentum.hxx) gradient descent optimizers
+  - The source code supports the [Stochastic Gradient Descent](./classes/optimizers/SGD.hxx)  gradient descent optimizer
 - An object containing the training data. We created our own [data container class](./classes/datasets/dataset.hxx)
 - The batch size for updating the weights in the network
 - The number of epochs (the number of times to train through the entire dataset)
