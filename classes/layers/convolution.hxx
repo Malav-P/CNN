@@ -49,6 +49,12 @@ class Convolution : public Layer {
         // access the kernel (FOR TESTING PURPOSES)
         std::vector<Cuboid<double>> const& get_filters()  const {return _filters;}
 
+        // return strides
+        Dims get_stride() const  {return {_h_str, _v_str};}
+
+        // return padding
+        Dimensions4<> get_padding() const {return {_padleft, _padright, _padtop, _padbottom};}
+
         // access the local input
         std::vector<Mat<double>> const& get_local_input() const {return _local_input;}
 

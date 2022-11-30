@@ -89,6 +89,9 @@ class Cuboid {
         // get depth of cuboid
         size_t const& get_depth() const {return _depth;}
 
+        // get data pointer
+        T* const& get_data() const {return _data;}
+
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
 

@@ -31,6 +31,7 @@ class RelU : public Layer {
 
         //! ----------------------------------------------------------------------------------------------------------
 
+        double const& get_leaky_param() const {return alpha;}
     private:
 
         // leaky reLU parameter

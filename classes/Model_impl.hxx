@@ -9,6 +9,9 @@
 
 #include "optimizers/optimizers.hxx"
 #include "helpers/progress_bar.hxx"
+#include <fstream>
+
+using namespace std;
 
 template<typename LossFunction>
 void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
@@ -383,6 +386,271 @@ void Model<LossFunction>::print()
             }
         }
     }
+
+}
+
+template<typename LossFunction>
+void Model<LossFunction>::save(const string& filepath, const string& model_name)
+{
+
+    char buf[1000];
+
+    ofstream fid(filepath);
+
+    // if file fails to open, exit program
+    if (!fid)
+    {
+        exit(1);
+    }
+
+    // print model name to json file
+    fid << "{\n \"" << model_name << "\" : [\n";
+
+    std::cout << "\nSaving Model...\n";
+    fid << buf;
+
+
+    size_t count = 0;
+    for (LayerTypes layer: network)
+    {
+        count +=1;
+        switch (layer.which())
+        {
+            case 0 : // convolutional layer
+            {
+
+                Convolution* ptr = boost::get<Convolution*>(layer);
+
+                size_t layerID = 0;
+                size_t parameters[12];
+                double* weights;
+
+                // in maps
+                parameters[0] = ptr->in_shape().depth;
+                // out maps
+                parameters[1] = ptr->out_shape().depth;
+                // in width
+                parameters[2] = ptr->in_shape().width;
+                // out width
+                parameters[3] = ptr->in_shape().height;
+                // filter width
+                parameters[4] = ptr->get_filters()[0].get_cols();
+                // filter height
+                parameters[5] = ptr->get_filters()[0].get_rows();
+                // horizontal stride
+                parameters[6] = ptr->get_stride().width;
+                // vertical stride
+                parameters[7] = ptr->get_stride().height;
+                // pad left
+                parameters[8] = ptr->get_padding().first;
+                // pad right
+                parameters[9] = ptr->get_padding().second;
+                // pad top
+                parameters[10] = ptr->get_padding().third;
+                // pad bottom
+                parameters[11] = ptr->get_padding().fourth;
+
+                // filters
+                std::vector<Cuboid<double>> _filters = ptr->get_filters();
+
+
+                size_t length = _filters[0].get_rows() *_filters[0].get_cols() * _filters[0].get_depth();
+                // linear array of weights
+                weights = new double[length * parameters[1]];
+                size_t offset;
+                for (size_t l = 0; l < parameters[1]; l++)
+                {
+                    offset =  length * l;
+                    std::memcpy(weights + offset, _filters[l].get_data(), length * sizeof(double));
+
+                }
+
+
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [";
+
+                // write parameters
+                for (size_t i = 0; i<11; i++)
+                {
+                    fid << parameters[i] <<",";
+                }
+                fid << parameters[11] << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : [";
+                for (size_t i = 0; i < length * parameters[1] - 1; i++)
+                {
+                    fid << weights[i] << ",";
+                }
+                fid << weights[length * parameters[1] - 1] << "] \n\t}";
+
+                delete[] weights;
+
+                break;
+            }
+
+            case 1 : // maxpooling layer
+            {
+
+                MaxPooling* ptr = boost::get<MaxPooling*>(layer);
+
+                size_t layerID = 1;
+                size_t parameters[7];
+
+                // in maps
+                parameters[0] = ptr->in_shape().depth;
+                // in width
+                parameters[1] = ptr->in_shape().width;
+                // in height
+                parameters[2] = ptr->in_shape().height;
+                // field width
+                parameters[3] = ptr->get_field().width;
+                // field height
+                parameters[4] = ptr->get_field().height;
+                // hor stride
+                parameters[5] = ptr->get_stride().width;
+                // v stride
+                parameters[6] = ptr->get_stride().height;
+
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [";
+
+                // write parameters
+                for (size_t i = 0; i<6; i++)
+                {
+                    fid << parameters[i] <<",";
+                }
+                fid << parameters[6] << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : null \n\t}";
+
+                break;
+            }
+
+            case 2 : // meanpooling layer
+            {
+
+                MeanPooling* ptr = boost::get<MeanPooling*>(layer);
+
+                size_t layerID = 2;
+                size_t parameters[7];
+
+                // in maps
+                parameters[0] = ptr->in_shape().depth;
+                // in width
+                parameters[1] = ptr->in_shape().width;
+                // in height
+                parameters[2] = ptr->in_shape().height;
+                // field width
+                parameters[3] = ptr->get_field().width;
+                // field height
+                parameters[4] = ptr->get_field().height;
+                // hor stride
+                parameters[5] = ptr->get_stride().width;
+                // v stride
+                parameters[6] = ptr->get_stride().height;
+
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [";
+
+                // write parameters
+                for (size_t i = 0; i<6; i++)
+                {
+                    fid << parameters[i] <<",";
+                }
+                fid << parameters[6] << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : null \n\t}";
+
+                break;
+            }
+
+            case 3 : // Linear layer
+            {
+                Linear* ptr = boost::get<Linear*>(layer);
+
+                size_t layerID = 3;
+                size_t in_size = ptr->in_shape().height;
+                size_t out_size = ptr->out_shape().height;
+                double* weights = ptr->get_weights().get_data();
+
+                // write parameters
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << in_size << "," << out_size << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : [";
+                for (size_t i = 0; i < in_size*out_size - 1; i++)
+                {
+                    fid << weights[i] << ",";
+                }
+                fid << weights[in_size*out_size - 1] << "] \n\t}";
+
+                break;
+            }
+
+
+            case 4 : // Softmax layer
+            {
+                Softmax* ptr = boost::get<Softmax*>(layer);
+
+                size_t layerID = 4;
+                size_t in_size = ptr->in_shape().height;
+                double temperature = ptr->get_beta();
+
+                // write parameters
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << in_size << "," << temperature <<  "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : null \n\t}";
+
+                break;
+            }
+
+            case 5 : // RelU layer
+            {
+                RelU* ptr = boost::get<RelU*>(layer);
+
+                size_t layerID = 5;
+                double leaky_param = ptr->get_leaky_param();
+                size_t in_width = ptr->in_shape().width;
+                size_t in_height = ptr->in_shape().height;
+                size_t in_depth = ptr->in_shape().depth;
+
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << leaky_param << "," << in_width << "," << in_height<< "," << in_depth << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : null \n\t}";
+
+                break;
+            }
+
+            case 6: // Sigmoid Layer
+            {
+
+
+                break;
+            }
+            case 7: // Tanh Layer
+            {
+
+
+                break;
+            }
+
+            default : // nothing to do
+            {
+                break;
+            }
+        }
+
+        if (count < network.size())
+        {
+            fid << ",\n";
+        }
+    }
+
+    fid << "\n]\n}";
+
+    fid.close();
 
 }
 

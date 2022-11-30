@@ -53,6 +53,9 @@ class Model {
         // print model summary
         void print();
 
+        // save model parameters to file
+        void save(const std::string& filepath, const std::string& model_name);
+
 
     private:
         std::vector<LayerTypes> network;

@@ -73,6 +73,8 @@ class Softmax: public Layer {
 
         //! ----------------------------------------------------------------------------------------------------------
 
+        double const& get_beta() const {return _beta;}
+
     private:
 
         // temperature parameter

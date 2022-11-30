@@ -103,6 +103,9 @@ class Mat {
         // get rotation state
         size_t const& get_rot()  const {return _rot;}
 
+        // get data
+        T* const& get_data() const {return _data;}
+
         // print the matrix
         void print() const;
 

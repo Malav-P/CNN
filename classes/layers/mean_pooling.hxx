@@ -93,6 +93,10 @@ public:
 
     //! OTHER ---------------------------------------------------------------------------------------------------
     std::vector<MeanPool> const & get_pool_vector() const {return pool_vector;}
+
+    Dims const& get_field() const {return _field;}
+
+    Dims get_stride() const {return {_h_str, _v_str};}
     //! ---------------------------------------------------------------------------------------------------------
 private:
 

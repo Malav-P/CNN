@@ -52,4 +52,32 @@ public:
     T3 depth {0};
 };
 
+template<typename T1 = size_t , typename T2 = size_t, typename T3 = size_t, typename  T4 = size_t>
+class Dimensions4 {
+public:
+
+    Dimensions4() = default;
+
+    Dimensions4(T1 first, T2 second, T3 third, T4 fourth)
+            : first(first),
+              second(second),
+              third(third),
+              fourth(fourth)
+    {}
+
+    friend bool operator==(const Dimensions4& l, const Dimensions4& r)
+    {
+        if (l.first == r.first && l.second == r.second && l.third == r.third && l.fourth == r.fourth) {return true;}
+        else {return false;}
+    }
+
+    T1 first {0};
+
+    T2 second {0};
+
+    T3 third {0};
+
+    T4 fourth {0};
+};
+
 #endif //ANN_PAIR_HXX
