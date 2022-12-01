@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     model.Train(&optimizer, container, 50, N_EPOCHS);
     model.Test(test_set, false);
 
-    model.save("/mnt/c/Users/malav/CLionProjects/CNN/testing/my_CNN.json", "CNN1");
+    model.save("/Users/malavpatel/Coding_Projects/CNN/testing/my_CNN.json", "CNN1");
 
 
     //! -----------------------------------------------------------------

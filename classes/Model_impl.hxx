@@ -393,8 +393,6 @@ template<typename LossFunction>
 void Model<LossFunction>::save(const string& filepath, const string& model_name)
 {
 
-    char buf[1000];
-
     ofstream fid(filepath);
 
     // if file fails to open, exit program
@@ -407,8 +405,6 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
     fid << "{\n \"" << model_name << "\" : [\n";
 
     std::cout << "\nSaving Model...\n";
-    fid << buf;
-
 
     size_t count = 0;
     for (LayerTypes layer: network)
@@ -625,13 +621,33 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
 
             case 6: // Sigmoid Layer
             {
+                Sigmoid* ptr = boost::get<Sigmoid*>(layer);
 
+                size_t layerID = 6;
+                size_t in_width = ptr->in_shape().width;
+                size_t in_height = ptr->in_shape().height;
+                size_t in_depth = ptr->in_shape().depth;
+
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : ["<< in_width << "," << in_height<< "," << in_depth << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : null \n\t}";
 
                 break;
             }
             case 7: // Tanh Layer
             {
+                Tanh* ptr = boost::get<Tanh*>(layer);
 
+                size_t layerID = 7;
+                size_t in_width = ptr->in_shape().width;
+                size_t in_height = ptr->in_shape().height;
+                size_t in_depth = ptr->in_shape().depth;
+
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : ["<< in_width << "," << in_height<< "," << in_depth << "], ";
+
+                // write weights
+                fid << "\n\t \"weights\" : null \n\t}";
 
                 break;
             }
