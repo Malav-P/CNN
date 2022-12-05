@@ -17,6 +17,9 @@ class Model {
         // Create a Model object
         Model() = default;
 
+        // Create Model obect from JSON file
+        explicit Model(std::string& filename);
+
         // Destructor to release allocated memory
         ~Model();
 

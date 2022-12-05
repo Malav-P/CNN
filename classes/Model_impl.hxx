@@ -10,6 +10,7 @@
 #include "optimizers/optimizers.hxx"
 #include "helpers/progress_bar.hxx"
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 using namespace std;
 
@@ -668,6 +669,114 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
 
     fid.close();
 
+}
+
+template<typename LossFunction>
+Model<LossFunction>::Model(string &filename)
+{
+    using json = nlohmann::json;
+
+
+    std::ifstream f(filename);
+    json data = json::parse(f);
+
+    string modelname = data.begin().key();
+    size_t num_layers = data[modelname].size();
+
+    size_t layerID;
+    double* weights;
+    for (size_t i = 0; i<num_layers; i++)
+    {
+        json layer = data[modelname][i];
+
+        // find type of layer (convolutions, relu, linear, etc.)
+        layerID = layer["layerID"];
+
+        switch (layerID)
+        {
+            case 0: // convolution
+            {
+                // parameters for layer
+                size_t p[12];
+                for (size_t j = 0; j < 12; j++){ p[j] = layer["parameters"][j];}
+
+                // weights for layer
+                weights = new double[layer["weights"].size()];
+                for (size_t j = 0; j < layer["weights"].size(); j++) {weights[j] = layer["weights"][j];}
+
+                Add<Convolution>(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], weights);
+
+                // free memory
+                delete[] weights;
+                break;
+            }
+            case 1: // maxpooling
+            {
+                // parameters for layer
+                size_t p[7];
+                for (size_t j = 0; j < 7; j++){ p[j] = layer["parameters"][j];}
+
+                Add<MaxPooling>(p[0], p[1], p[2], p[3], p[4], p[5], p[6]);
+                break;
+            }
+            case 2: // meanpooling
+            {
+                // parameters for layer
+                size_t p[7];
+                for (size_t j = 0; j < 7; j++){ p[j] = layer["parameters"][j];}
+                Add<MeanPooling>(p[0], p[1], p[2], p[3], p[4], p[5], p[6]);
+                break;
+            }
+            case 3: //  linear
+            {
+                // parameters for layer
+                size_t in = layer["parameters"][0];
+                size_t out = layer["parameters"][1];
+
+                // weights for layer
+                weights = new double[layer["weights"].size()];
+                for (size_t j = 0; j < layer["weights"].size(); j++) {weights[j] = layer["weights"][j];}
+
+                Add<Linear>(in, out, weights);
+
+                // free memory
+                delete[] weights;
+                break;
+            }
+            case 4: // softmax
+            {
+                size_t in_size = layer["parameters"][0];
+                size_t temperature = layer["parameters"][1];
+                Add<Softmax>(in_size, temperature);
+                break;
+            }
+            case 5: // relu
+            {
+                double alpha = layer["parameters"][0];
+                size_t p[3];
+                p[0] = layer["parameters"][1]; p[1] = layer["parameters"][2]; p[2] = layer["parameters"][3];
+                Add<RelU>(alpha, p[0], p[1], p[2]);
+                break;
+            }
+            case 6: // sigmoid
+            {
+                size_t p[3];
+                p[0] = layer["parameters"][0]; p[1] = layer["parameters"][1]; p[2] = layer["parameters"][2];
+                Add<Sigmoid>(p[0], p[1], p[2]);
+                break;
+            }
+            case 7: // tanh
+            {
+                size_t p[3];
+                p[0] = layer["parameters"][0]; p[1] = layer["parameters"][1]; p[2] = layer["parameters"][2];
+                Add<Tanh>(p[0], p[1], p[2]);
+                break;
+            }
+
+            default : break;
+        }
+
+    }
 }
 
 #endif //ANN_MODEL_IMPL_HXX

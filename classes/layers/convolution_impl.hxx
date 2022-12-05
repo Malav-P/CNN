@@ -11,7 +11,8 @@
 Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
                          size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft, size_t padright,
                          size_t padtop,
-                         size_t padbottom)
+                         size_t padbottom,
+                         double* weights)
 : Layer(in_width, in_height, in_maps, 0,0,0),
   _h_str(stride_h),
   _v_str(stride_v),
@@ -53,18 +54,32 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         _dLdFs[i] = Cuboid<double>(filter_height, filter_width, in_maps);
     }
 
-    // Glorot initialize the weights
-    for (Cuboid<double>& _filter : _filters)
+    // Glorot initialize the weights if weights pointer is null
+    if (weights == nullptr)
     {
-        for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++){ for (size_t k = 0; k < in_maps; k++){
-                    _filter(i,j,k) = distribution(generator);
-                }}}
+        for (Cuboid<double>& _filter : _filters)
+        {
+            for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++){ for (size_t k = 0; k < in_maps; k++){
+                        _filter(i,j,k) = distribution(generator);
+                    }}}
+        }
     }
+
+    // if weigths pointer is provided then we fill in the values
+    else
+    {
+        size_t len = _filters[0].get_depth() * _filters[0].get_rows() * _filters[0].get_cols();
+        for (size_t i = 0; i<_filters.size(); i++)
+        {
+            std::memcpy(_filters[i].get_data(), weights+(i*len), len * sizeof(double));
+        }
+    }
+
 
 }
 
 Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
-                         size_t filter_height, size_t stride_h, size_t stride_v, bool padding)
+                         size_t filter_height, size_t stride_h, size_t stride_v, bool padding, double* weights)
                          :_h_str(stride_h),
                           _v_str(stride_v),
                           _filters(out_maps),
@@ -129,12 +144,26 @@ Convolution::Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_
         _dLdFs[i] = Cuboid<double>(filter_height, filter_width, in_maps);
     }
 
-    // Glorot initialize the weights
-    for (Cuboid<double>& _filter : _filters)
+    // Glorot initialize the weights if no weight data is provided
+    if (weights == nullptr)
     {
-        for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++) { for (size_t k = 0; k< in_maps; k++){
-             _filter(i,j, k) = distribution(generator);
-        }}}
+        for (Cuboid<double>& _filter : _filters)
+        {
+            for (size_t i=0; i<filter_height; i++) { for (size_t j=0; j<filter_width; j++) { for (size_t k = 0; k< in_maps; k++){
+                        _filter(i,j, k) = distribution(generator);
+                    }}}
+        }
+    }
+
+
+    // if weigths pointer is provided then we fill in the values
+    else
+    {
+        size_t len = _filters[0].get_depth() * _filters[0].get_rows() * _filters[0].get_cols();
+        for (size_t i = 0; i<_filters.size(); i++)
+        {
+            std::memcpy(_filters[i].get_data(), weights+(i*len), len * sizeof(double));
+        }
     }
 
 }

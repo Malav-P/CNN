@@ -23,8 +23,6 @@ int main()
 
     linear.Forward(input, output);
 
-    linear.get_local_output().print();
-
     std::cout << "\n\n";
 
     output.print();

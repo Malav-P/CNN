@@ -8,7 +8,7 @@
 #include "linear.hxx"
 
 
-Linear::Linear(size_t in_size, size_t out_size)
+Linear::Linear(size_t in_size, size_t out_size, double* weights)
 : Layer(1, in_size, 1, 1, out_size, 1)
 , _local_input(in_size)
 , _weights(out_size, in_size)
@@ -27,9 +27,16 @@ Linear::Linear(size_t in_size, size_t out_size)
     std::default_random_engine generator(seed2);
     std::normal_distribution<double> distribution(0, sqrt(2.0/_in.height));
 
-    // He initialize the weights
-    for (size_t i=0; i<_weights.get_rows(); i++) { for (size_t j=0; j<_weights.get_cols(); j++)
-        { _weights(i,j) = distribution(generator); }
+    // He initialize the weights if no weights are provided
+    if (weights == nullptr)
+    {
+        for (size_t i=0; i<_weights.get_rows(); i++) { for (size_t j=0; j<_weights.get_cols(); j++)
+            { _weights(i,j) = distribution(generator); }
+        }
+    }
+    else
+    {
+        std::memcpy(_weights.get_data(), weights, _weights.get_rows()*_weights.get_cols() * sizeof(double));
     }
 }
 

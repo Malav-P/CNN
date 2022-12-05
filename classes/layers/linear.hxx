@@ -17,7 +17,7 @@ class Linear : public Layer {
         Linear() = delete;
 
         // construct Linear Layer with specified input and output sizes
-        Linear(size_t in_size, size_t out_size);
+        Linear(size_t in_size, size_t out_size, double* weights = nullptr);
 
 
         //! -----------------------------------------------------------------------------------------------------------

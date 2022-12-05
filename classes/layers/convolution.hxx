@@ -20,11 +20,12 @@ class Convolution : public Layer {
         Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
                     size_t filter_height, size_t stride_h, size_t stride_v, size_t padleft, size_t padright,
                     size_t padtop,
-                    size_t padbottom);
+                    size_t padbottom,
+                    double* weights = nullptr);
 
         // create Convolution object from given parameters
         Convolution(size_t in_maps, size_t out_maps, size_t in_width, size_t in_height, size_t filter_width,
-                    size_t filter_height, size_t stride_h, size_t stride_v, bool padding = false);
+                    size_t filter_height, size_t stride_h, size_t stride_v, bool padding = false, double* weights = nullptr);
 
 
         //! -----------------------------------------------------------------------------------------------------------
