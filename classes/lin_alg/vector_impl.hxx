@@ -6,7 +6,6 @@
 #define ANN_VECTOR_CPP
 
 #include "vector.hxx"
-#include "mat.hxx"
 
 //!  constructor ---------------------------------------------------------------------------
 template<typename T>

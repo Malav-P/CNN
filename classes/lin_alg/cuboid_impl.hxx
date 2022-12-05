@@ -6,7 +6,6 @@
 #define CNN_CUBOID_IMPL_HXX
 
 #include "cuboid.hxx"
-#include "vector.hxx"
 
 //! constructor -------------------------------------------------------------------------
 template<typename T>

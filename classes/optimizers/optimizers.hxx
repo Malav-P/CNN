@@ -5,11 +5,9 @@
 #ifndef ANN_OPTIMIZERS_HXX
 #define ANN_OPTIMIZERS_HXX
 
+#include "../lin_alg/data_types.hxx"
 
 class SGD;
-
-#include "../prereqs.hxx"
-#include "../lin_alg/data_types.hxx"
 
 #include "SGD.hxx"
 

@@ -2,15 +2,14 @@
 // Created by malav on 6/23/2022.
 //
 
-#include "../classes/Model.hxx"
-#include "../classes/loss functions/loss_functions.hxx"
+#include "../CNN.hxx"
 #include "../mnist/read_mnist.hxx"
 
 int main(int argc, char* argv[])
 {
     if (argc != 4)
     {
-        std::cout << "program takes three arguments\n usage is ./model_test <N_TRAIN> <N_TEST> <N_epochs\n";
+        std::cout << "program takes three arguments\n usage is ./model_test <N_TRAIN> <N_TEST> <N_epochs>\n";
     }
 
     int N_TRAIN = std::stoi(argv[1]);

@@ -5,8 +5,6 @@
 #ifndef ANN_MEAN_SQUARE_ERROR_HXX
 #define ANN_MEAN_SQUARE_ERROR_HXX
 
-#include "../lin_alg/data_types.hxx"
-#include "../prereqs.hxx"
 
 class MSE {
 

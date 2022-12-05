@@ -5,9 +5,6 @@
 #ifndef ANN_CONVOLUTION_HXX
 #define ANN_CONVOLUTION_HXX
 
-
-#include "layer.hxx"
-
 class Convolution : public Layer {
     public:
 

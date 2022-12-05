@@ -5,7 +5,7 @@
 // this file reads in the training data and testing data into formats acceptable by the CNN architecture
 
 #include "read_mnist.hxx"
-#include <iostream>
+
 
 
 DataSet read_mnist(size_t N_SAMPLES, size_t train_or_test)

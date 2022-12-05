@@ -7,11 +7,6 @@
 
 #include "Model.hxx"
 
-#include "optimizers/optimizers.hxx"
-#include "helpers/progress_bar.hxx"
-#include <fstream>
-#include <nlohmann/json.hpp>
-
 using namespace std;
 
 template<typename LossFunction>
@@ -214,74 +209,42 @@ Model<LossFunction>::~Model()
         {
             case 0 : // convolutional layer
             {
-                Convolution* ptr = boost::get<Convolution*>(layer);
-
-                delete ptr;
-
-                break;
+                Convolution* ptr = boost::get<Convolution*>(layer); delete ptr; break;
             }
 
             case 1 : // maxpooling layer
             {
-                MaxPooling* ptr = boost::get<MaxPooling*>(layer);
-
-                delete ptr;
-
-                break;
+                MaxPooling* ptr = boost::get<MaxPooling*>(layer); delete ptr; break;
             }
 
             case 2 : // meanpool layer
             {
-                MeanPooling* ptr = boost::get<MeanPooling*>(layer);
-
-                delete ptr;
-
-                break;
+                MeanPooling* ptr = boost::get<MeanPooling*>(layer); delete ptr; break;
             }
 
             case 3 : // Linear layer
             {
-                Linear* ptr = boost::get<Linear*>(layer);
-
-                delete ptr;
-
-                break;
+                Linear* ptr = boost::get<Linear*>(layer); delete ptr; break;
             }
 
 
             case 4 : // Softmax layer
             {
-                Softmax* ptr = boost::get<Softmax*>(layer);
-
-                delete ptr;
-
-                break;
+                Softmax* ptr = boost::get<Softmax*>(layer); delete ptr; break;
             }
 
             case 5: // RelU layer
             {
-                RelU* ptr = boost::get<RelU*>(layer);
-
-                delete ptr;
-
-                break;
+                RelU* ptr = boost::get<RelU*>(layer); delete ptr; break;
             }
 
             case 6: // Sigmoid Layer
             {
-                Sigmoid* ptr = boost::get<Sigmoid*>(layer);
-
-                delete ptr;
-
-                break;
+                Sigmoid* ptr = boost::get<Sigmoid*>(layer); delete ptr; break;
             }
             case 7: // Tanh Layer
             {
-                Tanh* ptr = boost::get<Tanh*>(layer);
-
-                delete ptr;
-
-                break;
+                Tanh* ptr = boost::get<Tanh*>(layer); delete ptr; break;
             }
 
             default : // nothing to do
@@ -668,7 +631,6 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
     fid << "\n]\n}";
 
     fid.close();
-
 }
 
 template<typename LossFunction>

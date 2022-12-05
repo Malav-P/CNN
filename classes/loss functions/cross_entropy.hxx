@@ -5,9 +5,6 @@
 #ifndef ANN_CROSS_ENTROPY_HXX
 #define ANN_CROSS_ENTROPY_HXX
 
-#include "../lin_alg/data_types.hxx"
-#include "../prereqs.hxx"
-
 class CrossEntropy {
 
     public:

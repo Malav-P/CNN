@@ -6,6 +6,7 @@
 #define ANN_LAYER_TYPES_HXX
 
 #include <boost/variant.hpp>
+#include "layer.hxx"
 
 // convolutional layer
 class Convolution;
@@ -43,8 +44,6 @@ using LayerTypes = boost::variant<
         Tanh*
         >;
 
-
-#include "../lin_alg/data_types.hxx"
 
 #include "convolution.hxx"
 #include "max_pooling.hxx"

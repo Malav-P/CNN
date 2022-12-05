@@ -6,7 +6,6 @@
 #define ANN_MAT_IMPL_HXX
 
 #include "mat.hxx"
-#include "vector.hxx"
 
 //! constructor -------------------------------------------------------------------------
 template<typename T>

@@ -8,7 +8,6 @@
 
 #include "data_types.hxx"
 
-
 template<typename T = double>
 class Cuboid {
     public:
