@@ -9,55 +9,52 @@
 #include "pair.hxx"
 #include "../lin_alg/data_types.hxx"
 
-using Dims = Dimensions<>;
+namespace CNN {
 
-class Outshape_visitor : public boost::static_visitor<Dims3>
-{
-public:
 
-    template<typename T>
-    Dims3 operator()(T* operand) const { return (*operand).out_shape(); }
-};
+    class Outshape_visitor : public boost::static_visitor<Dims3> {
+    public:
 
-class Inshape_visitor : public boost::static_visitor<Dims3>
-{
-public:
+        template<typename T>
+        Dims3 operator()(T *operand) const { return (*operand).out_shape(); }
+    };
 
-    template<typename T>
-    Dims3 operator()(T* operand) const { return (*operand).in_shape(); }
-};
+    class Inshape_visitor : public boost::static_visitor<Dims3> {
+    public:
 
-class Forward_visitor : public boost::static_visitor<>
-{
-public:
+        template<typename T>
+        Dims3 operator()(T *operand) const { return (*operand).in_shape(); }
+    };
 
-    template<typename T>
-    void operator()(T* operand) const {(*operand).Forward(*input, *output);}
+    class Forward_visitor : public boost::static_visitor<> {
+    public:
 
-    Vector<double>* input;
-    Vector<double>* output;
-};
+        template<typename T>
+        void operator()(T *operand) const { (*operand).Forward(*input, *output); }
 
-class Backward_visitor : public boost::static_visitor<>
-{
-public:
+        Vector<double> *input;
+        Vector<double> *output;
+    };
 
-    template<typename T>
-    void operator()(T* operand) const {(*operand).Backward(*dLdY, *dLdX);}
+    class Backward_visitor : public boost::static_visitor<> {
+    public:
 
-    Vector<double>* dLdY;
-    Vector<double>* dLdX;
-};
+        template<typename T>
+        void operator()(T *operand) const { (*operand).Backward(*dLdY, *dLdX); }
 
-template<typename Optimizer>
-class Update_parameters_visitor : public boost::static_visitor<>
-{
-public:
+        Vector<double> *dLdY;
+        Vector<double> *dLdX;
+    };
 
-    template<typename T>
-    void operator()(T* operand) const { (*operand).Update_Params(optimizer, normalizer);}
+    template<typename Optimizer>
+    class Update_parameters_visitor : public boost::static_visitor<> {
+    public:
 
-    Optimizer* optimizer {nullptr};
-    size_t normalizer {1};
-};
+        template<typename T>
+        void operator()(T *operand) const { (*operand).Update_Params(optimizer, normalizer); }
+
+        Optimizer *optimizer{nullptr};
+        size_t normalizer{1};
+    };
+}
 #endif //ANN_VISITORS_HXX

@@ -18,9 +18,4 @@
 
 #include "helpers/pair.hxx"
 
-using Pair = std::pair<size_t, double>;
-using Dims = Dimensions<>;
-using Dims3 = Dimensions3<>;
-
-
 #endif //ANN_PREREQS_HXX

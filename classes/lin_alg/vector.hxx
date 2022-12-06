@@ -7,8 +7,10 @@
 
 #include "data_types.hxx"
 
-template<typename T = double>
-class Vector {
+namespace CNN {
+
+    template<typename T = double>
+    class Vector {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ETC --------------------------------------------------------
@@ -17,67 +19,67 @@ class Vector {
         Vector() = default;
 
         // constructor
-        explicit Vector(size_t n, T* arr = nullptr);
+        explicit Vector(size_t n, T *arr = nullptr);
 
         // copy constructor
-        Vector(const Vector& other);
+        Vector(const Vector &other);
 
         // move constructor
-        Vector(Vector<T>&& other) noexcept;
+        Vector(Vector<T> &&other) noexcept;
 
         // destructor
-        ~Vector() {delete[] _data;}
+        ~Vector() { delete[] _data; }
         //! ----------------------------------------------------------------------------------------------------------
 
         //! ASSIGNMENT, BINARY, UNARY OPERATORS -----------------------------------------------------------------------
         // copy assignment operator
-        Vector<T>& operator=(const Vector<T>& rhs);
+        Vector<T> &operator=(const Vector<T> &rhs);
 
         // move assignment operator
-        Vector<T>& operator=(Vector<T>&& other) noexcept;
+        Vector<T> &operator=(Vector<T> &&other) noexcept;
 
         // += operator
-        Vector<T>& operator+=(const Vector<T>& other);
+        Vector<T> &operator+=(const Vector<T> &other);
 
         // indexing operator
-        T& operator[](size_t idx);
+        T &operator[](size_t idx);
 
         // const indexing operator
-        const T& operator[](size_t idx) const;
+        const T &operator[](size_t idx) const;
 
         // multiply operator (matrix)
-        Vector<T> operator * (Mat<T>& other);
+        Vector<T> operator*(Mat<T> &other);
 
         // multiply operator (scalar)
-        Vector<T> operator * (double c);
+        Vector<T> operator*(double c);
 
         // *= operator (scalar)
-        void operator *= (double c);
+        void operator*=(double c);
 
         // multiply operator (vector)
-        Mat<T> operator * (const Vector<T>& other);
+        Mat<T> operator*(const Vector<T> &other);
 
         // add operator
-        Vector<T> operator + (const Vector<T>& other);
+        Vector<T> operator+(const Vector<T> &other);
 
         // minus operator
-        Vector<T> operator - (const Vector<T>& other);
+        Vector<T> operator-(const Vector<T> &other);
 
         // merge two vectors
-        Vector<T> merge (const Vector<T>& other);
+        Vector<T> merge(const Vector<T> &other);
 
         //! ----------------------------------------------------------------------------------------------------------
 
 
         //! OTHER ----------------------------------------------------------------------------------------------------
         // compute dot product between two Vectors
-        T dot(const Vector<T>& other);
+        T dot(const Vector<T> &other);
 
         // write into the vector at a specified start point
-        void write(const Vector<T>& other, size_t start);
+        void write(const Vector<T> &other, size_t start);
 
         // reset data with another pointer
-        void reset_data(T* arr);
+        void reset_data(T *arr);
 
         // fill vector with a value
         void fill(T fill);
@@ -86,16 +88,16 @@ class Vector {
         Mat<T> reshape(size_t n_rows, size_t n_cols);
 
         // compute element-wise product between two Vectors
-        Vector<T> eprod(const Vector<T>& other) const;
+        Vector<T> eprod(const Vector<T> &other) const;
 
         // compute the element-wise quotient of two Vectors
-        Vector<T> edivide(const Vector<T>& other);
+        Vector<T> edivide(const Vector<T> &other);
 
         // get the _length of vector (read only)
-        size_t const& get_len() const {return _length;}
+        size_t const &get_len() const { return _length; }
 
         // get the data (read only)
-        T* const& get_data() const {return _data;}
+        T *const &get_data() const { return _data; }
 
         // print the vector elements
         void print() const;
@@ -105,16 +107,16 @@ class Vector {
     private:
 
         // _length of vector (number of elements)
-        size_t _length {0};
+        size_t _length{0};
 
         // pointer to _data;
-        T* _data {nullptr};
+        T *_data{nullptr};
 
         friend class Mat<T>;
 
-};
+    };
 
-
+}
 
 #include "vector_impl.hxx"
 #endif //ANN_VECTOR_HXX

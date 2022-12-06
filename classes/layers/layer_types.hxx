@@ -8,42 +8,46 @@
 #include <boost/variant.hpp>
 #include "layer.hxx"
 
+namespace CNN {
+
+
 // convolutional layer
-class Convolution;
+    class Convolution;
 
 // MaxPooling Layer
-class MaxPooling;
+    class MaxPooling;
 
 // applies mean pooling operation to incoming _data
-class MeanPooling;
+    class MeanPooling;
 
 // a standard y = W*x + b layer with _weights W, bias b
-class Linear;
+    class Linear;
 
 // softmax layer
-class Softmax;
+    class Softmax;
 
 // relU layer
-class RelU;
+    class RelU;
 
 // Sigmoid layer
-class Sigmoid;
+    class Sigmoid;
 
 // Tanh layer
-class Tanh;
+    class Tanh;
 
 
-using LayerTypes = boost::variant<
-        Convolution*,
-        MaxPooling*,
-        MeanPooling*,
-        Linear*,
-        Softmax*,
-        RelU*,
-        Sigmoid*,
-        Tanh*
-        >;
+    using LayerTypes = boost::variant<
+            Convolution *,
+            MaxPooling *,
+            MeanPooling *,
+            Linear *,
+            Softmax *,
+            RelU *,
+            Sigmoid *,
+            Tanh *
+    >;
 
+}
 
 #include "convolution.hxx"
 #include "max_pooling.hxx"

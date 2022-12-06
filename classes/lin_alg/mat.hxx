@@ -7,8 +7,10 @@
 
 #include "data_types.hxx"
 
-template<typename T = double>
-class Mat {
+namespace CNN {
+
+    template<typename T = double>
+    class Mat {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ETC --------------------------------------------------------
@@ -17,16 +19,16 @@ class Mat {
         Mat() = default;
 
         // constructor
-        explicit Mat(size_t side_len, T* arr = nullptr);
+        explicit Mat(size_t side_len, T *arr = nullptr);
 
         // constructor
-        Mat(size_t num_r, size_t num_c, T* arr = nullptr);
+        Mat(size_t num_r, size_t num_c, T *arr = nullptr);
 
         // copy constructor
-        Mat(const Mat<T>& other);
+        Mat(const Mat<T> &other);
 
         // move constructor
-        Mat(Mat<T>&& other) noexcept;
+        Mat(Mat<T> &&other) noexcept;
 
         // destructor
         ~Mat() { delete[] _data; }
@@ -35,44 +37,44 @@ class Mat {
 
         //! ASSIGNMENT, BINARY, UNARY OPERATORS -------------------------------------------------------------------
         // copy assignment operator
-        Mat<T>& operator=(const Mat<T>& rhs);
+        Mat<T> &operator=(const Mat<T> &rhs);
 
         // move assignment operator
-        Mat<T>& operator=(Mat<T>&& other) noexcept ;
+        Mat<T> &operator=(Mat<T> &&other) noexcept;
 
         // += operator
-        Mat<T>& operator+=(const Mat<T>& other);
+        Mat<T> &operator+=(const Mat<T> &other);
 
         // + operator
-        Mat<T> operator+(const Mat<T>& rhs);
+        Mat<T> operator+(const Mat<T> &rhs);
 
         // index operator
-        T& operator()(size_t i, size_t j);
+        T &operator()(size_t i, size_t j);
 
         // const index operator
-        const T& operator()(size_t i, size_t j) const;
+        const T &operator()(size_t i, size_t j) const;
 
         // multiply operator (matrix)
-        Mat<T> operator * (const Mat<T>& other);
+        Mat<T> operator*(const Mat<T> &other);
 
         // multiply operator (scalar)
-        Mat<T> operator * (double c);
+        Mat<T> operator*(double c);
 
         // multiply operator (vector)
-        Vector<T> operator * (const Vector<T>& other);
+        Vector<T> operator*(const Vector<T> &other);
 
         //! -------------------------------------------------------------------------------------------------------
 
         //! OTHER -------------------------------------------------------------------------------------------------
 
         // compute inner product between two Matrices
-        T dot(const Mat<T>& other);
+        T dot(const Mat<T> &other);
 
         // compute partial inner product with given Dims of starting indices
-        T partial_dot(const Mat<T>& other, Dims p);
+        T partial_dot(const Mat<T> &other, Dims p);
 
         // keep values in certain indices, and set all others to zero. indices must be sorted in increasing row, increasing column order
-        void keep(Dims* indices);
+        void keep(Dims *indices);
 
         // fill matrix with a value
         void fill(T t);
@@ -93,16 +95,16 @@ class Mat {
         Mat<T> transpose();
 
         // get number of rows of matrix (read only)
-        size_t const& get_rows() const {return _rows;}
+        size_t const &get_rows() const { return _rows; }
 
         // get number of cols of matrix (read only)
-        size_t const& get_cols() const {return _cols;}
+        size_t const &get_cols() const { return _cols; }
 
         // get rotation state
-        size_t const& get_rot()  const {return _rot;}
+        size_t const &get_rot() const { return _rot; }
 
         // get data
-        T* const& get_data() const {return _data;}
+        T *const &get_data() const { return _data; }
 
         // print the matrix
         void print() const;
@@ -116,21 +118,21 @@ class Mat {
         void rotate_once();
 
         // number of columns
-        size_t _cols {0};
+        size_t _cols{0};
 
         // number of rows
-        size_t _rows {0};
+        size_t _rows{0};
 
         // rotation state, 0 = no rotate; 1 = 90 degrees clockwise; 2 = 180 degrees clockwise; 3 = 270 degrees clockwise
-        size_t _rot {0};
+        size_t _rot{0};
 
         // pointer to _data
-        T* _data {nullptr};
+        T *_data{nullptr};
 
         friend class Vector<T>;
-};
+    };
 
-
+}
 
 #include "mat_impl.hxx"
 #endif //ANN_MAT_HXX

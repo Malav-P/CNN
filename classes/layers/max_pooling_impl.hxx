@@ -7,6 +7,8 @@
 
 #include "max_pooling.hxx"
 
+namespace CNN{
+
 MaxPool::MaxPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride)
         : _in(in_width, in_height, 1),
           _field(fld_width, fld_height),
@@ -133,5 +135,5 @@ void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
         dLdX.write(out, i*out.get_len());
     }
 }
-
+}
 #endif //CNN_MAX_POOLING_IMPL_HXX

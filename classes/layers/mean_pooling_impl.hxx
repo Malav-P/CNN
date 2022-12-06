@@ -7,6 +7,8 @@
 
 #include "mean_pooling.hxx"
 
+namespace CNN{
+
 MeanPool::MeanPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld_height, size_t h_stride, size_t v_stride)
 : _in(in_width, in_height,1),
   _field(fld_width, fld_height),
@@ -136,5 +138,5 @@ void MeanPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
     }
 
 }
-
+}
 #endif //ANN_MEAN_POOL_IMPL_HXX

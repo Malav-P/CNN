@@ -7,6 +7,9 @@
 
 #include "mat.hxx"
 
+
+namespace CNN{
+
 //! constructor -------------------------------------------------------------------------
 template<typename T>
 Mat<T>::Mat(size_t side_len, T* arr)
@@ -484,5 +487,6 @@ void Mat<T>::print() const
     std::cout << "\n";
 }
 
+}
 
 #endif //ANN_MAT_IMPL_HXX

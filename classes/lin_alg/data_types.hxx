@@ -7,14 +7,18 @@
 
 #include "../prereqs.hxx"
 
-template <typename T>
-class Mat;
+namespace CNN {
 
-template <typename T>
-class Vector;
+    template<typename T>
+    class Mat;
 
-template<typename T>
-class Cuboid;
+    template<typename T>
+    class Vector;
+
+    template<typename T>
+    class Cuboid;
+
+}
 
 #include "mat.hxx"
 #include "vector.hxx"

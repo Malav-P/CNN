@@ -7,6 +7,9 @@
 
 #include "vector.hxx"
 
+
+namespace CNN{
+
 //!  constructor ---------------------------------------------------------------------------
 template<typename T>
 Vector<T>::Vector(size_t n, T *arr)
@@ -355,6 +358,8 @@ template<typename T>
 void Vector<T>::reset_data(T *arr)
 {
     std::memcpy(_data, arr, sizeof(T)*_length);
+}
+
 }
 
 #endif //ANN_VECTOR_CPP

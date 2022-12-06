@@ -5,6 +5,8 @@
 #ifndef ANN_SOFTMAX_HXX
 #define ANN_SOFTMAX_HXX
 
+namespace CNN{
+
 class Softmax: public Layer {
     public:
 
@@ -90,5 +92,5 @@ class Softmax: public Layer {
         Mat<double> _jacobian {};
 };
 
-
+}
 #endif //ANN_SOFTMAX_HXX

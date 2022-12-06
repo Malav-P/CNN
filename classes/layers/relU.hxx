@@ -5,7 +5,9 @@
 #ifndef ANN_RELU_HXX
 #define ANN_RELU_HXX
 
-class RelU : public Layer {
+namespace CNN {
+
+    class RelU : public Layer {
     public:
 
         // default constructor shouldn't exist;
@@ -20,22 +22,24 @@ class RelU : public Layer {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(Vector<double>& input, Vector<double>& output) override;
+        void Forward(Vector<double> &input, Vector<double> &output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override;
+        void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
-        void Update_Params(Optimizer* optimizer, size_t normalizer){/* nothing to do, no parameters to be learned in this layer*/}
+        void Update_Params(Optimizer *optimizer,
+                           size_t normalizer) {/* nothing to do, no parameters to be learned in this layer*/}
 
         //! ----------------------------------------------------------------------------------------------------------
 
-        double const& get_leaky_param() const {return alpha;}
+        double const &get_leaky_param() const { return alpha; }
+
     private:
 
         // leaky reLU parameter
-        double alpha {0};
+        double alpha{0};
 
         // local input to layer
         Vector<double> _local_input;
@@ -45,9 +49,9 @@ class RelU : public Layer {
 
         // apply derivative to input
         double deriv(double input);
-};
+    };
 
 
-
+}
 #include "relU_impl.hxx"
 #endif //ANN_RELU_HXX

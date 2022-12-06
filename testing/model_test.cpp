@@ -5,6 +5,8 @@
 #include "../CNN.hxx"
 #include "../mnist/read_mnist.hxx"
 
+using namespace CNN;
+
 int main(int argc, char* argv[])
 {
     if (argc != 4)

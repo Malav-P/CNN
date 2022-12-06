@@ -5,8 +5,10 @@
 #ifndef CNN_SIGMOID_HXX
 #define CNN_SIGMOID_HXX
 
+namespace CNN {
 
-class Sigmoid: public Layer {
+
+    class Sigmoid : public Layer {
     public:
 
         // default constructor shouldnt exist
@@ -18,29 +20,30 @@ class Sigmoid: public Layer {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(Vector<double>& input, Vector<double>& output) override;
+        void Forward(Vector<double> &input, Vector<double> &output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override;
+        void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
-        void Update_Params(Optimizer* optimizer, size_t normalizer){/* nothing to do, no parameters to be learned in this layer*/}
+        void Update_Params(Optimizer *optimizer,
+                           size_t normalizer) {/* nothing to do, no parameters to be learned in this layer*/}
         //! ----------------------------------------------------------------------------------------------------------
 
     private:
         // local input to layer
-        Vector<double> _local_input {};
+        Vector<double> _local_input{};
 
         // apply function to input
         double func(double input);
 
         // apply derivative to input
         double deriv(double input);
-};
+    };
 
 
-
+}
 
 #include "./sigmoid_impl.hxx"
 #endif //CNN_SIGMOID_HXX

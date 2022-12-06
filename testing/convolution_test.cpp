@@ -5,6 +5,8 @@
 #include "../classes/layers/layer_types.hxx"
 #include "../classes/optimizers/SGD.hxx"
 
+using namespace CNN;
+
 int main()
 {
 

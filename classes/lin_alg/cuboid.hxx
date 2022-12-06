@@ -8,8 +8,10 @@
 
 #include "data_types.hxx"
 
-template<typename T = double>
-class Cuboid {
+namespace CNN {
+
+    template<typename T = double>
+    class Cuboid {
     public:
 
         //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ETC --------------------------------------------------------
@@ -18,16 +20,16 @@ class Cuboid {
         Cuboid() = default;
 
         // constructor
-        explicit Cuboid(size_t side_len, T* arr = nullptr);
+        explicit Cuboid(size_t side_len, T *arr = nullptr);
 
         // constructor
-        Cuboid(size_t num_r, size_t num_c, size_t num_d, T* arr = nullptr);
+        Cuboid(size_t num_r, size_t num_c, size_t num_d, T *arr = nullptr);
 
         // copy constructor
-        Cuboid(const Cuboid<T>& other);
+        Cuboid(const Cuboid<T> &other);
 
         // move constructor
-        Cuboid(Cuboid<T>&& other) noexcept;
+        Cuboid(Cuboid<T> &&other) noexcept;
 
         // destructor
         ~Cuboid() { delete[] _data; }
@@ -36,25 +38,25 @@ class Cuboid {
 
         //! ASSIGNMENT, BINARY, UNARY OPERATORS -------------------------------------------------------------------
         // copy assignment operator
-        Cuboid<T>& operator=(const Cuboid<T>& rhs);
+        Cuboid<T> &operator=(const Cuboid<T> &rhs);
 
         // move assignment operator
-        Cuboid<T>& operator=(Cuboid<T>&& other) noexcept ;
+        Cuboid<T> &operator=(Cuboid<T> &&other) noexcept;
 
         // += operator
-        Cuboid<T>& operator+=(const Cuboid<T>& other);
+        Cuboid<T> &operator+=(const Cuboid<T> &other);
 
         // + operator
-        Cuboid<T> operator+(const Cuboid<T>& rhs);
+        Cuboid<T> operator+(const Cuboid<T> &rhs);
 
         // index operator
-        T& operator()(size_t i, size_t j, size_t k);
+        T &operator()(size_t i, size_t j, size_t k);
 
         // const index operator
-        const T& operator()(size_t i, size_t j, size_t k) const;
+        const T &operator()(size_t i, size_t j, size_t k) const;
 
         // multiply operator (scalar)
-        Cuboid<T> operator * (double c);
+        Cuboid<T> operator*(double c);
 
 
         //! -------------------------------------------------------------------------------------------------------
@@ -62,13 +64,13 @@ class Cuboid {
         //! OTHER -------------------------------------------------------------------------------------------------
 
         // compute inner product between two Matrices
-        T dot(const Cuboid<T>& other);
+        T dot(const Cuboid<T> &other);
 
         // compute partial inner product with given Dims of starting indices
-        T partial_dot(const Cuboid<T>& other, Dims3 p);
+        T partial_dot(const Cuboid<T> &other, Dims3 p);
 
         // keep values in certain indices, and set all others to zero. indices must be sorted in increasing row, increasing column order
-        void keep(Dims3* indices);
+        void keep(Dims3 *indices);
 
         // fill cuboid with a value
         void fill(T t);
@@ -80,19 +82,19 @@ class Cuboid {
         Vector<T> flatten();
 
         // get number of rows of matrix (read only)
-        size_t const& get_rows() const {return _rows;}
+        size_t const &get_rows() const { return _rows; }
 
         // get number of cols of matrix (read only)
-        size_t const& get_cols() const {return _cols;}
+        size_t const &get_cols() const { return _cols; }
 
         // get depth of cuboid
-        size_t const& get_depth() const {return _depth;}
+        size_t const &get_depth() const { return _depth; }
 
         // get data pointer
-        T* const& get_data() const {return _data;}
+        T *const &get_data() const { return _data; }
 
         // get rotation state
-        size_t const& get_rot()  const {return _rot;}
+        size_t const &get_rot() const { return _rot; }
 
         // print the cuboid
         void print() const;
@@ -105,24 +107,27 @@ class Cuboid {
         void rotate_once();
 
         // number of columns
-        size_t _cols {0};
+        size_t _cols{0};
 
         // number of rows
-        size_t _rows {0};
+        size_t _rows{0};
 
         // depth
-        size_t _depth {0};
+        size_t _depth{0};
 
         // rotation state, 0 = no rotate; 1 = 90 degrees clockwise; 2 = 180 degrees clockwise; 3 = 270 degrees clockwise
-        size_t _rot {0};
+        size_t _rot{0};
 
     public:
         // pointer to _data
-        T* _data {nullptr};
+        T *_data{nullptr};
 
         friend class Vector<T>;
+
         friend class Mat<T>;
-};
+    };
+
+}
 
 #include "cuboid_impl.hxx"
 #endif //CNN_CUBOID_HXX

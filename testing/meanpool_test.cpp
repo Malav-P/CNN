@@ -4,6 +4,8 @@
 
 
 #include "../classes/layers/layer_types.hxx"
+
+using namespace CNN;
 int main()
 {
 //    size_t in_width = 4;

@@ -2,6 +2,8 @@
 #include "../classes/lin_alg/data_types.hxx"
 #include <iostream>
 
+using namespace CNN;
+
 int main()
 {
 //    int arr[8] = {4, 2, 1, 6, 8, 4, 0, 1};

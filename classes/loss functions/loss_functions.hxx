@@ -8,10 +8,13 @@
 
 #include "../lin_alg/data_types.hxx"
 
+namespace CNN {
 
-class CrossEntropy;
+    class CrossEntropy;
 
-class MSE;
+    class MSE;
+
+}
 
 #include "cross_entropy.hxx"
 #include "mean_square_error.hxx"

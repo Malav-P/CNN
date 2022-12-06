@@ -5,30 +5,35 @@
 #ifndef ANN_MEAN_SQUARE_ERROR_HXX
 #define ANN_MEAN_SQUARE_ERROR_HXX
 
+namespace CNN {
 
-class MSE {
 
-public:
+    class MSE {
 
-    double loss(Vector<double>& output, Vector<double>& target)
-    {
-        // assert that number of elements in other vector and this vector are equal
-        assert(output.get_len() == target.get_len());
+    public:
 
-        // initialize return variable
-        double loss = 0;
+        double loss(Vector<double> &output, Vector<double> &target) {
+            // assert that number of elements in other vector and this vector are equal
+            assert(output.get_len() == target.get_len());
 
-        // compute loss
-        for (size_t i = 0; i < output.get_len(); i++) { loss += 0.5 * (output[i] - target[i]) * (output[i] - target[i]) ; }
+            // initialize return variable
+            double loss = 0;
 
-        // return result
-        return loss;
-    }
+            // compute loss
+            for (size_t i = 0; i < output.get_len(); i++) {
+                loss += 0.5 * (output[i] - target[i]) * (output[i] - target[i]);
+            }
 
-    Vector<double> grad(Vector<double>& output, Vector<double>& target) {return output - target;}
+            // return result
+            return loss;
+        }
 
-private:
+        Vector<double> grad(Vector<double> &output, Vector<double> &target) { return output - target; }
 
-};
+    private:
 
+    };
+
+
+}
 #endif //ANN_MEAN_SQUARE_ERROR_HXX

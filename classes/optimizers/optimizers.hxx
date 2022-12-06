@@ -7,8 +7,12 @@
 
 #include "../lin_alg/data_types.hxx"
 
-class SGD;
 
+namespace CNN {
+
+    class SGD;
+
+}
 #include "SGD.hxx"
 
 #endif //ANN_OPTIMIZERS_HXX

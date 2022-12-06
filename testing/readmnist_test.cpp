@@ -5,6 +5,8 @@
 #include "../mnist/read_mnist.hxx"
 #include <iostream>
 
+using namespace CNN;
+
 int main()
 {
     DataSet container = read_mnist(10);

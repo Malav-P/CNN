@@ -9,6 +9,9 @@
 
 using namespace std;
 
+
+namespace CNN{
+
 template<typename LossFunction>
 void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
 {
@@ -741,4 +744,6 @@ Model<LossFunction>::Model(string &filename)
     }
 }
 
+
+}
 #endif //ANN_MODEL_IMPL_HXX

@@ -5,12 +5,13 @@
 #ifndef ANN_CROSS_ENTROPY_HXX
 #define ANN_CROSS_ENTROPY_HXX
 
-class CrossEntropy {
+namespace CNN {
+
+    class CrossEntropy {
 
     public:
 
-        double loss(Vector<double>& output, Vector<double>& target)
-        {
+        double loss(Vector<double> &output, Vector<double> &target) {
             // assert that number of elements in other vector and this vector are equal
             assert(output.get_len() == target.get_len());
 
@@ -24,10 +25,11 @@ class CrossEntropy {
             return loss;
         }
 
-        Vector<double> grad(Vector<double>& output, Vector<double>& target) {return (target*-1).edivide(output);}
+        Vector<double> grad(Vector<double> &output, Vector<double> &target) { return (target * -1).edivide(output); }
 
     private:
 
-};
+    };
 
+}
 #endif //ANN_CROSS_ENTROPY_HXX
