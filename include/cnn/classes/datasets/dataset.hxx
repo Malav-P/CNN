@@ -1,7 +1,3 @@
-//
-// Created by malav on 7/6/2022.
-//
-
 // This class defines a container for storing datapoints and their labels. The datapoint and its label are
 // stored as a pair of Vector<double>.
 

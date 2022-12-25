@@ -39,6 +39,15 @@ When using this package in your own project, include the following in your `CMak
 find_package(CNN REQUIRED)
 target_link_libraries(<your program here> PRIVATE cnn)
 ```
+and then use the `#include` directive shown below to include the library headers in your project:
+```C++
+#include "cnn/classes/Model.hxx"
+```
+When training, the model takes in the training data as a `DataSet` class object. 
+If you have data that needs to be placed in a `DataSet` object for the model to train on, you can include the following:
+```C++
+#include "cnn/datasets/dataset.hxx"
+```
 NOTE: When building your project, be sure to specify `CMAKE_PREFIX_PATH` variable to correspond to the
 `<desired installation path>` that was chosen above. For example, a project that utilizes this library
 and has the library installed at `/usr/local/` would call `cmake` like so:

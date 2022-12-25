@@ -6,6 +6,7 @@
 #define ANN_MODEL_IMPL_HXX
 
 #include "Model.hxx"
+#include <boost/progress.hpp>
 
 using namespace std;
 
@@ -96,12 +97,6 @@ template<typename Optimizer>
 void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, size_t batch_size, size_t epochs /* args TBD */)
 {
 
-    // initialize progress bar
-    ProgressBar bar;
-    bar.set_bar_width(60);
-    bar.fill_bar_progress_with("■");
-    bar.fill_bar_remainder_with(" ");
-
     // determine if number of training points is divisible by the batch_size
     //      - if there is no remainder, we will be updating the parameters (num training points) / (batch_size) times
     //      - if there is a remainder, we will update the parameters |_ (num training points) / (batch_size) _| times
@@ -111,6 +106,9 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
     size_t num_training_points = training_set.shape.width;
 
     size_t remainder = num_training_points % batch_size;
+
+    size_t expected_count = remainder/batch_size >= 0.1 ? ceil(epochs*num_training_points/batch_size) : floor(epochs*num_training_points/batch_size);
+    boost::progress_display show_progress(expected_count );
 
     // for each data point in my training set:
     //      - make a Forward pass
@@ -140,15 +138,16 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
             if (count % batch_size == 0)
             {
                 Update_Params(optimizer, batch_size);
-                bar.update(100*(count + i*num_training_points)/(epochs*num_training_points));
+                ++show_progress;
             }
         }
 
-        // if remainder exists we can update the model with the remaining datapoints
-        if (remainder != 0)
+        // if remainder exists we can update the model with the remaining datapoints if there are enough of them!
+        // update only if the remainder is greater than 10% of the batch size
+        if (remainder/batch_size >= 0.1)
         {
             Update_Params(optimizer, remainder);
-            bar.update(100*(count + i*num_training_points)/(epochs*num_training_points));
+            ++show_progress;
         }
 
     }

@@ -9,7 +9,6 @@
 #include "helpers/visitors.hxx"
 #include "datasets/dataset.hxx"
 #include "optimizers/optimizers.hxx"
-#include "helpers/progress_bar.hxx"
 #include "../classes/loss functions/loss_functions.hxx"
 
 #include <fstream>
