@@ -215,3 +215,20 @@ model.Train(  &optimizer  // reference to optimizer
             , N_EPOCHS    // number of epochs
             );  
 ```
+
+## Saving and Loading Models
+
+Saving a model can be done by calling the `save` member function. Models are save as `JSON` files.
+
+```C++
+std::string filepath = "desired/save/path/my_model.json"
+model.save(filepath);
+```
+
+Loading a model can be done by calling the appropriate constructor on a model file. Input must be `JSON` file. The user
+is responsible for determining the `LossFunction` that corresponds to the saved data. 
+
+```C++
+std::string filepath = "desired/save/path/my_model.json"
+Model<CrossEntropy> model(filepath);
+```
