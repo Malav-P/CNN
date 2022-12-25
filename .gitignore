@@ -1,3 +1,4 @@
 # Project exclude paths
 /build/
 .idea/
+/standalone_example/mnist/*.csv
