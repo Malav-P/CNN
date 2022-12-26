@@ -9,8 +9,14 @@ include(GNUInstallDirs)
 
 add_library(cnn 
 	INTERFACE
-	${CNN_INTERFACE_HEADERS}
+#	${CNN_INTERFACE_HEADERS}
 )
+
+#target_sources(cnn
+
+#INTERFACE
+#${CNN_INTERFACE_HEADERS}
+#)
 
 target_link_libraries(cnn
 	INTERFACE
