@@ -14,11 +14,7 @@ namespace CNN {
         RelU() = delete;
 
         // default constructor
-        RelU(size_t input_width, size_t input_height, size_t input_depth);
-
-        // constructor, alpha =/= 0 implies a leaky relU unit, alpha usually greater than 0
-        RelU(double Alpha, size_t input_width, size_t input_height, size_t input_depth);
-
+        RelU(size_t input_width, size_t input_height, size_t input_depth, double Alpha=0.0);
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer

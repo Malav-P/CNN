@@ -10,10 +10,7 @@
 
 namespace CNN {
 
-    RelU::RelU(size_t input_width, size_t input_height, size_t input_depth)
-            : Layer(input_width, input_height, input_depth, input_width, input_height, input_depth) {}
-
-    RelU::RelU(double Alpha, size_t input_width, size_t input_height, size_t input_depth)
+    RelU::RelU(size_t input_width, size_t input_height, size_t input_depth, double Alpha)
             : alpha(Alpha),
               Layer(input_width, input_height, input_depth, input_width, input_height, input_depth) {
         if (Alpha < 0) { alpha = 0; } //! alpha cannot be negative

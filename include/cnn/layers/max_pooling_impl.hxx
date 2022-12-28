@@ -91,7 +91,7 @@ Pair MaxPool::max_value(Pair *arr, size_t n)
 }
 //!--------------------------
 
-MaxPooling::MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height,
+MaxPooling::MaxPooling(size_t in_width, size_t in_height, size_t in_maps, size_t fld_width, size_t fld_height,
                        size_t h_stride, size_t v_stride):
                        pool_vector(in_maps),
                        Layer(in_width, in_height, in_maps, 0,0,0),

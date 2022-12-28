@@ -83,7 +83,7 @@ namespace CNN {
         MaxPooling() = delete;
 
         // create MaxPool object from given parameters
-        MaxPooling(size_t in_maps, size_t in_width, size_t in_height, size_t fld_width, size_t fld_height,
+        MaxPooling(size_t in_width, size_t in_height, size_t in_maps, size_t fld_width, size_t fld_height,
                    size_t h_stride, size_t v_stride);
 
         //!------------------------------------------------------------------------------------------------------------

@@ -53,16 +53,16 @@ int main(int argc, char* argv[])
                            , true
                            );
 
-    model.Add<RelU>(    0.1,                                // leaky RelU parameter
-                        model.get_outshape(0).width,    // input width
-                        model.get_outshape(0).height,   // input height
-                        model.get_outshape(0).depth     // input depth
+    model.Add<RelU>(    model.get_outshape(0).width,     // input width
+                        model.get_outshape(0).height,    // input height
+                        model.get_outshape(0).depth,     // input depth
+			0.1				 // leaky parameter
     );
 
 
-    model.Add<MaxPooling>(   model.get_outshape(1).depth   // in maps
-                           , model.get_outshape(1).width   // input width
+    model.Add<MaxPooling>(   model.get_outshape(1).width   // input width
                            , model.get_outshape(1).height  // input height
+                           , model.get_outshape(1).depth   // in maps
                            , 2  // filter width
                            , 2  // filter height
                            , 2  // horizontal stride length
@@ -76,16 +76,16 @@ int main(int argc, char* argv[])
                         , 256   // output size
                             );
 
-    model.Add<RelU>(    0.1,                                // leaky RelU parameter
-                        model.get_outshape(3).width,    // input width
+    model.Add<RelU>(    model.get_outshape(3).width,    // input width
                         model.get_outshape(3).height,   // input height
-                        model.get_outshape(3).depth     // input depth
+                        model.get_outshape(3).depth,    // input depth
+                        0.1                             // leaky RelU parameter
     );
 
     model.Add<Linear>(   model.get_outshape(4).depth
                          *model.get_outshape(4).width
                          *model.get_outshape(4).height  // input size
-            , 10   // output size
+                         , 10                           // output size
     );
 
 

@@ -5,7 +5,7 @@ An implementation of a convolutional neural network written in C++.
 
 Provided is a header-only library for the implementation of a convolutional neural network. We break down each of the layers later 
 in this section. The structure for the `Model` class was inspired by [mlpack](https://www.mlpack.org/).
-However, the implementation was done exclusively using my own [linear algebra library](./classes/lin_alg).
+However, the implementation was done exclusively using my own [linear algebra library](./lin_alg).
 
 ### Dependencies
 
@@ -81,9 +81,9 @@ This class defines the max pooling layer.
 The [`max_pooling.hxx`](include/cnn/layers/max_pooling.hxx) file contains the class definition for a max pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
-    model.Add<MaxPooling>(    model.get_outshape(1).depth   // number of input maps
-                            , model.get_outshape(1).width   // input width
+    model.Add<MaxPooling>(    model.get_outshape(1).width   // input width
                             , model.get_outshape(1).height  // input height
+                            , model.get_outshape(1).depth   // number of input maps
                             , 2  // filter width
                             , 2  // filter height
                             , 2  // horizontal stride length
@@ -95,9 +95,9 @@ This class defines the mean pooling layer.
 The [`mean_pooling.hxx`](include/cnn/layers/mean_pooling.hxx) file contains the class definition for the mean pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
-    model.Add<MeanPooling>(   model.get_outshape(1).depth    // number of input maps
-                            , model.get_outshape(1).width    // input width
+    model.Add<MeanPooling>(   model.get_outshape(1).width    // input width
                             , model.get_outshape(1).height   // input height
+                            , model.get_outshape(1).depth    // number of input maps
                             , 2  // filter width
                             , 2  // filter height
                             , 2  // horizontal stride length
@@ -128,9 +128,9 @@ Currently the source code supports the following activation functions.
 Below is an example of how to instantiate a member of this class
 
 ```C++
-     RelU activation( 0.1     // leaky parameter
-                    , 1       // input width
-                    , 380     // input height
+     RelU activation( 1         // input width
+                    , 380       // input height
+                    , 0.1       // leaky parameter
                     );
 ```
 ## Output
@@ -166,16 +166,16 @@ model.Add<Convolution>(   1     // input feature maps
                         , true
                         );
 
-model.Add<RelU>(    0.1,                            // leaky RelU parameter
-                    model.get_outshape(0).width,    // input width
+model.Add<RelU>(    model.get_outshape(0).width,    // input width
                     model.get_outshape(0).height,   // input height
-                    model.get_outshape(0).depth     // input depth
+                    model.get_outshape(0).depth,    // input depth
+                    0.1                             // leaky RelU parameter
                     );
 
 
-model.Add<MaxPooling>(  model.get_outshape(1).depth   // in maps
-                      , model.get_outshape(1).width   // input width
+model.Add<MaxPooling>(  model.get_outshape(1).width   // input width
                       , model.get_outshape(1).height  // input height
+                      , model.get_outshape(1).depth   // in maps
                       , 2  // filter width
                       , 2  // filter height
                       , 2  // horizontal stride length
@@ -183,21 +183,21 @@ model.Add<MaxPooling>(  model.get_outshape(1).depth   // in maps
                       );
 
 
-model.Add<Linear>(   model.get_outshape(2).depth
-                    *model.get_outshape(2).width
-                    *model.get_outshape(2).height  // input size
+model.Add<Linear>(   model.get_outshape(2).width
+                    *model.get_outshape(2).height
+                    *model.get_outshape(2).depth // input size
                     , 256   // output size
                     );
 
-model.Add<RelU>(    0.1,                            // leaky RelU parameter
-                    model.get_outshape(3).width,    // input width
+model.Add<RelU>(    model.get_outshape(3).width,    // input width
                     model.get_outshape(3).height,   // input height
-                    model.get_outshape(3).depth     // input depth
+                    model.get_outshape(3).depth,    // input depth
+                    0.1                             // leaky RelU parameter
                     );
 
-model.Add<Linear>(   model.get_outshape(4).depth
-                    *model.get_outshape(4).width
-                    *model.get_outshape(4).height  // input size
+model.Add<Linear>(  model.get_outshape(4).width
+                    *model.get_outshape(4).height
+                    *model.get_outshape(4).depth // input size
                     , 10   // output size
                     );
 
