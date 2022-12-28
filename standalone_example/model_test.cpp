@@ -2,8 +2,8 @@
 // Created by malav on 6/23/2022.
 //
 
-#include "cnn/classes/Model.hxx"
-#include "cnn/classes/datasets/dataset.hxx"
+#include "cnn/Model.hxx"
+#include "cnn/datasets/dataset.hxx"
 #include "mnist/read_mnist.hxx"
 
 using namespace CNN;

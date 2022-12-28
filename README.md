@@ -41,7 +41,7 @@ target_link_libraries(<your program here> PRIVATE cnn)
 ```
 and then use the `#include` directive shown below to include the library headers in your project:
 ```C++
-#include "cnn/classes/Model.hxx"
+#include "cnn/Model.hxx"
 ```
 When training, the model takes in the training data as a `DataSet` class object. 
 If you have data that needs to be placed in a `DataSet` object for the model to train on, you can include the following:
@@ -61,7 +61,7 @@ how to work with this repository. Eaah layer is its own class.
 
 ## `Convolution` 
 This class defines the convolutional layer.
-The [`convolution.hxx`](./include/cnn/classes/layers/convolution.hxx) file contains the class definition for the Convolutional Layer.
+The [`convolution.hxx`](include/cnn/layers/convolution.hxx) file contains the class definition for the Convolutional Layer.
 Below is example code of how to construct an instance of this class.
 
 ```C++
@@ -78,7 +78,7 @@ Below is example code of how to construct an instance of this class.
 ```
 ## `MaxPooling` 
 This class defines the max pooling layer.
-The [`max_pooling.hxx`](./include/cnn/classes/layers/max_pooling.hxx) file contains the class definition for a max pooling layer.
+The [`max_pooling.hxx`](include/cnn/layers/max_pooling.hxx) file contains the class definition for a max pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
     model.Add<MaxPooling>(    model.get_outshape(1).depth   // number of input maps
@@ -92,7 +92,7 @@ Below is example code of how to construct an instance of this class.
 ```
 ## `MeanPooling`
 This class defines the mean pooling layer.
-The [`mean_pooling.hxx`](./include/cnn/classes/layers/mean_pooling.hxx) file contains the class definition for the mean pooling layer.
+The [`mean_pooling.hxx`](include/cnn/layers/mean_pooling.hxx) file contains the class definition for the mean pooling layer.
 Below is example code of how to construct an instance of this class.
 ```C++
     model.Add<MeanPooling>(   model.get_outshape(1).depth    // number of input maps
@@ -107,7 +107,7 @@ Below is example code of how to construct an instance of this class.
 
 ## `Linear`
 
-The [`linear.hxx`](./include/cnn/classes/layers/linear.hxx) file contains the class definition for the linear layer. 
+The [`linear.hxx`](include/cnn/layers/linear.hxx) file contains the class definition for the linear layer. 
 
 
 Below is an example of how to create an instance of the linear layer using the `RelU` activation function class
@@ -121,9 +121,9 @@ Below is an example of how to create an instance of the linear layer using the `
 
 Currently the source code supports the following activation functions. 
 
-- [ReLU activation](./include/cnn/classes/layers/relU.hxx)
-- [Sigmoid activation](./include/cnn/classes/layers/sigmoid.hxx)
-- [Tanh activation](./include/cnn/classes/layers/tanh.hxx)
+- [ReLU activation](include/cnn/layers/relU.hxx)
+- [Sigmoid activation](include/cnn/layers/sigmoid.hxx)
+- [Tanh activation](include/cnn/layers/tanh.hxx)
 
 Below is an example of how to instantiate a member of this class
 
@@ -142,12 +142,12 @@ to create an instance of this class.
                         );
 ```
 # The Model
-The [`Model`](./include/cnn/classes/Model.hxx) class provides the class definition for this type. This class 
+The [`Model`](include/cnn/Model.hxx) class provides the class definition for this type. This class 
 synthesizes layers and creates a trainable model. Note that this is a template class. The argument to this
 template class is a loss function. Currently the source code supports the following loss functions :
 
-- [Mean Square Error](./include/cnn/classes/loss%20functions/mean_square_error.hxx)
-- [Cross Entropy](./include/cnn/classes/loss%20functions/cross_entropy.hxx)
+- [Mean Square Error](./include/cnn/loss_functions/mean_square_error.hxx)
+- [Cross Entropy](./include/cnn/loss_functions/cross_entropy.hxx)
 
 See the example code below for constructing a model using the `CrossEntropy` class.
 
@@ -210,9 +210,9 @@ model.Add<Softmax>(model.get_outshape(5).width * model.get_outshape(5).height //
 
 Training the model can be done by calling the `Train` member function of the `Model` class. It takes the following arguments :
 
-- An [Optimizer](./include/cnn/classes/optimizers/optimizers.hxx)
-  - The source code supports the [Stochastic Gradient Descent](./include/cnn/classes/optimizers/SGD.hxx)  gradient descent optimizer
-- An object containing the training data. We created our own [data container class](./include/cnn/classes/datasets/dataset.hxx)
+- An [Optimizer](include/cnn/optimizers/optimizers.hxx)
+  - The source code supports the [Stochastic Gradient Descent](include/cnn/optimizers/SGD.hxx)  gradient descent optimizer
+- An object containing the training data. We created our own [data container class](include/cnn/datasets/dataset.hxx)
 - The batch size for updating the weights in the network
 - The number of epochs (the number of times to train through the entire dataset)
 

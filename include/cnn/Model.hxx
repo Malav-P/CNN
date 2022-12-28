@@ -9,7 +9,7 @@
 #include "helpers/visitors.hxx"
 #include "datasets/dataset.hxx"
 #include "optimizers/optimizers.hxx"
-#include "../classes/loss functions/loss_functions.hxx"
+#include "loss_functions/loss_functions.hxx"
 
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -31,7 +31,7 @@ namespace CNN {
 
         // Add a layer to the model, memory is freed in the destructor ~Model();
         template<typename LayerType, typename... Args>
-        void Add(Args... args) { network.push_back(new LayerType(args...)); }
+        void Add(Args... args) {network.push_back(new LayerType(args...)); }
 
         // train the network on the _data
         template<typename Optimizer>
