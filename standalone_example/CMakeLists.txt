@@ -27,6 +27,6 @@ set(CMAKE_CXX_FLAGS "-O3 -ggdb")
 add_executable(model_test model_test.cpp mnist/read_mnist_impl.cpp)
 target_link_libraries(model_test PRIVATE cnn)
 
-add_executable(arraytest arraytest.cpp)
-target_link_libraries(arraytest PRIVATE cnn)
+#add_executable(arraytest arraytest.cpp)
+#target_link_libraries(arraytest PRIVATE cnn)
 
