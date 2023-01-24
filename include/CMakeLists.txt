@@ -27,7 +27,7 @@ target_link_libraries(cnn
 	INTERFACE
 	Boost::boost
 	nlohmann_json::nlohmann_json
-		BLAS::BLAS
+		${BLAS_LIBRARIES}
 )
 
 target_include_directories(cnn
