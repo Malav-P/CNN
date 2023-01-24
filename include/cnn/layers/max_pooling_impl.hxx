@@ -25,13 +25,17 @@ MaxPool::MaxPool(size_t in_width, size_t in_height, size_t fld_width, size_t fld
 }
 
 void
-MaxPool::Forward(Vector<double> &input, Vector<double> &output)
+MaxPool::Forward(Array<double> &input, Array<double> &output)
 {
     // check to make sure input length matches the input shape of pooling layer
-    assert(input.get_len() == _in.width*_in.height);
+    assert(input.getsize() == _in.width*_in.height);
 
     // initialize array for temporary value storage
     Pair buffer[_field.width * _field.height];
+
+    // output data pointer
+    double* outputdata = output.getdata();
+    double* inputdata = input.getdata();
 
     // do max pooling operation
     for (size_t v_stride = 0; v_stride < _out.height; v_stride++) {for (size_t h_stride = 0; h_stride < _out.width; h_stride++)
@@ -44,7 +48,7 @@ MaxPool::Forward(Vector<double> &input, Vector<double> &output)
             {
                 for (size_t i = 0; i < _field.width; i++)
                 {
-                    buffer[j * _field.width + i] = {offset + j * _in.width + i, input[offset + j * _in.width + i]};
+                    buffer[j * _field.width + i] = {offset + j * _in.width + i, inputdata[offset + j * _in.width + i]};
                 }
             }
 
@@ -52,7 +56,7 @@ MaxPool::Forward(Vector<double> &input, Vector<double> &output)
             Pair winner = max_value(buffer, _field.width * _field.height);
 
             // store max value into output
-            output[v_stride*_out.width + h_stride] = winner.second;
+            outputdata[v_stride*_out.width + h_stride] = winner.second;
 
             // store max value's index
             _winners[v_stride * _out.width + h_stride] = winner.first;
@@ -60,16 +64,19 @@ MaxPool::Forward(Vector<double> &input, Vector<double> &output)
 }
 
 
-void MaxPool::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
+void MaxPool::Backward(Array<double> &dLdY, Array<double> &dLdX)
 {
 
     // ensure that dLdY has same length as output of pooling layer
-    assert(_winners.get_len() == dLdY.get_len());
+    assert(_winners.size() == dLdY.getsize());
+
+    double* dydata = dLdY.getdata();
+    double* dxdata = dLdX.getdata();
 
     // do backpropagation
-    for (size_t i=0; i < _winners.get_len(); i++)
+    for (size_t i=0; i < _winners.size(); i++)
     {
-        dLdX[_winners[i]] = dLdY[i];
+        dxdata[_winners[i]] = dydata[i];
     }
 
 
@@ -108,31 +115,31 @@ MaxPooling::MaxPooling(size_t in_width, size_t in_height, size_t in_maps, size_t
     _out.depth = in_maps;
 }
 
-void MaxPooling::Forward(Vector<double> &input, Vector<double> &output)
+void MaxPooling::Forward(Array<double> &input, Array<double> &output)
 {
 
-    Vector<double> out(_out.width*_out.height);
-    Vector<double> in(_in.height * _in.width);
+    Array<double> out({1, _out.width*_out.height});
+    Array<double> in({1,_in.height * _in.width});
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
 
-        in.reset_data(input.get_data() + i *_in.height * _in.width);
+        in.resetdata(input.get_data() + i *_in.height * _in.width);
         pool_vector[i].Forward(in, out);
-        output.write(out, i*out.get_len());
+        output.write(out, i*out.getsize());
     }
 
 }
 
-void MaxPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
+void MaxPooling::Backward(Array<double> &dLdY, Array<double> &dLdX)
 {
-    Vector<double> out(_in.height*_in.width);
-    Vector<double> in(_out.height * _out.width);
+    Array<double> out({1,_in.height*_in.width});
+    Array<double> in({1,_out.height * _out.width});
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
-        in.reset_data(dLdY.get_data() + i *_out.height * _out.width);
+        in.resetdata(dLdY.get_data() + i *_out.height * _out.width);
         pool_vector[i].Backward(in, out);
 
-        dLdX.write(out, i*out.get_len());
+        dLdX.write(out, i*out.getsize());
     }
 }
 }

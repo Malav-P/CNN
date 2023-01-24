@@ -22,22 +22,22 @@ class Softmax: public Layer {
           _beta(beta),
           _normalization(-1),
           _normalized(false),
-          _jacobian(len, len)
+          _jacobian({len, len})
         {}
         //! ----------------------------------------------------------------------------------------------------------
 
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
         // send vector through softmax layer
-        void Forward(Vector<double>& input, Vector<double>& output) override
+        void Forward(Array<double>& input, Array<double>& output) override
         {
             // check to make sure input and output is of same length as softmax length
-            assert(input.get_len() == _in.height && output.get_len() == _in.height);
+            assert(input.getsize() == _in.height && output.getsize() == _in.height);
 
             // calculate normalization factor
             _normalization = 0;
             for (size_t i = 0; i<_in.height ; i++)
             {
-                _normalization += exp(-_beta * input[i]);
+                _normalization += exp(-_beta * input[{0,i}]);
             }
 
             // set normalization flag to true
@@ -46,24 +46,39 @@ class Softmax: public Layer {
             // fill in output vector
             for (size_t i = 0; i<_in.height ; i++)
             {
-                output[i] = (1/_normalization) * exp(-_beta * input[i]);
+                output[{0,i}] = (1/_normalization) * exp(-_beta * input[{0,i}]);
             }
 
 
             // fill in derivative matrix
             for (size_t i = 0; i < _in.height; i++) { for (size_t j = 0; j < _in.height; j++)
                 {
-                    _jacobian(i,j) = (-_beta * (exp(-_beta * input[j])/_normalization))*(((i == j) ? 1 : 0 ) - (exp(-_beta * input[i]) / _normalization));
+                    _jacobian[{i,j}] = (-_beta * (exp(-_beta * input[{0,j}])/_normalization))*(((i == j) ? 1 : 0 ) - (exp(-_beta * input[{0,i}]) / _normalization));
                 }}
 
         }
 
         // send vector backward through the layer
-        void Backward(Vector<double>& dLdY, Vector<double>& dLdX) override
+        void Backward(Array<double>& dLdY, Array<double>& dLdX) override
         {
             // check to ensure a forward pass has occurred
             assert(_normalized);
-            dLdX = dLdY * _jacobian;
+
+            // num rows in C
+            int l = dLdX.getshape()[0];
+            // num cols in C
+            int n = dLdX.getshape()[1];
+            // num cols in A
+            int m = dLdY.getshape()[1];
+            double alpha = 1.0;
+            int lda = dLdY.getshape()[1];
+            int ldb = _jacobian.getshape()[1];
+            double beta = 0.0;
+            int ldc = dLdX.getshape()[1];
+
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, l, n,m,alpha, dLdY.getdata(), lda, _jacobian.getdata(), ldb, beta, dLdX.getdata(), ldc);
+
+            //dLdX = dLdY * _jacobian;
 
             // reset normalization to -1
             _normalized = false;
@@ -89,7 +104,7 @@ class Softmax: public Layer {
         bool _normalized {false};
 
         // derivative matrix
-        Mat<double> _jacobian {};
+        Array<double> _jacobian {};
 };
 
 }

@@ -18,8 +18,6 @@ DataSet read_mnist(size_t N_SAMPLES, size_t train_or_test)
     int row, col, label;
 
     char buf[10000];
-    double label_buf[10]{0};
-    double vector_buf[784];
 
     char* tok;
 
@@ -35,6 +33,9 @@ DataSet read_mnist(size_t N_SAMPLES, size_t train_or_test)
 
     for(row=0; row < N_SAMPLES; row++){
 
+        Array<double> mydatapoint({1,784});
+        Array<double> mylabel({1,10});
+
         col = 0;
 
         fgets(buf, sizeof(buf), fp);
@@ -43,20 +44,18 @@ DataSet read_mnist(size_t N_SAMPLES, size_t train_or_test)
         label = atoi(tok);
 
         // fill in buffer with correct truth value
-        label_buf[label] = 1.0;
+        mylabel[{0,label}] = 1.0;
 
         tok = strtok(nullptr, ",");
         while (tok != nullptr){
-            vector_buf[col] = strtod(tok, nullptr)/255.0;
+            mydatapoint[{0,col}] = strtod(tok, nullptr)/255.0;
             col +=1;
             tok = strtok(nullptr, ",");
         }
 
 
-        container.datapoints.emplace_back(Vector<double>(784, vector_buf), Vector<double>(10, label_buf));
+        container.datapoints.emplace_back(mydatapoint, mylabel);
 
-        // return buffer to original state
-        label_buf[label] = 0;
     }
 
     fclose(fp);

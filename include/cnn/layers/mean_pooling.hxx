@@ -25,10 +25,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ------------------------------------------------------------------------------
 
         // send feature through the MeanPool layer
-        void Forward(Vector<double> &input, Vector<double> &output);
+        void Forward(Array<double> &input, Array<double> &output);
 
         // send feature backward through the MeanPool Layer
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX);
+        void Backward(Array<double> &dLdY, Array<double> &dLdX);
 
         // get output shape
         Dims3 const &out_shape() const { return _out; }
@@ -83,10 +83,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(Vector<double> &input, Vector<double> &output) override;
+        void Forward(Array<double> &input, Array<double> &output) override;
 
         // send feature backward through the MaxPool layer
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
+        void Backward(Array<double> &dLdY, Array<double> &dLdX) override;
 
         // update parameters in this layer (during learning)
         template<typename Optimizer>

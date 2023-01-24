@@ -6,8 +6,7 @@
 #define ANN_CONVOLUTION_IMPL_HXX
 
 #include "convolution.hxx"
-#include "../lin_alg/miscellaneous_helpers.hxx"
-
+#include "../helpers/im2col.hxx"
 
 namespace CNN {
 
@@ -23,9 +22,9 @@ namespace CNN {
               _padright(padright),
               _padtop(padtop),
               _padbottom(padbottom),
-              _filters(out_maps),
-              _dLdFs(out_maps),
-              _local_input(in_maps){
+              _filters({out_maps, in_maps, filter_height, filter_width}),
+              _dLdFs({out_maps, in_maps, filter_height, filter_width})
+              {
 
         // calculate total number of vertical and horizontal strides
         size_t num_v_strides = std::floor((_in.height + _padtop + _padbottom - filter_height) / _v_str) + 1;
@@ -34,45 +33,35 @@ namespace CNN {
         // specify output shape
         _out = {num_h_strides, num_v_strides, out_maps};
 
-        // get the current time to seed the random number generator
-        typedef std::chrono::high_resolution_clock myclock;
-        myclock::time_point beginning = myclock::now();
-        myclock::duration d = myclock::now() - beginning;
-        unsigned seed2 = d.count();
-
-        size_t m = _in.height + _padtop + _padbottom;
-        size_t n = _in.width + _padleft + _padright;
-
-        // seed the random number generator
-        std::default_random_engine generator(seed2);
-        std::uniform_real_distribution<double> distribution(-sqrt(6.0 / (m * n + _out.height * _out.width)),
-                                                            sqrt(6.0 / (m * n + _out.height * _out.width)));
-
-        // allocate memory for an initialize filters
-        for (size_t i = 0; i < _filters.size(); i++) {
-            _filters[i] = Cuboid<double>(filter_height, filter_width, in_maps);
-            _dLdFs[i] = Cuboid<double>(filter_height, filter_width, in_maps);
-        }
 
         // Glorot initialize the weights if weights pointer is null
         if (weights == nullptr) {
-            for (Cuboid<double> &_filter: _filters) {
-                for (size_t i = 0; i < filter_height; i++) {
-                    for (size_t j = 0; j < filter_width; j++) {
-                        for (size_t k = 0; k < in_maps; k++) {
-                            _filter(i, j, k) = distribution(generator);
-                        }
-                    }
-                }
+
+            // get the current time to seed the random number generator
+            typedef std::chrono::high_resolution_clock myclock;
+            myclock::time_point beginning = myclock::now();
+            myclock::duration d = myclock::now() - beginning;
+            unsigned seed2 = d.count();
+
+            size_t m = _in.height + _padtop + _padbottom;
+            size_t n = _in.width + _padleft + _padright;
+
+            // seed the random number generator
+            std::default_random_engine generator(seed2);
+            std::uniform_real_distribution<double> distribution(-sqrt(6.0 / (m * n + _out.height * _out.width)),
+                                                                sqrt(6.0 / (m * n + _out.height * _out.width)));
+
+            double* data = _filters.getdata();
+            for (int i = 0 ; i < _filters.getsize(); i++)
+            {
+                *(data++) = distribution(generator);
             }
         }
 
             // if weights pointer is provided then we fill in the values
         else {
-            size_t len = _filters[0].get_depth() * _filters[0].get_rows() * _filters[0].get_cols();
-            for (size_t i = 0; i < _filters.size(); i++) {
-                std::memcpy(_filters[i].get_data(), weights + (i * len), len * sizeof(double));
-            }
+            std::memcpy(_filters.getdata(), weights, _filters.getsize() * sizeof(double));
+
         }
 
 
@@ -82,17 +71,16 @@ namespace CNN {
                              size_t filter_height, size_t stride_h, size_t stride_v, bool padding, double *weights)
             : _h_str(stride_h),
               _v_str(stride_v),
-              _filters(out_maps),
-              _dLdFs(out_maps),
-              _local_input(in_maps),
+              _filters({out_maps, in_maps, filter_height, filter_width}),
+              _dLdFs({out_maps, in_maps, filter_height, filter_width}),
               Layer(in_width, in_height, in_maps, 0, 0, 0) {
-        if (!padding) {
-            _padleft = 0;
-            _padright = 0;
-            _padtop = 0;
-            _padbottom = 0;
+        if (!padding)
+        {
+            _padleft = 0; _padright = 0; _padtop = 0; _padbottom = 0;
+        }
 
-        } else {
+        else
+        {
             // total number of padded rows
             size_t vert_pad = (in_height - 1) * stride_v - in_height + filter_height;
 
@@ -112,186 +100,233 @@ namespace CNN {
             _padright = std::ceil(hor_pad / 2.0);
         }
 
-
+        // input height with padding
         size_t m = _in.height + _padtop + _padbottom;
+        // input width with padding
         size_t n = _in.width + _padleft + _padright;
 
         // calculate total number of vertical and horizontal strides
         size_t num_v_strides = std::floor((m - filter_height) / _v_str) + 1;
         size_t num_h_strides = std::floor((n - filter_width) / _h_str) + 1;
 
-        // specify output shape
+        // output shape
         _out = {num_h_strides, num_v_strides, out_maps};
 
-        // get the current time to seed the random number generator
-        typedef std::chrono::high_resolution_clock myclock;
-        myclock::time_point beginning = myclock::now();
-        myclock::duration d = myclock::now() - beginning;
-        unsigned seed2 = d.count();
+        // Glorot initialize the weights if weights pointer is null
+        if (weights == nullptr)
+        {
 
-        // seed the random number generator
-        std::default_random_engine generator(seed2);
-        std::uniform_real_distribution<double> distribution(-sqrt(6.0 / (m * n + _out.height * _out.width)),
-                                                            sqrt(6.0 / (m * n + _out.height * _out.width)));
+            // get the current time to seed the random number generator
+            typedef std::chrono::high_resolution_clock myclock;
+            myclock::time_point beginning = myclock::now();
+            myclock::duration d = myclock::now() - beginning;
+            unsigned seed2 = d.count();
 
-        // initialize filters
-        for (size_t i = 0; i < _filters.size(); i++) {
-            _filters[i] = Cuboid<double>(filter_height, filter_width, in_maps);
-            _dLdFs[i] = Cuboid<double>(filter_height, filter_width, in_maps);
-        }
+            // seed the random number generator
+            std::default_random_engine generator(seed2);
+            std::uniform_real_distribution<double> distribution(-sqrt(6.0 / (m * n + _out.height * _out.width)),
+                                                                sqrt(6.0 / (m * n + _out.height * _out.width)));
 
-        // Glorot initialize the weights if no weight data is provided
-        if (weights == nullptr){
-            for (Cuboid<double> &_filter: _filters) {
-                for (size_t i = 0; i < filter_height; i++) {
-                    for (size_t j = 0; j < filter_width; j++) {
-                        for (size_t k = 0; k < in_maps; k++) {
-                            _filter(i, j, k) = distribution(generator);
-                        }
-                    }
-                }
+
+            double* data = _filters.getdata();
+            for (int i = 0 ; i < _filters.getsize(); i++)
+            {
+                *(data++) = distribution(generator);
             }
         }
 
 
         // if weights pointer is provided then we fill in the values
-        else {
-            size_t len = _filters[0].get_depth() * _filters[0].get_rows() * _filters[0].get_cols();
-            for (size_t i = 0; i < _filters.size(); i++) {
-                std::memcpy(_filters[i].get_data(), weights + (i * len), len * sizeof(double));
-            }
+        else
+        {
+            std::memcpy(_filters.getdata(), weights, _filters.getsize() * sizeof(double));
         }
 
     }
 
-    void Convolution::Forward(Vector<double> &input, Vector<double> &output) {
+    void Convolution::Forward(Array<double> &input, Array<double> &output) {
         // note that input length matching with _in parameters is indirectly checked in the matrix*vector operator overload
 
         // this routine can be optimized (we take a vector, turn it into matrix, pad it, then flatten back to vector)
         // find a way to do the padding with the vector itself
+        output.Reshape({_out.depth, _out.height, _out.width});
 
-        size_t rows = _in.height;
-        size_t cols = _in.width;
+        _local_input = Array<double>(input);
+        _local_input.Reshape({_in.depth, _in.height, _in.width});
+        _local_input = _local_input.pad({0, 0, _padtop, _padbottom, _padleft, _padright});
 
-        for (size_t i = 0; i < _filters[0].get_depth(); i++) {
-            _local_input[i] = Mat<double>(rows, cols, input.get_data() + i * rows * cols);
-            _local_input[i].padding(_padleft, _padright, _padtop, _padbottom);
-        }
 
-        Cuboid<double> input_cube = cubify(_local_input);
+        // generate col matrix using im2col
+        int filterwidth = _filters.getshape()[3];
+        int filterheight = _filters.getshape()[2];
+        int filterdepth = _filters.getshape()[1];
 
-        for (size_t k = 0; k < _filters.size(); k++) {
+        int N_zstr = 1;
+        int N_vstr = _out.height;
+        int N_hstr = _out.width;
 
-            // do convolution
-            for (size_t i = 0; i < _out.height; i++) {
-                for (size_t j = 0; j < _out.width; j++) {
-                    output[k * _out.height * _out.width + i * _out.width + j] = input_cube.partial_dot(_filters[k],
-                                                                                                       {i * _v_str,
-                                                                                                        j * _h_str, 0});
-                }
-            }
-        }
+        int v_ = _v_str;
+        int h_ = _h_str;
+        int z_ = 1;
+
+        // TODO - shape dimensions should actaully be swapped
+        Array<double> col({ filterwidth*filterheight*filterdepth, _out.width*_out.height});
+
+        im2col(_local_input, col,N_zstr, N_vstr, N_hstr, filterdepth, filterheight, filterwidth, v_, h_, z_);
+
+
+        // num rows in C
+        int l = _out.depth;
+        // num cols in C
+        int n = _out.width*_out.height;
+        // num cols in A
+        int m = filterwidth*filterheight*filterdepth;
+        double alpha = 1.0;
+        int lda = m;
+        int ldb = m;
+        double beta = 0.0;
+        int ldc = _out.width*_out.height;
+
+        // do matmul
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, l, n,m,alpha, _filters.getdata(), lda, col.getdata(), ldb, beta, output.getdata(), ldc);
+
+        output.Reshape({1, output.getsize()});
     }
 
 
-    void Convolution::Backward(Vector<double> &dLdYs, Vector<double> &dLdXs) {
+    void Convolution::Backward(Array<double> &dLdYs, Array<double> &dLdXs) {
 
-        size_t m = _out.height;
-        size_t n = _out.width;
+        int p = _in.height + _padtop + _padbottom;
+        int q = _in.width + _padleft + _padright;
 
-        size_t p = _in.height + _padtop + _padbottom;
-        size_t q = _in.width + _padleft + _padright;
+        int filter_height = _filters.getshape()[2];
+        int filter_width = _filters.getshape()[3];
+        int filter_depth = _in.depth;
 
-        size_t filter_height = _filters[0].get_rows();
-        size_t filter_width = _filters[0].get_cols();
+        //! begin overhaul
 
-        size_t N_filters = _filters.size();
-        size_t N_in_maps = _filters[0].get_depth();
+        Array<double> reform_output({_out.depth, _out.height + ((p - filter_height) % _v_str) + (_out.height - 1) * (_v_str - 1),
+                                     _out.width + ((q - filter_width) % _h_str) + (_out.width - 1) * (_h_str - 1)});
 
+        double* reform_output_data = reform_output.getdata();
+        vector<int> reform_output_strides = reform_output.getstride();
 
-        for (size_t idx = 0; idx < N_filters; idx++) {
-            // reshape dLdY into a matrix
-            double *dLdY = dLdYs.get_data() + idx * m * n;
+        dLdYs.Reshape({_out.depth, _out.height, _out.width});
+        double* dLdYs_data = dLdYs.getdata();
+        vector<int> dLdYs_strides = dLdYs.getstride();
 
-            // reformatted output
-            Mat<double> reformatted_output(m + ((p - filter_height) % _v_str) + (m - 1) * (_v_str - 1),
-                                           n + ((q - filter_width) % _h_str) + (n - 1) * (_h_str - 1));
-
-            // fill in reformatted output matrix with the correct values
-            for (size_t i = 0; i < m; i++) {
-                for (size_t j = 0; j < n; j++) {
-                    reformatted_output(i * (_v_str), j * (_h_str)) = dLdY[i * n + j];
+        for (int k = 0; k < _out.depth; k++)
+        {
+            for (int i = 0; i < _out.height; i++)
+            {
+                for (int j = 0; j < _out.width; j++)
+                {
+                    reform_output_data[k*reform_output_strides[0] + i*_v_str*reform_output_strides[1] + j*_h_str*reform_output_strides[2]] = dLdYs_data[k*dLdYs_strides[0] + i*dLdYs_strides[1] + j*dLdYs_strides[2]];
                 }
             }
-
-            // convolve the input images with reformatted output with unit strides
-            size_t num_v_strides = std::floor((p - reformatted_output.get_rows())) + 1;
-            size_t num_h_strides = std::floor((q - reformatted_output.get_cols())) + 1;
-
-            for (size_t k = 0; k < N_in_maps; k++) {
-                for (size_t i = 0; i < num_v_strides; i++) {
-                    for (size_t j = 0; j < num_h_strides; j++) {
-                        _dLdFs[idx](i, j, k) += _local_input[k].partial_dot(reformatted_output, {i, j});
-                    }
-                }
-            }
-
-            // this concludes the calculation of _dLdFs
-
-            // we move to calculation of dLdX
-
-            // add padding to reformatted matrix
-            reformatted_output.padding(filter_width - 1, filter_width - 1, filter_height - 1, filter_height - 1);
-
-            num_v_strides = std::floor((reformatted_output.get_rows() - filter_height)) + 1;
-            num_h_strides = std::floor((reformatted_output.get_cols() - filter_width)) + 1;
-
-            // number of strides in each direction should be equal to the dimensions of dLdX_matrix
-            assert(num_v_strides == p);
-            assert(num_h_strides == q);
-
-            size_t n_rows = num_v_strides - _padtop - _padbottom;
-            size_t n_cols = num_h_strides - _padleft - _padright;
-
-            for (size_t k = 0; k < N_in_maps; k++) {
-                Mat<double> filter_plane(filter_height, filter_width,
-                                         _filters[idx]._data + k * filter_width * filter_height);
-                //rotate filter by 180 degrees
-                filter_plane.set_rot(2);
-                // crop the matrices and only look at cropped portion of data
-                for (size_t i = 0; i < n_rows; i++) {
-                    for (size_t j = 0; j < n_cols; j++) {
-                        dLdXs[k * n_rows * n_cols + (i) * n_cols + (j)] += reformatted_output.partial_dot(filter_plane,
-                                                                                                          {i + _padtop,
-                                                                                                           j +
-                                                                                                           _padleft});
-                    }
-                }
-            }
-
         }
+
+        // generate col matrix using im2col
+        int reformoutputwidth = reform_output.getshape()[2];
+        int reformoutputheight = reform_output.getshape()[1];
+        int reformoutputdepth = reform_output.getshape()[0];
+
+        // convolve the input images with reformatted output with unit strides
+        int N_zstr = _in.depth;
+        int N_vstr = std::floor((p - reform_output.getshape()[1])) + 1;
+        int N_hstr = std::floor((q - reform_output.getshape()[2])) + 1;
+
+        int N_maps = 1;
+
+        int v_ = 1;
+        int h_ = 1;
+        int z_ = 1;
+
+        // TODO - shape dimensions should actually be swapped
+        Array<double> col({ reformoutputheight*reformoutputwidth*N_maps, N_zstr*N_vstr*N_hstr});
+
+        im2col(_local_input, col, N_zstr, N_vstr, N_hstr, N_maps, reformoutputheight, reformoutputwidth, v_, h_, z_);
+
+        // num rows in C, also num rows in A
+        int l = reformoutputdepth;
+        // num cols in C, also num cols in B
+        int n = filter_width*filter_height*filter_depth;
+        // num cols in A
+        int m = reformoutputwidth*reformoutputheight*N_maps;
+        double alpha = 1.0;
+        int lda = m;
+        int ldb = m;
+        double beta = 1.0;
+        int ldc = n;
+
+        // do matmul
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, l, n,m,alpha, reform_output.getdata(), lda, col.getdata(), ldb, beta, _dLdFs.getdata(), ldc);
+
+        // this concludes the calculation of _dLdFs
+
+        // we move to calculation of dLdX
+
+        // add padding to reformatted matrix
+        reform_output = reform_output.pad({0,0,filter_height - 1 - _padtop, filter_height - 1 - _padbottom, filter_width - 1 - _padleft, filter_width - 1 - _padright});
+
+        N_zstr = _out.depth;
+        N_vstr = _in.height;
+        N_hstr = _in.width;
+
+        v_ = 1;
+        h_ = 1;
+        z_ = 1;
+
+        N_maps = 1;
+
+        // TODO - shape dimensions should actaully be swapped
+        col.Reshape({ filter_width*filter_height*N_maps, N_zstr*N_vstr*N_hstr});
+
+        im2col(reform_output, col, N_zstr, N_vstr, N_hstr, N_maps, filter_height, filter_width, v_, h_, z_);
+
+        // num rows in C, depth of each filter
+        l = filter_depth;
+        // num cols in C, total number of strides for one slice of reformoutput
+        n = N_vstr*N_hstr;
+        // num cols in A
+        m = filter_width*filter_height;
+        alpha = 1.0;
+        lda = m;
+        ldb = m;
+        beta = 1.0;
+        ldc = n;
+
+        Array<double> rotated_filters = _filters.rotate();
+        for (int idx = 0 ; idx < _out.depth ; idx++)
+        {
+             double* rot_filter_data = rotated_filters.getdata() + idx*rotated_filters.getstride()[0];
+             double* col_data = col.getdata() + idx*N_vstr*N_hstr*filter_height*filter_width;
+
+            // do matmul
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, l, n,m,alpha, rot_filter_data, lda, col_data, ldb, beta, dLdXs.getdata(), ldc);
+        }
+
         // we are averaging the loss gradient over the total number of filters
-        dLdXs *= 1.0 / N_filters;
+        // alternatively, change alpha on line 297 to 1/N_filters
+        dLdXs *= 1.0 / _out.depth;
+
+        // reshape operation technically not needed
+        dLdXs.Reshape({1, dLdXs.getsize()});
+
+        //! END OVERHAUL
+
     }
 
     template<typename Optimizer>
     void Convolution::Update_Params(Optimizer *optimizer, size_t normalizer) {
-        for (size_t i = 0; i < _filters.size(); i++) {
+
             // update the weights according to the optimizer
-            (*optimizer).Forward(_filters[i], _dLdFs[i], normalizer);
+            (*optimizer).Forward(_filters, _dLdFs, normalizer);
 
-            // fill the gradient with zeros
-            _dLdFs[i].fill(0);
-        }
-
+            // fill the gradient with zeros, ideally could use memset
+            _dLdFs.fill(0);
     }
 
-    void Convolution::print_filters() {
-        for (size_t i = 0; i < _filters.size(); i++) {
-            std::cout << "FILTER " << i << "----------------\n\n";
-            _filters[i].print();
-        }
-    }
 
 } // namespace CNN
 #endif //ANN_CONVOLUTION_IMPL_HXX

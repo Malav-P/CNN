@@ -12,16 +12,17 @@ namespace CNN {
     Tanh::Tanh(size_t input_width, size_t input_height, size_t input_depth) :
             Layer(input_width, input_height, input_depth, input_width, input_height, input_depth) {}
 
-    void Tanh::Forward(Vector<double> &input, Vector<double> &output) {
-        assert(input.get_len() == output.get_len());
+    void Tanh::Forward(Array<double> &input, Array<double> &output) {
+        assert(input.getsize() == output.getsize());
 
+        // might need copy constructor here TODO
         _local_input = input;
-        for (size_t i = 0; i < input.get_len(); i++) { output[i] = func(input[i]); }
+        for (size_t i = 0; i < input.getsize(); i++) { output[{0,i}] = func(input[{0,i}]); }
     }
 
-    void Tanh::Backward(Vector<double> &dLdY, Vector<double> &dLdX) {
-        assert(dLdY.get_len() == dLdX.get_len());
-        for (size_t i = 0; i < dLdY.get_len(); i++) { dLdX[i] = dLdY[i] * deriv(_local_input[i]); }
+    void Tanh::Backward(Array<double> &dLdY, Array<double> &dLdX) {
+        assert(dLdY.getsize() == dLdX.getsize());
+        for (size_t i = 0; i < dLdY.getsize(); i++) { dLdX[{0,i}] = dLdY[{0,i}] * deriv(_local_input[{0,i}]); }
     }
 
     double Tanh::func(double input) {

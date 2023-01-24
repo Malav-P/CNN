@@ -23,10 +23,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ----------------------------------------------------------------------------
 
         // send feature through the convolutional layer
-        virtual void Forward(Vector<double> &input, Vector<double> &output) = 0;
+        virtual void Forward(Array<double> &input, Array<double> &output) = 0;
 
         // send feature backward through convolutional layer, keeping track of gradients
-        virtual void Backward(Vector<double> &dLdYs, Vector<double> &dLdXs) = 0;
+        virtual void Backward(Array<double> &dLdYs, Array<double> &dLdXs) = 0;
 
         // get output shape of convolution
         Dims3 const &out_shape() const { return _out; }

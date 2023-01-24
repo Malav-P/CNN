@@ -18,10 +18,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(Vector<double> &input, Vector<double> &output) override;
+        void Forward(Array<double> &input, Array<double> &output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
+        void Backward(Array<double> &dLdY, Array<double> &dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
@@ -38,7 +38,7 @@ namespace CNN {
         double alpha{0};
 
         // local input to layer
-        Vector<double> _local_input;
+        Array<double> _local_input;
 
         // apply function to input
         double func(double input);

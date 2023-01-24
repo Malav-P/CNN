@@ -24,10 +24,10 @@ MeanPool::MeanPool(size_t in_width, size_t in_height, size_t fld_width, size_t f
 }
 
 void
-MeanPool::Forward(Vector<double> &input, Vector<double> &output)
+MeanPool::Forward(Array<double> &input, Array<double> &output)
 {
     // ensure input length matches input shape of mean pool layer
-    assert(input.get_len() == _in.width*_in.height);
+    assert(input.getsize() == _in.width*_in.height);
 
     // create a buffer to hold values from the sliding window
     double buffer[_field.width * _field.height];
@@ -41,16 +41,16 @@ MeanPool::Forward(Vector<double> &input, Vector<double> &output)
             // add the elements of the array to the buffer
             for (size_t j = 0; j < _field.height; j++) {for (size_t i = 0; i < _field.width; i++)
                 {
-                    buffer[j * _field.width + i] = input[offset + j * _in.width + i];
+                    buffer[j * _field.width + i] = input[{0,offset + j * _in.width + i}];
                 }
             }
 
             // compute the average value of the buffer
-            output[v_stride*_out.width + h_stride] = avg_value(buffer, _field.width * _field.height);
+            output[{0,v_stride*_out.width + h_stride}] = avg_value(buffer, _field.width * _field.height);
         }}
 }
 
-void MeanPool::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
+void MeanPool::Backward(Array<double> &dLdY, Array<double> &dLdX)
 {
     // compute total number of vertical and horizontal strides
     size_t num_v_strides = std::floor((_in.height - _field.height) / _v_str) + 1;
@@ -67,7 +67,7 @@ void MeanPool::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
             {
                 for (size_t i = 0; i < _field.width; i++)
                 {
-                    dLdX[offset + j * _in.width + i] = (1.0 / (_field.width * _field.height)) * dLdY[v_stride * num_h_strides + h_stride];
+                    dLdX[{0,offset + j * _in.width + i}] = (1.0 / (_field.width * _field.height)) * dLdY[{0,v_stride * num_h_strides + h_stride}];
                 }
             }
 
@@ -107,34 +107,34 @@ MeanPooling::MeanPooling(size_t in_width, size_t in_height, size_t in_maps, size
     _out.depth = in_maps;
 }
 
-void MeanPooling::Forward(Vector<double> &input, Vector<double> &output)
+void MeanPooling::Forward(Array<double> &input, Array<double> &output)
 {
 
     // allocate memory for output vector
-    Vector<double> out(_out.width*_out.height);
-    Vector<double> in(_in.height * _in.width);
+    Array<double> out({1,_out.width*_out.height});
+    Array<double> in({1,_in.height * _in.width});
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
 
-        in.reset_data(input.get_data() + i *_in.height * _in.width);
+        in.resetdata(input.getdata() + i *_in.height * _in.width);
         pool_vector[i].Forward(in, out);
 
-        output.write(out, i*out.get_len());
+        output.write(out, i*out.getsize());
     }
 
 }
 
-void MeanPooling::Backward(Vector<double> &dLdY, Vector<double> &dLdX)
+void MeanPooling::Backward(Array<double> &dLdY, Array<double> &dLdX)
 {
 
-    Vector<double> out(_in.height*_in.width);
-    Vector<double> in(_out.height*_out.width);
+    Array<double> out({1,_in.height*_in.width});
+    Array<double> in({1,_out.height*_out.width});
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
-        in.reset_data(dLdY.get_data() + i *_out.height * _out.width);
+        in.resetdata(dLdY.getdata() + i *_out.height * _out.width);
         pool_vector[i].Backward(in, out);
 
-        dLdX.write(out, i*out.get_len());
+        dLdX.write(out, i*out.getsize());
     }
 
 }

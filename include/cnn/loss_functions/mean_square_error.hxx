@@ -12,23 +12,23 @@ namespace CNN {
 
     public:
 
-        double loss(Vector<double> &output, Vector<double> &target) {
+        double loss(Array<double> &output, Array<double> &target) {
             // assert that number of elements in other vector and this vector are equal
-            assert(output.get_len() == target.get_len());
+            assert(output.getsize() == target.getsize());
 
             // initialize return variable
             double loss = 0;
 
             // compute loss
-            for (size_t i = 0; i < output.get_len(); i++) {
-                loss += 0.5 * (output[i] - target[i]) * (output[i] - target[i]);
+            for (size_t i = 0; i < output.getsize(); i++) {
+                loss += 0.5 * (output[{0,i}] - target[{0,i}]) * (output[{0,i}] - target[{0,i}]);
             }
 
             // return result
             return loss;
         }
 
-        Vector<double> grad(Vector<double> &output, Vector<double> &target) { return output - target; }
+        Array<double> grad(Array<double> &output, Array<double> &target) { return output - target; }
 
     private:
 

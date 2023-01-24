@@ -7,7 +7,7 @@
 #include "../lin_alg/data_types.hxx"
 
 // <datapoint, label>
-using Vector_Pair = std::pair<CNN::Vector<double>, CNN::Vector<double>>;
+using Vector_Pair = std::pair<CNN::Array<double>, CNN::Array<double>>;
 
 namespace CNN {
 

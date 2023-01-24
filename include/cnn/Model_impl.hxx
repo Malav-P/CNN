@@ -14,19 +14,19 @@ using namespace std;
 namespace CNN{
 
 template<typename LossFunction>
-void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
+void Model<LossFunction>::Forward(Array<double> &input, Array<double>& output)
 {
     Forward_visitor visitor{};
 
     // this is here because otherwise leads to memory access violation (SIGTRAP) on line 29
-    visitor.input = new Vector<double>(input);
+    visitor.input = new Array<double>(input);
 
 
     for (LayerTypes layer : network)
     {
         Dims3 out_shape = boost::apply_visitor(Outshape_visitor(), layer);
 
-        visitor.output = new Vector<double>(out_shape.width*out_shape.height*out_shape.depth);
+        visitor.output = new Array<double>({1,out_shape.width*out_shape.height*out_shape.depth});
         boost::apply_visitor(visitor, layer);
 
         delete visitor.input;
@@ -41,12 +41,12 @@ void Model<LossFunction>::Forward(Vector<double> &input, Vector<double>& output)
 }
 
 template<typename LossFunction>
-void Model<LossFunction>::Backward(Vector<double> &dLdY, Vector<double>& dLdX)
+void Model<LossFunction>::Backward(Array<double> &dLdY, Array<double>& dLdX)
 {
     Backward_visitor visitor{};
 
     // this is here because otherwise leads to memory access violation (SIGTRAP) on line 54
-    visitor.dLdY = new Vector<double>(dLdY);
+    visitor.dLdY = new Array<double>(dLdY);
 
     // i must be type int or else code fails! i-- turn i = 0 into i = largest unsigned int possible
     for (int i = network.size() - 1; i >= 0; i--)
@@ -55,7 +55,7 @@ void Model<LossFunction>::Backward(Vector<double> &dLdY, Vector<double>& dLdX)
 
         Dims3 in_shape =  boost::apply_visitor(Inshape_visitor(), layer);
 
-        visitor.dLdX = new Vector<double>(in_shape.width * in_shape.height * in_shape.depth);
+        visitor.dLdX = new Array<double>({1,in_shape.width * in_shape.height * in_shape.depth});
         boost::apply_visitor(visitor, layer);
 
         delete visitor.dLdY;
@@ -119,7 +119,7 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
 
     for (size_t i = 0; i < epochs ; i++) {
 
-        Vector<double> output, dLdY, dLdX;
+        Array<double> output, dLdY, dLdX;
         size_t count = 0;
 
         for (Vector_Pair datapoint: training_set.datapoints) {
@@ -158,7 +158,7 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
 template<typename LossFunction>
 void Model<LossFunction>::Test(DataSet &test_set, bool verbose)
 {
-    Vector<double> output, dLdY, dLdX;
+    Array<double> output, dLdY, dLdX;
     size_t num_correct = 0;
     for (Vector_Pair datapoint : test_set.datapoints)
     {
@@ -167,14 +167,14 @@ void Model<LossFunction>::Test(DataSet &test_set, bool verbose)
 
         // find index with largest probability
         int idx = 0;
-        for (int i = 0; i< output.get_len(); i++)
+        for (int i = 0; i< output.getsize(); i++)
         {
-            if (output[idx] < output[i])
+            if (output[{0,idx}] < output[{0,i}])
             { idx = i; }
         }
 
         // check if idx is correct with the label
-        if (datapoint.second[idx] == 1)
+        if (datapoint.second[{0,idx}] == 1)
         {
             num_correct += 1;
         }
@@ -396,9 +396,9 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 // out width
                 parameters[3] = ptr->in_shape().height;
                 // filter width
-                parameters[4] = ptr->get_filters()[0].get_cols();
+                parameters[4] = ptr->get_filters().getshape()[3];
                 // filter height
-                parameters[5] = ptr->get_filters()[0].get_rows();
+                parameters[5] = ptr->get_filters().getshape()[2];
                 // horizontal stride
                 parameters[6] = ptr->get_stride().width;
                 // vertical stride
@@ -413,19 +413,13 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 parameters[11] = ptr->get_padding().fourth;
 
                 // filters
-                std::vector<Cuboid<double>> _filters = ptr->get_filters();
+                Array<double> _filters = ptr->get_filters();
 
 
-                size_t length = _filters[0].get_rows() *_filters[0].get_cols() * _filters[0].get_depth();
+                size_t length = _filters.getsize();
                 // linear array of weights
                 weights = new double[length * parameters[1]];
-                size_t offset;
-                for (size_t l = 0; l < parameters[1]; l++)
-                {
-                    offset =  length * l;
-                    std::memcpy(weights + offset, _filters[l].get_data(), length * sizeof(double));
-
-                }
+                std::memcpy(weights, _filters.get_data(), length * sizeof(double));
 
 
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [";
@@ -533,8 +527,8 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t layerID = 3;
                 size_t in_size = ptr->in_shape().height;
                 size_t out_size = ptr->out_shape().height;
-                double* weights = ptr->get_weights().get_data();
-                double* biases = ptr->get_biases().get_data();
+                Array<double> weights = ptr->get_weights();
+                Array<double> biases = ptr->get_biases();
 
                 // write parameters
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << in_size << "," << out_size << "], ";
@@ -543,15 +537,15 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 fid << "\n\t \"weights\" : [";
                 for (size_t i = 0; i < in_size*out_size; i++)
                 {
-                    fid << weights[i] << ",";
+                    fid << weights.getdata()[i] << ",";
                 }
 
                 //write biases
                 for (size_t i = 0; i < out_size - 1; i++)
                 {
-                    fid << biases[i] << ",";
+                    fid << biases.getdata()[i] << ",";
                 }
-                fid << biases[out_size - 1] << "] \n\t}";
+                fid << biases.getdata()[out_size - 1] << "] \n\t}";
 
                 break;
             }
@@ -768,19 +762,19 @@ Model<LossFunction>::Model(string &filename)
 
 
 template<typename LossFunction>
-double Model<LossFunction>::Classify(Vector<double> &input, Vector<double> &output, int& answer)
+double Model<LossFunction>::Classify(Array<double> &input, Array<double> &output, int& answer)
 {
     Forward(input, output);
 
     // find index with largest probability
     answer = 0;
-    for (int i = 0; i< output.get_len(); i++)
+    for (int i = 0; i< output.getsize(); i++)
     {
-        if (output[answer] < output[i])
+        if (output[{0,answer}] < output[{0,i}])
         { answer = i; }
     }
 
-    return output[answer];
+    return output[{0,answer}];
 }
 
 

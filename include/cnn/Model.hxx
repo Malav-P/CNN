@@ -41,16 +41,16 @@ namespace CNN {
         Dims3 get_outshape(size_t idx) { return boost::apply_visitor(Outshape_visitor(), network[idx]); }
 
         // make a forward pass through the network
-        void Forward(Vector<double> &input, Vector<double> &output);
+        void Forward(Array<double> &input, Array<double> &output);
 
         // make a Backward pass through the network
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX);
+        void Backward(Array<double> &dLdY, Array<double> &dLdX);
 
         // make a pass through the network, updating all the parameters
         template<typename Optimizer>
         void Update_Params(Optimizer *optimizer, size_t normalizer);
 
-        double Classify(Vector<double> & input, Vector<double>& output, int& answer);
+        double Classify(Array<double> & input, Array<double>& output, int& answer);
 
         // get number of layers in model
         size_t get_size() const { return network.size(); }
