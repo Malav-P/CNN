@@ -16,16 +16,27 @@ namespace CNN {
         if (Alpha < 0) { alpha = 0; } //! alpha cannot be negative
     }
 
-    void RelU::Forward(Vector<double> &input, Vector<double> &output) {
-        assert(input.get_len() == output.get_len());
+    void RelU::Forward(Array<double> &input, Array<double> &output) {
+        assert(input.getsize() == output.getsize());
 
+        // might need copy constructor here TODO
         _local_input = input;
-        for (size_t i = 0; i < input.get_len(); i++) { output[i] = func(input[i]); }
+
+        double* indata = input.getdata();
+        double* outdata = output.getdata();
+
+        for (size_t i = 0; i < input.getsize(); i++) { *(outdata++) = *(indata) < 0 ? alpha * (*(indata)) : *indata; indata++; }
     }
 
-    void RelU::Backward(Vector<double> &dLdY, Vector<double> &dLdX) {
-        assert(dLdY.get_len() == dLdX.get_len());
-        for (size_t i = 0; i < dLdY.get_len(); i++) { dLdX[i] = dLdY[i] * deriv(_local_input[i]); }
+    void RelU::Backward(Array<double> &dLdY, Array<double> &dLdX) {
+        assert(dLdY.getsize() == dLdX.getsize());
+
+
+        double* dXdata = dLdX.getdata();
+        double* dYdata = dLdY.getdata();
+        double* localinputdata = _local_input.getdata();
+
+        for (size_t i = 0; i < dLdY.getsize(); i++) { *(dXdata++) = *(dYdata++) * (*(localinputdata++) < 0 ? alpha : 1); }
 
     }
 

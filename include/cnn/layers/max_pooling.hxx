@@ -26,10 +26,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(Vector<double> &input, Vector<double> &output);
+        void Forward(Array<double> &input, Array<double> &output);
 
         // send feature backward through the MaxPool layer
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX);
+        void Backward(Array<double> &dLdY, Array<double> &dLdX);
 
         // get output shape of pooling layer
         Dims3 const &out_shape() const { return _out; }
@@ -47,7 +47,7 @@ namespace CNN {
 
         //! OTHER ---------------------------------------------------------------------------------------------------
         // access the _winners (FOR TESTING PURPOSES)
-        Vector<size_t> const &get_winners() const { return _winners; }
+        std::vector<size_t> const &get_winners() const { return _winners; }
         //! ---------------------------------------------------------------------------------------------------------
     private:
 
@@ -70,7 +70,7 @@ namespace CNN {
         size_t _v_str{0};
 
         // a vector that keeps track of which indices in the pooling layer are "winning units"
-        Vector<size_t> _winners{};
+        std::vector<size_t> _winners{};
 
     };
 
@@ -91,10 +91,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send feature through the MaxPool layer
-        void Forward(Vector<double> &input, Vector<double> &output) override;
+        void Forward(Array<double> &input, Array<double> &output) override;
 
         // send feature backward through the MaxPool layer
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
+        void Backward(Array<double> &dLdY, Array<double> &dLdX) override;
 
         // update parameters in this layer (during learning)
         template<typename Optimizer>

@@ -18,4 +18,10 @@
 
 #include "helpers/pair.hxx"
 
+#if   defined(APPLE)
+    #include <Accelerate/Accelerate.h>
+#elif defined(OTHER)
+    #include <cblas.h>
+#endif
+
 #endif //ANN_PREREQS_HXX

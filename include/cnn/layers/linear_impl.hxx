@@ -11,8 +11,8 @@ namespace CNN {
 
 
     Linear::Linear(size_t in_size, size_t out_size, double *weights, double* biases)
-            : Layer(1, in_size, 1, 1, out_size, 1), _local_input(in_size), _weights(out_size, in_size),
-              _dLdW(out_size, in_size), _biases(out_size), _dLdB(out_size) {
+            : Layer(1, in_size, 1, 1, out_size, 1), _weights({out_size, in_size}),
+              _dLdW({out_size, in_size}), _biases({out_size, 1}), _dLdB({out_size,1}) {
 
         // get the current time to seed the random number generator
         typedef std::chrono::high_resolution_clock myclock;
@@ -26,11 +26,12 @@ namespace CNN {
 
         // He initialize the weights if no weights are provided,
         if (weights == nullptr) {
-            for (size_t i = 0; i < _weights.get_rows(); i++) {
-                for (size_t j = 0; j < _weights.get_cols(); j++) { _weights(i, j) = distribution(generator); }
+            double* data = _weights.getdata();
+            for (size_t i = 0; i < _weights.getsize(); i++) {
+                data[i] = distribution(generator);
             }
         } else {
-            std::memcpy(_weights.get_data(), weights, _weights.get_rows() * _weights.get_cols() * sizeof(double));
+            std::memcpy(_weights.get_data(), weights, _weights.getsize() * sizeof(double));
         }
 
         if (biases != nullptr)
@@ -41,25 +42,96 @@ namespace CNN {
     }
 
 
-    void Linear::Forward(Vector<double> &input, Vector<double> &output) {
-        assert(output.get_len() == _weights.get_rows());
+    void Linear::Forward(Array<double> &input, Array<double> &output) {
+
+        // TODO - ensure that output has correct dimensions for matrix multiplication
+        // Reshape output to column vector
+        output.Reshape({output.getshape()[1], 1});
+        assert(output.getshape()[0] == _weights.getshape()[0]);
 
         // copy input to local variable
         _local_input = input;
+        _local_input.Reshape({input.getsize(),1});
 
         // perform Y = Wx + B
-        output = (_weights * input) + _biases;
+        // combination of dgemm and saxpy
+
+
+        // num rows in C
+        int l = output.getshape()[0];
+        // num cols in C
+        int n = output.getshape()[1];
+        // num cols in A
+        int m = _weights.getshape()[1];
+        double alpha = 1.0;
+        int lda = _weights.getshape()[1];
+        int ldb = _local_input.getshape()[1];
+        double beta = 0.0;
+        int ldc = output.getshape()[1];
+
+        // do matmul
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, l, n,m,alpha, _weights.getdata(), lda, _local_input.getdata(), ldb, beta, output.getdata(), ldc);
+
+        // add biases
+        int len = output.getsize();
+        double scalar = 1.0;
+        cblas_daxpy(len, scalar, _biases.getdata(), 1, output.getdata(), 1);
+
+        //Reshape output back
+        output.Reshape({1, output.getshape()[0]});
+
+//        output = (_weights * _local_input) + _biases;
     }
 
-    void Linear::Backward(Vector<double> &dLdY, Vector<double> &dLdX) {
+    void Linear::Backward(Array<double> &dLdY, Array<double> &dLdX) {
+
+
+        // num rows in C
+        int l = dLdX.getshape()[0];
+        // num cols in C
+        int n = dLdX.getshape()[1];
+        // num cols in A
+        int m = dLdY.getshape()[1];
+        double alpha = 1.0;
+        int lda = dLdY.getshape()[1];
+        int ldb = _weights.getshape()[1];
+        double beta = 0.0;
+        int ldc = dLdX.getshape()[1];
+
+        // do matmul
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, l, n,m,alpha, dLdY.getdata(), lda, _weights.getdata(), ldb, beta, dLdX.getdata(), ldc);
+
 
         // compute dLdX, this vector will be sent to be backpropagated through the previous layer
-        dLdX = dLdY * (_weights);
+        //dLdX = dLdY * (_weights);
+
+        dLdY.Reshape({dLdY.getshape()[1], 1});
+        _local_input.Reshape({1, _local_input.getshape()[0]});
+        // num rows in C
+        l = _dLdW.getshape()[0];
+        // num cols in C
+        n = _dLdW.getshape()[1];
+        // num cols in A
+        m = dLdY.getshape()[1];
+        alpha = 1.0;
+        lda = dLdY.getshape()[1];
+        ldb = _local_input.getshape()[1];
+        beta = 1.0;
+        ldc = _dLdW.getshape()[1];
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, l, n,m,alpha, dLdY.getdata(), lda, _local_input.getdata(), ldb, beta, _dLdW.getdata(), ldc);
 
 
         // compute gradients
-        _dLdW += dLdY * _local_input;
-        _dLdB += dLdY;
+        // this is dgemm
+//        _dLdW += dLdY * _local_input;
+
+        // add biases
+        int len = _dLdB.getsize();
+        double scalar = 1.0;
+        cblas_daxpy(len, scalar, dLdY.getdata(), 1, _dLdB.getdata(), 1);
+        // this is saxpy
+//        _dLdB += dLdY;
     }
 
     template<typename Optimizer>

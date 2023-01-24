@@ -17,3 +17,4 @@ install(FILES cmake/CNN-config.cmake
 
 install(EXPORT CNN
 	DESTINATION cmake)
+

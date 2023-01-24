@@ -10,18 +10,11 @@
 namespace CNN {
 
     template<typename T>
-    class Mat;
-
-    template<typename T>
-    class Vector;
-
-    template<typename T>
-    class Cuboid;
+    class Array;
 
 }
 
-#include "mat.hxx"
-#include "vector.hxx"
-#include "cuboid.hxx"
+
+#include "array.hxx"
 
 #endif //ANN_DATA_TYPES_HXX

@@ -19,8 +19,27 @@ namespace CNN {
         explicit SGD(double learn_rate)
                 : alpha(learn_rate) {}
 
-        template<typename T>
-        void Forward(T &weights, T &gradient, size_t normalizer) { weights += gradient * (-alpha / normalizer); }
+        // this is daxpy
+        void Forward(Array<double> &weights, Array<double> &gradient, size_t normalizer)
+        {
+            // assert two arrays have equal dimensions TODO
+
+            // do daxpy
+            int n = weights.getsize();
+            double scalar = -alpha/normalizer;
+            cblas_daxpy(n, scalar, gradient.getdata(), 1, weights.getdata(), 1);
+        }
+
+        // this is saxpy
+        void Forward(Array<float> &weights, Array<float> &gradient, size_t normalizer)
+        {
+            // assert two arrays have equal dimensions TODO
+
+            // do daxpy
+            int n = weights.getsize();
+            float scalar = -alpha/normalizer;
+            cblas_saxpy(n, scalar, gradient.getdata(), 1, weights.getdata(), 1);
+        }
 
         // reset the optimizer for another pass through the network
         void reset() {/*nothing to do */}

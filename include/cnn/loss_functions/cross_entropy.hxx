@@ -11,21 +11,22 @@ namespace CNN {
 
     public:
 
-        double loss(Vector<double> &output, Vector<double> &target) {
+        double loss(Array<double> &output, Array<double> &target) {
             // assert that number of elements in other vector and this vector are equal
-            assert(output.get_len() == target.get_len());
+            assert(output.getsize() == target.getsize());
 
             // initialize return variable
             double loss = 0;
 
             // compute loss
-            for (size_t i = 0; i < output.get_len(); i++) { loss -= target[i] * log(output[i]); }
+            for (size_t i = 0; i < output.getsize(); i++) { loss -= target[{0,i}] * log(output[{0,i}]); }
 
             // return result
             return loss;
         }
 
-        Vector<double> grad(Vector<double> &output, Vector<double> &target) { return (target * -1).edivide(output); }
+        // TODO
+        Array<double> grad(Array<double> &output, Array<double> &target) { return (target).edivide(output, -1); }
 
     private:
 

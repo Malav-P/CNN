@@ -38,8 +38,8 @@ namespace CNN {
         template<typename T>
         void operator()(T *operand) const { (*operand).Forward(*input, *output); }
 
-        Vector<double> *input;
-        Vector<double> *output;
+        Array<double> *input;
+        Array<double> *output;
     };
 
     // execute the Backward member function of the layer, using the dLdY and dLdX pointers carried by the visitor
@@ -49,8 +49,8 @@ namespace CNN {
         template<typename T>
         void operator()(T *operand) const { (*operand).Backward(*dLdY, *dLdX); }
 
-        Vector<double> *dLdY;
-        Vector<double> *dLdX;
+        Array<double> *dLdY;
+        Array<double> *dLdX;
     };
 
     // execute the Update_Params member function of the layer, using the specified optimizer and normalizer(usually the batch size)

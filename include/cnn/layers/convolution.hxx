@@ -5,6 +5,8 @@
 #ifndef ANN_CONVOLUTION_HXX
 #define ANN_CONVOLUTION_HXX
 
+
+
 namespace CNN {
 
     class Convolution : public Layer {
@@ -34,10 +36,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ----------------------------------------------------------------------------
 
         // send feature through the convolutional layer
-        void Forward(Vector<double> &input, Vector<double> &output) override;
+        void Forward(Array<double> &input, Array<double> &output) override;
 
         // send feature backward through convolutional layer, storing gradients in _dLdFs
-        void Backward(Vector<double> &dLdYs, Vector<double> &dLdXs) override;
+        void Backward(Array<double> &dLdYs, Array<double> &dLdXs) override;
 
         // update the weights according to their gradients
         template<typename Optimizer>
@@ -48,7 +50,7 @@ namespace CNN {
         //! OTHER ----------------------------------------------------------------------------------------------------
 
         // access the filters
-        std::vector<Cuboid<double>> const &get_filters() const { return _filters; }
+        Array<double> const &get_filters() const { return _filters; }
 
         // return strides
         Dims get_stride() const { return {_h_str, _v_str}; }
@@ -57,20 +59,20 @@ namespace CNN {
         Dimensions4<> get_padding() const { return {_padleft, _padright, _padtop, _padbottom}; }
 
         // print the filters
-        void print_filters();
+        void print_filters() {}
 
         //! -----------------------------------------------------------------------------------------------------------
 
     private:
 
         // stores the filters
-        std::vector<Cuboid<double>> _filters{};
+        Array<double> _filters{};
 
         // locally stored filter gradients _dLdFs
-        std::vector<Cuboid<double>> _dLdFs{};
+        Array<double> _dLdFs{};
 
         // locally stored input feature maps
-        std::vector<Mat<double>> _local_input{};
+        Array<double> _local_input{};
 
         // horizontal stride length
         size_t _h_str{1};

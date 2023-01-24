@@ -27,10 +27,10 @@ namespace CNN {
         //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
 
         // send vector forward through this layer
-        void Forward(Vector<double> &input, Vector<double> &output) override;
+        void Forward(Array<double> &input, Array<double> &output) override;
 
         // send vector backwards through layer, computing gradients and input error dLdX
-        void Backward(Vector<double> &dLdY, Vector<double> &dLdX) override;
+        void Backward(Array<double> &dLdY, Array<double> &dLdX) override;
 
         // update the weights and biases according to their gradients
         template<typename Optimizer>
@@ -41,10 +41,10 @@ namespace CNN {
         //! OTHER ----------------------------------------------------------------------------------------------------
 
         // get the weight matrix
-        Mat<double> const &get_weights() const { return _weights; }
+        Array<double> const &get_weights() const { return _weights; }
 
         // get the biases
-        Vector<double> const &get_biases() const { return _biases; }
+        Array<double> const &get_biases() const { return _biases; }
 
 
         //! ---------------------------------------------------------------------------------------------------------
@@ -52,19 +52,19 @@ namespace CNN {
         // NOTE: empty braces call default constructor for that class ( at least i hope it does)
 
         // locally stored input
-        Vector<double> _local_input{};
+        Array<double> _local_input{};
 
         // weight matrix W
-        Mat<double> _weights{};
+        Array<double> _weights{};
 
         // bias vector
-        Vector<double> _biases{};
+        Array<double> _biases{};
 
         // locally stored gradients dL/dW
-        Mat<double> _dLdW{};
+        Array<double> _dLdW{};
 
         // locally stored gradients dL/dB
-        Vector<double> _dLdB{};
+        Array<double> _dLdB{};
 
     };
 

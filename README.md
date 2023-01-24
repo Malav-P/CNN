@@ -195,7 +195,7 @@ model.Add<RelU>(    model.get_outshape(3).width,    // input width
                     0.1                             // leaky RelU parameter
                     );
 
-model.Add<Linear>(  model.get_outshape(4).width
+model.Add<Linear>(   model.get_outshape(4).width
                     *model.get_outshape(4).height
                     *model.get_outshape(4).depth // input size
                     , 10   // output size
