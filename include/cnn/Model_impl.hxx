@@ -736,7 +736,7 @@ Model<LossFunction>::Model(string &filename)
                 double alpha = layer["parameters"][0];
                 size_t p[3];
                 p[0] = layer["parameters"][1]; p[1] = layer["parameters"][2]; p[2] = layer["parameters"][3];
-                Add<RelU>(alpha, p[0], p[1], p[2]);
+                Add<RelU>( p[0], p[1], p[2], alpha);
                 break;
             }
             case 6: // sigmoid
