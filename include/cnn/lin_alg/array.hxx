@@ -91,7 +91,7 @@ namespace CNN {
         const size_t& getsize() const {return size_;}
         T* getdata() {return data_;}
         // get the data (read only)
-        T *const &get_data() const { return data_; }
+        T *const &getdata() const { return data_; }
 
         // get strides
 

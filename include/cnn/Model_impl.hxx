@@ -418,8 +418,8 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
 
                 size_t length = _filters.getsize();
                 // linear array of weights
-                weights = new double[length * parameters[1]];
-                std::memcpy(weights, _filters.get_data(), length * sizeof(double));
+                weights = new double[length];
+                std::memcpy(weights, _filters.getdata(), length * sizeof(double));
 
 
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [";
@@ -433,11 +433,11 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
 
                 // write weights
                 fid << "\n\t \"weights\" : [";
-                for (size_t i = 0; i < length * parameters[1] - 1; i++)
+                for (size_t i = 0; i < length - 1; i++)
                 {
                     fid << weights[i] << ",";
                 }
-                fid << weights[length * parameters[1] - 1] << "] \n\t}";
+                fid << weights[length - 1] << "] \n\t}";
 
                 delete[] weights;
 
@@ -453,11 +453,11 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t parameters[7];
 
                 // in maps
-                parameters[0] = ptr->in_shape().depth;
+                parameters[2] = ptr->in_shape().depth;
                 // in width
-                parameters[1] = ptr->in_shape().width;
+                parameters[0] = ptr->in_shape().width;
                 // in height
-                parameters[2] = ptr->in_shape().height;
+                parameters[1] = ptr->in_shape().height;
                 // field width
                 parameters[3] = ptr->get_field().width;
                 // field height
@@ -491,11 +491,11 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t parameters[7];
 
                 // in maps
-                parameters[0] = ptr->in_shape().depth;
+                parameters[2] = ptr->in_shape().depth;
                 // in width
-                parameters[1] = ptr->in_shape().width;
+                parameters[0] = ptr->in_shape().width;
                 // in height
-                parameters[2] = ptr->in_shape().height;
+                parameters[1] = ptr->in_shape().height;
                 // field width
                 parameters[3] = ptr->get_field().width;
                 // field height
@@ -578,7 +578,7 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t in_height = ptr->in_shape().height;
                 size_t in_depth = ptr->in_shape().depth;
 
-                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << leaky_param << "," << in_width << "," << in_height<< "," << in_depth << "], ";
+                fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << in_width << "," << in_height << "," << in_depth<< "," << leaky_param << "], ";
 
                 // write weights
                 fid << "\n\t \"weights\" : null \n\t}";
@@ -733,9 +733,9 @@ Model<LossFunction>::Model(string &filename)
             }
             case 5: // relu
             {
-                double alpha = layer["parameters"][0];
+                double alpha = layer["parameters"][3];
                 size_t p[3];
-                p[0] = layer["parameters"][1]; p[1] = layer["parameters"][2]; p[2] = layer["parameters"][3];
+                p[0] = layer["parameters"][0]; p[1] = layer["parameters"][1]; p[2] = layer["parameters"][2];
                 Add<RelU>( p[0], p[1], p[2], alpha);
                 break;
             }

@@ -123,7 +123,7 @@ void MaxPooling::Forward(Array<double> &input, Array<double> &output)
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
 
-        in.resetdata(input.get_data() + i *_in.height * _in.width);
+        in.resetdata(input.getdata() + i *_in.height * _in.width);
         pool_vector[i].Forward(in, out);
         output.write(out, i*out.getsize());
     }
@@ -136,7 +136,7 @@ void MaxPooling::Backward(Array<double> &dLdY, Array<double> &dLdX)
     Array<double> in({1,_out.height * _out.width});
     for (size_t i = 0; i < pool_vector.size() ; i++)
     {
-        in.resetdata(dLdY.get_data() + i *_out.height * _out.width);
+        in.resetdata(dLdY.getdata() + i *_out.height * _out.width);
         pool_vector[i].Backward(in, out);
 
         dLdX.write(out, i*out.getsize());

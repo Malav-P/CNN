@@ -31,12 +31,12 @@ namespace CNN {
                 data[i] = distribution(generator);
             }
         } else {
-            std::memcpy(_weights.get_data(), weights, _weights.getsize() * sizeof(double));
+            std::memcpy(_weights.getdata(), weights, _weights.getsize() * sizeof(double));
         }
 
         if (biases != nullptr)
         {
-            std::memcpy(_biases.get_data(), biases, out_size*sizeof(double ));
+            std::memcpy(_biases.getdata(), biases, out_size*sizeof(double ));
         }
 
     }
