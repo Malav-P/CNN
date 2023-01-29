@@ -18,7 +18,7 @@ namespace CNN {
         explicit DataSet(Dims shape)
                 : shape(shape) {}
 
-        // the data
+        // the data formatted as a 2-tuple <datapoint, label>
         std::vector<Vector_Pair> datapoints;
 
         // size of training set, columns = number of samples, rows = number of elements in each sample

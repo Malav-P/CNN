@@ -286,7 +286,8 @@ namespace CNN {
         n = N_vstr*N_hstr;
         // num cols in A
         m = filter_width*filter_height;
-        alpha = 1.0;
+        // average over number of filters
+        alpha = 1.0/_out.depth;
         lda = m;
         ldb = m;
         beta = 1.0;
@@ -302,9 +303,6 @@ namespace CNN {
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, l, n,m,alpha, rot_filter_data, lda, col_data, ldb, beta, dLdXs.getdata(), ldc);
         }
 
-        // we are averaging the loss gradient over the total number of filters
-        // alternatively, change alpha on line 297 to 1/N_filters
-        dLdXs *= 1.0 / _out.depth;
 
         // reshape operation technically not needed
         dLdXs.Reshape({1, dLdXs.getsize()});

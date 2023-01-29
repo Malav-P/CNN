@@ -66,13 +66,8 @@ namespace CNN {
         // write into array
         void write(const Array<T> &other, size_t start);
 
-        // 2D convolution of two 2D-arrays -- TODO
-        friend Array<T> conv2(const Array &A, const Array &B);
-
         // reshape the array
         void Reshape(const vector<int> &newshape);
-
-        Array<T> operator*(const Array<T> &B);
 
         // partial dot product
         T partial_dot(Array<T> &other, const vector<int> &startpos);
@@ -88,14 +83,18 @@ namespace CNN {
 
         // get shape
         const vector<int> &getshape() const { return shape_; }
-        const size_t& getsize() const {return size_;}
-        T* getdata() {return data_;}
-        // get the data (read only)
-        T *const &getdata() const { return data_; }
 
         // get strides
-
         const vector<int>& getstride() const {return strides_;}
+
+        // get number of elements in array
+        const size_t& getsize() const {return size_;}
+
+        // mutable reference to data
+        T* getdata() {return data_;}
+
+        // const reference to data
+        T *const &getdata() const { return data_; }
 
 
     private:

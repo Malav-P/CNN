@@ -6,7 +6,6 @@
 #define ANN_CONVOLUTION_HXX
 
 
-
 namespace CNN {
 
     class Convolution : public Layer {
@@ -53,13 +52,10 @@ namespace CNN {
         Array<double> const &get_filters() const { return _filters; }
 
         // return strides
-        Dims get_stride() const { return {_h_str, _v_str}; }
+        Dims const get_stride() const { return {_h_str, _v_str}; }
 
         // return padding
         Dimensions4<> get_padding() const { return {_padleft, _padright, _padtop, _padbottom}; }
-
-        // print the filters
-        void print_filters() {}
 
         //! -----------------------------------------------------------------------------------------------------------
 
@@ -91,7 +87,6 @@ namespace CNN {
 
         // padding
         size_t _padbottom{0};
-
 
     };
 
