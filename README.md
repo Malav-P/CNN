@@ -14,8 +14,11 @@ However, the implementation was done using my own [N-D array class](include/cnn/
   - If using Windows, it is recommended to use [WSL](https://learn.microsoft.com/en-us/training/modules/get-started-with-windows-subsystem-for-linux/). Then no further action is required
   - If MacOS and using Homebrew package manager, run `brew install boost` to install the library. 
 - Reading saved models is facilitated by a json reading package, [nlohmann_json](https://github.com/nlohmann/json)
-  - If MacOS and using Homebrew package manager, run `brew install nlohmann-json` to install the libary
-
+  - If MacOS and using Homebrew package manager, run `brew install nlohmann-json` to install the library
+- Matrix multiplication is facilitated by the BLAS routines
+  - If using Linux, run `sudo apt-get install libopenblas-dev` to install BLAS
+  - If using Windows, get WSL as outlined above and then, run `sudo apt-get install libopenblas-dev` to install BLAS
+  - If MacOS, do nothing (library uses Apple's Accelerate Framework which comes with the machine)
 ### Installation
 
 To install the package, find your desired working directory and run the following shell command:
@@ -57,7 +60,7 @@ cmake .. -DCMAKE_PREFIX_PATH=/usr/local
 # Layers
 
 The following is a walk-through of how the layers are structured to better help the user understand
-how to work with this repository. Eaah layer is its own class.
+how to work with this repository. Each layer is its own class.
 
 ## `Convolution` 
 This class defines the convolutional layer.

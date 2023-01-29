@@ -132,7 +132,7 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
 
             // make a backward pass
             Backward(dLdY, dLdX);
-            count += 1;
+            count++;
 
             // update parameters if we have propagated batch_size number of samples
             if (count % batch_size == 0)
@@ -176,7 +176,7 @@ void Model<LossFunction>::Test(DataSet &test_set, bool verbose)
         // check if idx is correct with the label
         if (datapoint.second[{0,idx}] == 1)
         {
-            num_correct += 1;
+            num_correct++;
         }
 
         if (verbose)
@@ -418,9 +418,7 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
 
                 size_t length = _filters.getsize();
                 // linear array of weights
-                weights = new double[length];
-                std::memcpy(weights, _filters.getdata(), length * sizeof(double));
-
+                weights = _filters.getdata();
 
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [";
 
@@ -438,8 +436,6 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                     fid << weights[i] << ",";
                 }
                 fid << weights[length - 1] << "] \n\t}";
-
-                delete[] weights;
 
                 break;
             }
@@ -527,8 +523,8 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t layerID = 3;
                 size_t in_size = ptr->in_shape().height;
                 size_t out_size = ptr->out_shape().height;
-                Array<double> weights = ptr->get_weights();
-                Array<double> biases = ptr->get_biases();
+                double* weights = ptr->get_weights().getdata();
+                double* biases = ptr->get_biases().getdata();
 
                 // write parameters
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << in_size << "," << out_size << "], ";
@@ -537,15 +533,15 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 fid << "\n\t \"weights\" : [";
                 for (size_t i = 0; i < in_size*out_size; i++)
                 {
-                    fid << weights.getdata()[i] << ",";
+                    fid << *(weights++) << ",";
                 }
 
                 //write biases
                 for (size_t i = 0; i < out_size - 1; i++)
                 {
-                    fid << biases.getdata()[i] << ",";
+                    fid << *(biases++) << ",";
                 }
-                fid << biases.getdata()[out_size - 1] << "] \n\t}";
+                fid << *(biases) << "] \n\t}";
 
                 break;
             }
@@ -578,6 +574,7 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t in_height = ptr->in_shape().height;
                 size_t in_depth = ptr->in_shape().depth;
 
+                // write parameters
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : [" << in_width << "," << in_height << "," << in_depth<< "," << leaky_param << "], ";
 
                 // write weights
@@ -595,6 +592,7 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t in_height = ptr->in_shape().height;
                 size_t in_depth = ptr->in_shape().depth;
 
+                // write parameters
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : ["<< in_width << "," << in_height<< "," << in_depth << "], ";
 
                 // write weights
@@ -611,6 +609,7 @@ void Model<LossFunction>::save(const string& filepath, const string& model_name)
                 size_t in_height = ptr->in_shape().height;
                 size_t in_depth = ptr->in_shape().depth;
 
+                // write parameters
                 fid << "\t{\n\t \"layerID\" : " << layerID << ", \n\t \"parameters\" : ["<< in_width << "," << in_height<< "," << in_depth << "], ";
 
                 // write weights
@@ -643,6 +642,11 @@ Model<LossFunction>::Model(string &filename)
 
 
     std::ifstream f(filename);
+    if(!f)
+    {
+        cout << "filename :" << filename << " not found, exiting program...";
+        exit(1);
+    }
     json data = json::parse(f);
 
     string modelname = data.begin().key();
