@@ -61,9 +61,6 @@ namespace CNN {
         // test the network
         void Test(DataSet &test_set, bool verbose = false /* args to be filled */ );
 
-        // print model summary
-        void print();
-
         // save model parameters to file
         void save(const std::string &filepath, const std::string &model_name);
 
