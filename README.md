@@ -5,7 +5,7 @@ An implementation of a convolutional neural network written in C++.
 
 Provided is a header-only library for the implementation of a convolutional neural network. We break down each of the layers later 
 in this section. The structure for the `Model` class was inspired by [mlpack](https://www.mlpack.org/).
-However, the implementation was done exclusively using my own [linear algebra library](./lin_alg).
+However, the implementation was done using my own [N-D array class](include/cnn/lin_alg/).
 
 ### Dependencies
 
@@ -230,8 +230,9 @@ model.Train(  &optimizer  // reference to optimizer
 Saving a model can be done by calling the `save` member function. Models are save as `JSON` files.
 
 ```C++
-std::string filepath = "desired/save/path/my_model.json"
-model.save(filepath);
+std::string filepath = "desired/save/path/my_model.json";
+std::string modelname = "your_model_name";        
+model.save(filepath, modelname);
 ```
 
 Loading a model can be done by calling the appropriate constructor on a model file. Input must be `JSON` file. The user

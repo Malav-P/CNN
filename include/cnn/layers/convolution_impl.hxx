@@ -151,7 +151,7 @@ namespace CNN {
         // find a way to do the padding with the vector itself
         output.Reshape({_out.depth, _out.height, _out.width});
 
-        _local_input = Array<double>(input);
+        _local_input = input;
         _local_input.Reshape({_in.depth, _in.height, _in.width});
         _local_input = _local_input.pad({0, 0, _padtop, _padbottom, _padleft, _padright});
 
