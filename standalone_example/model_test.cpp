@@ -101,11 +101,17 @@ int main(int argc, char* argv[])
     model.Train(&optimizer, container, 50, N_EPOCHS);
     model.Test(test_set, false);
 
-    //model.save("/Users/malavpatel/Coding_Projects/CNN/my_second_CNN.json", "CNN2");
+//    model.save("/Users/malavpatel/Coding_Projects/CNN/my_second_CNN.json", "CNN2");
+//
+//    Model<CrossEntropy> model2((string&)"/Users/malavpatel/Coding_Projects/CNN/my_second_CNN.json");
+//
+//    model2.Test(test_set, false);
 
-    //Model<CrossEntropy> model2((string&)"/Users/malavpatel/Coding_Projects/CNN/my_second_CNN.json");
-
-    //model2.Test(test_set, false);
+//    model.save("/mnt/c/Users/malav/CLionProjects/CNN/models/crossentropy2.json", "CNN3");
+//
+//    string fp = "/mnt/c/Users/malav/CLionProjects/CNN/models/crossentropy2.json";
+//    Model<CrossEntropy> model2(fp );
+//    model2.Test(test_set, false);
 
 
     //! -----------------------------------------------------------------
