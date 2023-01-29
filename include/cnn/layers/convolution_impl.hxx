@@ -145,10 +145,6 @@ namespace CNN {
     }
 
     void Convolution::Forward(Array<double> &input, Array<double> &output) {
-        // note that input length matching with _in parameters is indirectly checked in the matrix*vector operator overload
-
-        // this routine can be optimized (we take a vector, turn it into matrix, pad it, then flatten back to vector)
-        // find a way to do the padding with the vector itself
         output.Reshape({_out.depth, _out.height, _out.width});
 
         _local_input = input;
@@ -169,7 +165,7 @@ namespace CNN {
         int h_ = _h_str;
         int z_ = 1;
 
-        // TODO - shape dimensions should actaully be swapped
+        // TODO - shape dimensions should actually be swapped
         Array<double> col({ filterwidth*filterheight*filterdepth, _out.width*_out.height});
 
         im2col(_local_input, col,N_zstr, N_vstr, N_hstr, filterdepth, filterheight, filterwidth, v_, h_, z_);
