@@ -24,7 +24,11 @@ if(NOT EXISTS ${MNIST_TRAIN})
 endif()
 
 set(CMAKE_CXX_FLAGS "-O3 -ggdb")
-add_executable(model_test model_test.cpp mnist/read_mnist_impl.cpp)
+
+add_executable(model_test models/model_test.cpp mnist/read_mnist_impl.cpp)
 target_link_libraries(model_test PRIVATE cnn)
+
+add_executable(model1 models/model1.cpp mnist/read_mnist_impl.cpp)
+target_link_libraries(model1 PRIVATE cnn)
 
 
