@@ -194,16 +194,20 @@ namespace CNN {
         double* newdata = newarray.getdata();
         vector<int> newstride = newarray.getstride();
 
-        for (int k = padims[0]; k < newshape[0] - padims[1]; k++ )
+	int add1 = padims[1] < 0 ? padims[1] : 0;
+	int add2 = padims[3] < 0 ? padims[3] : 0;
+	int add3 = padims[5] < 0 ? padims[5] : 0;
+
+        for (int k = -padims[0]; k < shape_[0] + add1; k++ )
         {
             if (k < 0) {continue;}
-            for (int i = padims[2]; i < newshape[1] - padims[3]; i++)
+            for (int i = -padims[2]; i < shape_[1] + add2; i++)
             {
                 if (i < 0) { continue;}
-                for (int j = padims[4]; j < newshape[2] - padims[5]; j++)
+                for (int j = -padims[4]; j < shape_[2] + add3; j++)
                 {
                     if (j <0) {continue;}
-                    newdata[k*newstride[0] + i * newstride[1] + j* newstride[2]] = data_[(k - padims[0]) * strides_[0] + ( i - padims[2])*strides_[1] + ( j - padims[4]) * strides_[2]];
+                    newdata[(k + padims[0])*newstride[0] + (i + padims[2]) * newstride[1] + (j + padims[4])* newstride[2]] = data_[(k) * strides_[0] + ( i )*strides_[1] + ( j ) * strides_[2]];
                 }
             }
         }

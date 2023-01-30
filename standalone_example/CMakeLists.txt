@@ -31,4 +31,10 @@ target_link_libraries(model_test PRIVATE cnn)
 add_executable(model1 models/model1.cpp mnist/read_mnist_impl.cpp)
 target_link_libraries(model1 PRIVATE cnn)
 
+add_executable(model2 models/model2.cpp mnist/read_mnist_impl.cpp)
+target_link_libraries(model2 PRIVATE cnn)
+
+add_executable(arraytest array_test.cpp)
+target_link_libraries(arraytest PRIVATE cnn)
+
 
