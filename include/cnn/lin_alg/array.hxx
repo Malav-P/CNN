@@ -112,7 +112,7 @@ namespace CNN {
         size_t capacity_{0};
 
         // ownership of data
-        bool owndata_;
+        bool owndata_ {false};
 
         // pointer to data
         T *data_{nullptr};

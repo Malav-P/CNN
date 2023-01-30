@@ -158,7 +158,7 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
 template<typename LossFunction>
 void Model<LossFunction>::Test(DataSet &test_set, bool verbose)
 {
-    Array<double> output, dLdY, dLdX;
+    Array<double> output;
     size_t num_correct = 0;
     for (Vector_Pair datapoint : test_set.datapoints)
     {
