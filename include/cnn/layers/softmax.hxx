@@ -7,15 +7,25 @@
 
 namespace CNN{
 
+    /**
+     * An implementation of the softmax activation, used to output probabilities for object classification
+     *
+     * @see [Softmax Activation](https://en.wikipedia.org/wiki/Softmax_function)
+     */
 class Softmax: public Layer {
     public:
 
-        //! CONSTRUCTORS, DESTRUCTORS, MOVE CONSTRUCTORS, ASSIGNMENT OPERATORS, ETC ------------------------------------
-
-        // default constructor shouldnt exist
+        /**
+         * Default constructor should not exist, only defined constructor can be called
+         */
         Softmax() = delete;
 
-        // constructor
+        /**
+         * Constructor for Softmax class
+         *
+         * @param len number of output classification categories
+         * @param beta the temperature parameter, defaults to -1
+         */
         explicit Softmax(size_t len, double beta = -1)
         :
           Layer(1, len, 1, 1, len, 1),
@@ -24,10 +34,12 @@ class Softmax: public Layer {
           _normalized(false),
           _jacobian({len, len})
         {}
-        //! ----------------------------------------------------------------------------------------------------------
 
-        //! BOOST::APPLY_VISITOR FUNCTIONS ---------------------------------------------------------------------------
-        // send vector through softmax layer
+        /**
+         * Propagate data forward through this layer
+         * @param input input image
+         * @param output output where results of Softmax activation on input will be stored
+         */
         void Forward(Array<double>& input, Array<double>& output) override
         {
             // check to make sure input and output is of same length as softmax length
@@ -58,7 +70,12 @@ class Softmax: public Layer {
 
         }
 
-        // send vector backward through the layer
+        /**
+         * Propagate gradients backwards through layer and compute loss gradient wrt input
+         *
+         * @param dLdY loss gradient wrt output
+         * @param dLdX where the loss gradient wrt input will be stored
+         */
         void Backward(Array<double>& dLdY, Array<double>& dLdX) override
         {
             // check to ensure a forward pass has occurred
@@ -84,26 +101,36 @@ class Softmax: public Layer {
             _normalized = false;
         }
 
-        // update parameters for the layer
+        /**
+         * Update the parameters in the layer
+         *
+         * @tparam Optimizer the optimizer used for updating the weights (adam, rmsprop, sgd, etc.). Optimizers
+         * will be defined as classes.
+         * @param optimizer pointer to an Optimizer class containing the necessary parameters
+         * @param normalizer a constant used to normalize the update, usually equal to the batch size
+         */
         template<typename Optimizer>
         void Update_Params(Optimizer* optimizer, size_t normalizer) {/* nothing to do */}
 
-        //! ----------------------------------------------------------------------------------------------------------
-
+        /**
+         * Utility function to access the temperature parameter (read-only)
+         *
+         * @return a constant reference to the temperature, _beta
+         */
         double const& get_beta() const {return _beta;}
 
     private:
 
-        // temperature parameter
+        /// temperature parameter
         double _beta {-1};
 
-        // normalization factor
+        /// normalization factor
         double _normalization {-1};
 
-        // normalization flag
+        /// normalization flag
         bool _normalized {false};
 
-        // derivative matrix
+        /// derivative matrix
         Array<double> _jacobian {};
 };
 

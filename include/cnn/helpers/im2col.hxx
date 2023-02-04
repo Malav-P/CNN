@@ -9,24 +9,29 @@
 
 
 #include "../lin_alg/array.hxx"
-
-//! im2col converts an image into a matrix ready for convolution via matrix multiplication. This can take advantage
-//! of optimized matrix multiplication routines included in BLAS.
-
-// PARAMETERS
-// im           | type Array<double>& |  image being converted to a matrix for convolutions
-// col          | type Array<double>& |  matrix that data for matrix will be stored in
-// N_zstr       | type const int |  number of strides along the z direction during convolution
-// N_vstr       | type const int |  number of strides along the vertical (row, or height) direction
-// N_hstr       | type const int |  number of strides along the horizontal (col, or width) direction
-// N_maps       | type const int |  number of channels produced during each window slide
-// filterheight | type const int | filter height (or number of rows in filter)
-// filterwidth  | type const int | filter width (or number of cols in filter)
-// v_           | type const int | vertical stride for the convolution
-// h_           | type const int | horizontal stride for the convolution
-// z_           | type const int | depth stride for the convolution
-
 using namespace CNN;
+
+
+/**
+ * Im2Col Operation
+ *
+ * This function converts an image to a matrix ready for matrix-multiplication facilitated convolution using the BLAS
+ * routines.
+ *
+ * @param im the image being converted to matrix for convolutions
+ * @param col the matrix that data will be written to
+ * @param N_zstr number of strides along the z direction during convolution
+ * @param N_vstr number of strides along the vertical (also referred to as row or height) direction
+ * @param N_hstr number of strides along the horizontal (also referred to as col or width) direction
+ * @param N_maps number of channels produced during each window slide
+ * @param filterheight filter height (number of rows in filter)
+ * @param filterwidth filter width (number of columns in filter)
+ * @param v_ vertical stride for convolution
+ * @param h_ horizontal stride for convolution
+ * @param z_ depth stride for convolution
+ *
+ * @return void
+ */
 
 void im2col( Array<double>& im, Array<double>& col, const int N_zstr, const int N_vstr, const int N_hstr, const int N_maps, const int filterheight, const int filterwidth,
              const int v_, const int h_, const int z_)

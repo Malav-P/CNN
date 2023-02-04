@@ -7,7 +7,6 @@
 
 namespace CNN {
 
-
     class MaxPool {
     public:
 

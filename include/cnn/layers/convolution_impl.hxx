@@ -113,8 +113,7 @@ namespace CNN {
         _out = {num_h_strides, num_v_strides, out_maps};
 
         // Glorot initialize the weights if weights pointer is null
-        if (weights == nullptr)
-        {
+        if (weights == nullptr){
 
             // get the current time to seed the random number generator
             typedef std::chrono::high_resolution_clock myclock;
@@ -137,8 +136,7 @@ namespace CNN {
 
 
         // if weights pointer is provided then we fill in the values
-        else
-        {
+        else{
             std::memcpy(_filters.getdata(), weights, _filters.getsize() * sizeof(double));
         }
 

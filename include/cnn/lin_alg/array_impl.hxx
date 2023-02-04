@@ -36,9 +36,6 @@ namespace CNN {
 
     template<typename T>
     int Array<T>::offset(const vector<int> &indices) {
-        // need to check if indices are within array dimensions
-
-
         int offset = 0;
         for (int i = 0 ; i < shape_.size(); i++) {offset += strides_[i] * indices[i];}
         return offset;
@@ -154,28 +151,6 @@ namespace CNN {
 
     }
 
-    template<typename T>
-    T Array<T>::partial_dot(Array<T> &other, const vector<int> &startpos) {
-        // assert that array dimensions are within bounds -- TODO
-
-        T answer = 0;
-
-        // define lambda function
-        auto pdot = [&](vector<int> index) {
-            vector<int> newindex(shape_.size());
-            for (int i = 0; i < newindex.size(); i++) { newindex[i] = index[i] + startpos[i]; }
-
-            answer += (*this)[index] * other[newindex];
-        };
-
-
-        vector<int> index(shape_.size());
-        vector<int> start(shape_.size(), 0);
-
-        recurse(index, 0, pdot, start, shape_);
-
-        return answer;
-    }
 
     template<typename T>
     Array<T> Array<T>::pad(const vector<int> &padims) {
@@ -242,16 +217,6 @@ namespace CNN {
     }
 
     template<typename T>
-    void Array<T>::operator*=(T alpha) {
-
-        if (owndata_) {
-            for (int i = 0; i < size_; i++) { data_[i] *= alpha; }
-        } else {
-            // TODO
-        }
-    }
-
-    template<typename T>
     void Array<T>::fill(T value) {
         if (owndata_) {
             for (int i = 0; i < size_; i++) { data_[i] = value; }
@@ -278,7 +243,7 @@ namespace CNN {
     }
 
     template<typename T>
-    Array<T> Array<T>::edivide(const Array &other, T scalar) {
+    Array<T> Array<T>::edivide(const Array &other, const T scalar) {
         // assert that arrays have same dimensions TODO
 
         Array<T> C = Array<T>(shape_);
@@ -290,7 +255,6 @@ namespace CNN {
 
     template<typename T>
     Array<T> Array<T>::operator-(const Array<T> &other) {
-        // assert that arrays have same dimensions TODO
 
         Array<T> C = Array<T>(shape_);
 
