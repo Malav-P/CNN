@@ -32,13 +32,14 @@ cd CNN # navigate to `CNN` directory
 mkdir build # create a new directory named `build`
 cd build    # navigate into newly built directory
 
-cmake .. -DCMAKE_INSTALL_PREFIX=<desired installation path> # build project and specify installation path
+cmake .. -DCMAKE_INSTALL_PREFIX=<desired/installation/path> # build project and specify installation path
 make  # build CNN library and associated executables, if any
 make install # install the library at a desired location 
 ```
 
 When using this package in your own project, include the following in your `CMakeLists.txt` file:
-```
+```cmake
+set(CNN_DIR "<desired/installation/path>")
 find_package(CNN REQUIRED)
 target_link_libraries(<your program here> PRIVATE cnn)
 ```
