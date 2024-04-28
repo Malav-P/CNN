@@ -6,7 +6,7 @@
 #define ANN_MODEL_IMPL_HXX
 
 #include "Model.hxx"
-#include <boost/progress.hpp>
+#include <boost/timer/progress_display.hpp>
 
 using namespace std;
 
@@ -108,7 +108,7 @@ void Model<LossFunction>::Train(Optimizer* optimizer, DataSet& training_set, siz
     size_t remainder = num_training_points % batch_size;
 
     size_t expected_count = remainder/batch_size >= 0.1 ? ceil(epochs*num_training_points/batch_size) : floor(epochs*num_training_points/batch_size);
-    boost::progress_display show_progress(expected_count );
+    boost::timer::progress_display show_progress(expected_count );
 
     // for each data point in my training set:
     //      - make a Forward pass
